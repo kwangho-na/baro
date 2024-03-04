@@ -1,1 +1,521 @@
-PGZ1bmM+DQoJcmVmcmVzaChyZXEsIHBhcmFtLCAmdXJpKSB7DQoJCUByb3V0ZXIubWFrZVVybE1hcCgpOw0KCQlyZXR1cm4gcGFyYW07DQoJfQ0KCXNhdmVUZXN0U3JjKHJlcSwgcGFyYW0sICZ1cmkpIHsNCgkJZGI9QmFyby5kYignY29uZmlnJykNCgkJcGFyYW0uaW5qZWN0KHNhdmVOYW1lLCBzYXZlRGVzYywgZGF0YSkNCgkJcGFyYW0uZGF0YT0nJw0KCQljbnQ9ZGIudmFsdWUoInNlbGVjdCBjb3VudCgxKSBmcm9tIGNvbmZfaW5mbyB3aGVyZSBncnA9J3Rlc3Qjc3JjJyBhbmQgY2Q9JyRzYXZlTmFtZSciKQ0KCQljb25mKCJ0ZXN0I3NyYy4kc2F2ZU5hbWUiLCBkYXRhLmVzY2FwZSgpLCB0cnVlKQ0KCQlpZihjbnQ9PTAgKSANCgkJCXBhcmFtLm1lc3NhZ2U9IiRzYXZlTmFtZSDthYzsiqTtirgg7IaM7Iqk6rCAIOuTseuhnSDrkJjsl4jsirXri4jri6QiDQoJCWVsc2UgDQoJCQlwYXJhbS5tZXNzYWdlPSIkc2F2ZU5hbWUg7YWM7Iqk7Yq4IOyGjOyKpOqwgCDsiJjsoJUg65CY7JeI7Iq164uI64ukIg0KCQlpZihzYXZlRGVzYykgY29uZigidGVzdCNkZXNjLiRzYXZlTmFtZSIsIHNhdmVEZXNjLCB0cnVlKQ0KCQlyZXR1cm4gcGFyYW0NCgl9DQoJc2F2ZU5hbWVDb3VudChyZXEsIHBhcmFtLCAmdXJpKSB7DQoJCWRiPUJhcm8uZGIoJ2NvbmZpZycpDQoJCW5hbWU9dXJpLnRyaW0oKQ0KCQlwYXJhbS5jb3VudD1kYi52YWx1ZSgic2VsZWN0IGNvdW50KDEpIGZyb20gY29uZl9pbmZvIHdoZXJlIGdycD0ndGVzdCNzcmMnIGFuZCBjZD0nJG5hbWUnIikNCgkJcmV0dXJuIHBhcmFtOw0KCX0NCglyZWFkVGVzdFNyYyhyZXEsIHBhcmFtLCAmdXJpICkgew0KCQlkYj1CYXJvLmRiKCdjb25maWcnKQ0KCQluYW1lPXVyaS50cmltKCkNCgkJY250PWRiLnZhbHVlKCJzZWxlY3QgY291bnQoMSkgZnJvbSBjb25mX2luZm8gd2hlcmUgZ3JwPSd0ZXN0I3NyYycgYW5kIGNkIGxpa2UgJyUkbmFtZSUnIikNCgkJaWYoY250PT0wICkgew0KCQkJcmV0dXJuICIkbmFtZSDsnLzroZwg6rKA7IOJ65CY64qUIO2FjOyKpO2KuCDshozsiqTqsIAg7JeG7Iq164uI64ukIjsNCgkJfQ0KCQlpZihjbnQ9PTEgKSB7DQoJCQljbnQ9ZGIudmFsdWUoInNlbGVjdCBjb3VudCgxKSBmcm9tIGNvbmZfaW5mbyB3aGVyZSBncnA9J3Rlc3Qjc3JjJyBhbmQgY2QgPSckbmFtZSciKQ0KCQkJaWYoY250PT0xICkgew0KCQkJCW5vZGU9ZGIuZmV0Y2goInNlbGVjdCBkYXRhIGZyb20gY29uZl9pbmZvIHdoZXJlIGdycD0ndGVzdCNzcmMnIGFuZCBjZD0nJG5hbWUnIikNCgkJCQlkZXNjPWNvbmYoInRlc3QjZGVzYy4kbmFtZSIpOw0KCQkJCXJldHVybiAiWyR7ZGVzY31dJHtub2RlLmRhdGF9IjsNCgkJCX0NCgkJfQ0KCQlkYi5mZXRjaEFsbCgic2VsZWN0IGdycCwgY2QsIHJlZ2R0LCB0bSBmcm9tIGNvbmZfaW5mbyB3aGVyZSBncnA9J3Rlc3Qjc3JjJyBhbmQgY2QgbGlrZSAnJSRuYW1lJSciLCBwYXJhbSkNCgkJc3M9IiRuYW1lIOycvOuhnCDrk7HroZ3rkJwg7YWM7Iqk7Yq4IOyGjOyKpCI7DQoJCXdoaWxlKGN1ciwgcGFyYW0pIHsNCgkJCWN1ci5pbmplY3QoZ3JwLCBjZCwgcmVnZHQsIHRtKQ0KCQkJbW9kaWZ5RGF0ZT1TeXN0ZW0uZGF0ZSh0bSwneXl5eS1NTS1kZCBoaDptbScpDQoJCQlyZWdEYXRlPXJlZ2R0LnZhbHVlKDAsMTYpDQoJCQlkZXNjPWNvbmYoInRlc3QjZGVzYy4kY2QiKTsNCgkJCXNzLmFkZCgiXG4tICRjZCAkZGVzYyDrk7HroZ3snbw6JHJlZ0RhdGUg7IiY7KCV7J28OiRtb2RpZnlEYXRlIik7DQoJCX0NCgkJcHJpbnQoIj4+PiIsIGNudCwgc3MpDQoJCXJldHVybiBzczsNCgl9DQoJcm91dGVQYWdlKHJlcSwgcGFyYW0sICZ1cmkpIHsNCgkJLy8gZXgpIGxvY2FsaG9zdC9hcGkvY29uZi9yb3V0ZVBhZ2UNCgkJZGI9QmFyby5kYignY29uZmlnJykNCgkJYWE9dXJpLmZpbmRQb3MoJy8nKS50cmltKCkNCgkJaWYoIGFhPT0nc2F2ZScgKSB7DQoJCQlzYXZlUGF0aD11cmkuZmluZFBvcygnLycpLnRyaW0oKQ0KCQkJaWYoc2F2ZVBhdGgpIHsNCgkJCQlzYXZlUGF0aD1DZi52YWwoU3lzdGVtLnBhdGgoKSwnLycsc2F2ZVBhdGgpDQoJCQl9IGVsc2Ugew0KCQkJCXNhdmVQYXRoPWNvbmYoJ3BhdGguc291cmNlU2F2ZVBhdGgnKQ0KCQkJCW5vdChzYXZlUGF0aCkgew0KCQkJCQlzYXZlUGF0aD1TeXN0ZW0ucGF0aCgpDQoJCQkJCXNhdmVQYXRoLmFkZCgnL2RhdGEvdGVtcCcpDQoJCQkJfQ0KCQkJfQ0KCQkJY250PTANCgkJCXdoaWxlKGN1ciwgZGIuZmV0Y2hBbGwoInNlbGVjdCBncnAsIGNkLCBkYXRhIGZyb20gY29uZl9pbmZvIHdoZXJlIGdycCBsaWtlICd1cmxNYXAjJSciKSkgew0KCQkJCWlmKGN1ci5jZD09Jy8nKSBjdXIuY2Q9Jy9tYWluJw0KCQkJCWZpbGVXcml0ZSgiJHtzYXZlUGF0aH0ke2N1ci5jZH0uaHRtbCIsIGN1ci5kYXRhKTsNCgkJCQljbnQrKzsNCgkJCX0NCgkJCXBhcmFtLm1lc3NhZ2UgPSAiJHNhdmVQYXRoIO2PtOuNlOyXkCAkY250IOqxtCDsoIDsnqXtlojsirXri4jri6QiDQoJCX0gDQoJCWlmKGFhPT0nbGlzdCcpIHsNCgkJCWRiLmZldGNoQWxsKCJzZWxlY3QgY2QgYXMgcGFnZV9jb2RlLCB0bSwgcmVnZHQgZnJvbSBjb25mX2luZm8gd2hlcmUgZ3JwIGxpa2UgJ3VybE1hcCMlJyBvcmRlciBieSByZWdkdCBkZXNjIiwgcGFyYW0pDQoJCQlyZXR1cm4gcGFyYW07DQoJCX0NCgkJLy8g7IaM7IqkIOusuOyekOyXtCDrpqzthLQNCgkJZ3JvdXA9YWENCgkJYmI9dXJpLmZpbmRQb3MoJy8nKS50cmltKCkNCgkJaWYoYmIpIHsNCgkJCWNkPSIvJGJiIg0KCQl9IGVsc2Ugew0KCQkJaWYoZ3JvdXApIHsNCgkJCQlpZihncm91cD09J21haW4nKSBjZD0nLycgZWxzZSBjZD0iLyRncm91cCINCgkJCX0gZWxzZSB7DQoJCQkJZ3JvdXA9J21haW4nDQoJCQkJY2Q9Jy8nDQoJCQl9DQoJCX0NCgkJbm9kZT1kYi5mZXRjaCgic2VsZWN0IGRhdGEgZnJvbSBjb25mX2luZm8gd2hlcmUgZ3JwPSd1cmxNYXAjJGdyb3VwJyBhbmQgY2Q9JyRjZCciKQ0KCQlpZihub2RlKSByZXR1cm4gbm9kZS5kYXRhDQoJCXBhcmFtLmVycm9yID0gIkdST1VQOiRncm91cCBDT0RFOiRjZCDsoJXrs7Trpbwg67aI65+s7Jis7IiYIOyXhuyKteuLiOuLpCINCgkJcmV0dXJuIHBhcmFtOw0KCX0NCglzdWJQYWdlKHJlcSwgcGFyYW0sICZ1cmkpIHsNCgkJLy8gZXgpIGxvY2FsaG9zdC9hcGkvY29uZi9zdWJQYWdlL1t1cmwsbGlzdCxzYXZlLGRlbGV0ZV0NCgkJZGI9QmFyby5kYignY29uZmlnJykNCgkJYWE9dXJpLmZpbmRQb3MoJy8nKS50cmltKCkNCgkJaWYoIGFhPT0nc2F2ZScgKSB7DQoJCQlzYXZlUGF0aD0NCgkJCWlmKHNhdmVQYXRoKSB7DQoJCQkJc2F2ZVBhdGg9Q2YudmFsKFN5c3RlbS5wYXRoKCksJy8nLHNhdmVQYXRoKQ0KCQkJfSBlbHNlIHsNCgkJCQlzYXZlUGF0aD1jb25mKCdwYXRoLnNvdXJjZVNhdmVQYXRoJykNCgkJCQlub3Qoc2F2ZVBhdGgpIHsNCgkJCQkJc2F2ZVBhdGg9U3lzdGVtLnBhdGgoKQ0KCQkJCQlzYXZlUGF0aC5hZGQoJy9kYXRhL3RlbXAnKQ0KCQkJCX0NCgkJCX0NCgkJCWNudD0wDQoJCQl3aGlsZShjdXIsIGRiLmZldGNoQWxsKCJzZWxlY3QgZ3JwLCBjZCwgZGF0YSBmcm9tIGNvbmZfaW5mbyB3aGVyZSBncnAgPSAnc3JjI3BhZ2VzJyIpKSB7DQoJCQkJaWYoY3VyLmNkPT0nLycpIGN1ci5jZD0nL21haW4nDQoJCQkJZmlsZVdyaXRlKCIke3NhdmVQYXRofSR7Y3VyLmNkfS5odG1sIiwgY3VyLmRhdGEpOw0KCQkJCWNudCsrOw0KCQkJfQ0KCQkJcGFyYW0ubWVzc2FnZSA9ICIkc2F2ZVBhdGgg7Y+0642U7JeQICRjbnQg6rG0IOyggOyepe2WiOyKteuLiOuLpCINCgkJCXJldHVybiBwYXJhbTsNCgkJfSANCgkJaWYoYWE9PSdsaXN0Jykgew0KCQkJLy8gZXgpIGh0dHA6Ly9sb2NhbGhvc3QvYXBpL2NvbmYvc3ViUGFnZS9saXN0DQoJCQlkYi5mZXRjaEFsbCgic2VsZWN0IGNkIGFzIHBhZ2VfY29kZSwgdG0sIHJlZ2R0IGZyb20gY29uZl9pbmZvIHdoZXJlIGdycD0nc3JjI3BhZ2VzJyBvcmRlciBieSByZWdkdCBkZXNjIiwgcGFyYW0pDQoJCQlyZXR1cm4gcGFyYW07DQoJCX0NCgkJaWYoYWE9PSdkZWxldGUnKSB7DQoJCQlkYi5mZXRjaEFsbCgic2VsZWN0IGNkIGFzIHBhZ2VfY29kZSwgdG0sIHJlZ2R0IGZyb20gY29uZl9pbmZvIHdoZXJlIGdycD0nc3JjI3BhZ2VzJyBvcmRlciBieSByZWdkdCBkZXNjIiwgcGFyYW0pDQoJCQlyZXR1cm4gcGFyYW07DQoJCX0NCgkJLy8g7IaM7IqkIOusuOyekOyXtCDrpqzthLQNCgkJY2Q9YWE7DQoJCWJiPXVyaS50cmltKCkNCgkJaWYoYmIpIGNkLmFkZCgnLycsYmIpDQoJCW5vZGU9ZGIuZmV0Y2goInNlbGVjdCBkYXRhIGZyb20gY29uZl9pbmZvIHdoZXJlIGdycD0nc3JjI3BhZ2VzJyBhbmQgY2Q9JyRjZCciKQ0KCQlpZihub2RlKSB7DQoJCQlpZihub2RlLmRhdGEpIHJldHVybiBub2RlLmRhdGENCgkJCW5vZGUuZXJyb3IgPSJVUkkgJGNkIO2OmOydtOyngCDshozsiqQg64K07Jqp7J20IOyXhuyKteuLiOuLpCINCgkJfQ0KCQlwYXJhbS5lcnJvciA9ICJVUkkgJGNkIO2OmOydtOyngCDsoJXrs7Trpbwg7LC+7J2EIOyImCDsl4bsirXri4jri6QiDQoJCXJldHVybiBwYXJhbTsNCgl9DQoJZGF0YShyZXEsIHBhcmFtLCAmdXJpKSB7DQoJCWRiPUJhcm8uZGIoJ2NvbmZpZycpDQoJCWE9dXJpLmZpbmRQb3MoJy8nKS50cmltKCkNCgkJYj11cmkudHJpbSgpDQoJCW5vZGU9ZGIuZmV0Y2goInNlbGVjdCBkYXRhIGZyb20gY29uZl9pbmZvIHdoZXJlIGdycD0nJGEnIGFuZCBjZD0nJGInIikNCgkJcHJpbnQoIm5vZGU9PiRub2RlIiwgYSxiKQ0KCQlyZXR1cm4gd2hlbihub2RlLG5vZGUuZGF0YSwibm9kYXRhIikNCgl9DQoJbWFrZVBhdGhUcmVlKHJlcSwgcGFyYW0sICZ1cmkpIHsNCgkJdHlwZT11cmkuZmluZFBvcygnLycpLnRyaW0oKQ0KCQlzd2l0Y2godHlwZSkgew0KCQljYXNlIGpzOiANCgkJCXBhdGg9U3lzdGVtLnBhdGgoKTsNCgkJCXBhdGguYWRkKCIvd2ViL2pzIik7DQoJCQlyZXR1cm4gbWFrZShwYXRoLCBvYmplY3QoJ3BhdGguanMnKS5yZW1vdmVBbGwoKSk7DQoJCWRlZmF1bHQ6DQoJCX0JCQ0KCQltYWtlPWZ1bmMocGF0aCwgcm9vdCwgYmFzZUxlbiApIHsNCgkJCW5vdChiYXNlTGVuKSBiYXNlTGVuPXBhdGguc2l6ZSgpKzE7DQoJCQlmbz1CYXJvLmZpbGUoKQ0KCQkJZm8udmFyKHNvcnQsJ3R5cGUsbmFtZScpDQoJCQlmby5saXN0KHBhdGgsIGZ1bmMoaW5mbykgew0KCQkJCXdoaWxlKGluZm8ubmV4dCgpKSB7DQoJCQkJCWluZm8uaW5qZWN0KHR5cGUsIGZ1bGxQYXRoLCBuYW1lLCBtb2RpZnlEdCwgY3JlYXRlRHQpDQoJCQkJCWlmKHR5cGU9PSdmb2xkZXInKSB7DQoJCQkJCQlyZWxhdGl2ZT1mdWxsUGF0aC52YWx1ZShiYXNlTGVuKQ0KCQkJCQkJcHJpbnQodHlwZSwgbmFtZSwgcmVsYXRpdmUpDQoJCQkJCQljdXI9cm9vdC5hZGROb2RlKCkud2l0aCh0eXBlLCBuYW1lLCByZWxhdGl2ZSwgbW9kaWZ5RHQsIGNyZWF0ZUR0KQ0KCQkJCQkJbWFrZShmdWxsUGF0aCwgY3VyLCBiYXNlTGVuKQ0KCQkJCQl9DQoJCQkJfQ0KCQkJfSkNCgkJCXJldHVybiByb290Ow0KCQl9Ow0KCX0NCglzdWJQYWdlU2F2ZShyZXEsIHBhcmFtLCAmdXJpKSB7DQoJCXBhcmFtLmluamVjdChhcGlVcmksIHNyYykNCgkJYXBpVXJpLnJlZigpDQoJCXByaW50KCJ4eHh4eHh4eHh4eCIsIHBhcmFtLCBhcGlVcmkgKQ0KCQlpZihhcGlVcmkuY2goJy8nKSkgYXBpVXJpLmluY3IoKTsNCgkJYT1hcGlVcmkuZmluZFBvcygnLycpLnRyaW0oKTsNCgkJYj1hcGlVcmkudHJpbSgpIA0KCQlpZihzZXJ2aWNlICYmIHN1YlBhZ2VDb2RlICkgew0KCQkJY29uZigic3JjIyR7YX0uJHtifSIsIHNyYy5lc2NhcGUoKSwgdHJ1ZSk7DQoJCX0NCgkJcGFyYW0uc3JjPScnDQoJCXJldHVybiBwYXJhbQ0KCX0NCgkvLyBhY2Ug6rK966GcIHh1aS5kZWZpbmUg7ISk7KCVDQoJYWNlUmVwbGFjZSgpIHsNCgkJZm89QmFyby5maWxlKCkNCgkJcGFyc2U9ZnVuYygmcykgew0KCQkJcnN0PScnDQoJCQl3aGlsZShzLnZhbGlkKCksIG4pIHsNCgkJCQlsZWZ0PXMuZmluZFBvcygnYWNlLmRlZmluZScpDQoJCQkJcnN0LmFkZChsZWZ0KQ0KCQkJCW5vdChzLmNoKCkpIGJyZWFrDQoJCQkJcnN0LmFkZCgneHVpLmRlZmluZScpDQoJCQl9DQoJCQlyZXR1cm4gcnN0DQoJCX07DQoJCXBhcnNlUmVxdWlyZT1mdW5jKCZzKSB7DQoJCQlyc3Q9JycNCgkJCXdoaWxlKHMudmFsaWQoKSwgbikgew0KCQkJCWxlZnQ9cy5maW5kUG9zKCdhY2UucmVxdWlyZScpDQoJCQkJcnN0LmFkZChsZWZ0KQ0KCQkJCW5vdChzLmNoKCkpIGJyZWFrDQoJCQkJcnN0LmFkZCgneHVpLnJlcXVpcmUnKQ0KCQkJfQ0KCQkJcmV0dXJuIHJzdA0KCQl9Ow0KCQlmby5saXN0KCdDOlxCQVJPXHdlYlxqc1xhY2Vcd29ya2VyJywgZnVuYyhpbmZvKSB7DQoJCQl3aGlsZShpbmZvLm5leHQoKSApIHsNCgkJCQlpbmZvLmluamVjdCh0eXBlLCBmdWxsUGF0aCkNCgkJCQlpZih0eXBlPT0nZmlsZScpIHsNCgkJCQkJc3JjPXBhcnNlKGZpbGVSZWFkKGZ1bGxQYXRoKSkNCgkJCQkJaWYoc3JjLmZpbmQoJ2FjZS5yZXF1aXJlJykpIHsNCgkJCQkJCXNyYz1wYXJzZVJlcXVpcmUoc3JjKQ0KCQkJCQl9DQoJCQkJCWZpbGVXcml0ZShmdWxsUGF0aCwgc3JjKQ0KCQkJCX0NCgkJCX0NCgkJfSkNCgl9DQoJZHJpdmVMaXN0KHJlcSxwYXJhbSkgew0KCQlwYXJhbS5kcml2ZUxpc3Q9U3lzdGVtLmRyaXZlTGlzdCgpDQoJCXJldHVybiBwYXJhbQ0KCX0NCglmb2xkZXJDaGlsZChyZXEscGFyYW0sJnVyaSkgew0KCQlkcml2ZT11cmkuZmluZFBvcygnLycpLnRyaW0oKQ0KCQlwYXJlbnROYW1lPXVyaS50cmltKCkNCgkJcGF0aD0iJGRyaXZlOi8kcGFyZW50TmFtZSI7DQoJCXByaW50KCJ4eHh4eCIsIGRyaXZlLCBwYXJlbnROYW1lKQ0KCQlmbz1CYXJvLmZpbGUoJ2ZvbGRlcnMnKQ0KCQlmby52YXIoZmlsdGVyLCdmb2xkZXJzJykNCgkJZm8udmFyKHNvcnQsICduYW1lJykNCgkJZm8ubGlzdChwYXRoLGZ1bmMoaW5mbykgew0KCQkJd2hpbGUoaW5mby5uZXh0KCkpIHsNCgkJCQlpbmZvLmluamVjdCh0eXBlLCBuYW1lLCBmdWxsUGF0aCwgY3JlYXRlRHQpDQoJCQkJaWYodHlwZT09J2ZpbGUnKSBjb250aW51ZQ0KCQkJCWlmKG5hbWUuZXEoJy4nLCcuLicpKSBjb250aW51ZQ0KCQkJCWlmKGNoa1Jvb3QpIHsNCgkJCQkJaWYobmFtZS5zdGFydCgnUHJvZ3JhbSBGaWxlcycpKSBjb250aW51ZTsNCgkJCQkJaWYobmFtZS5lcSgnV2luZG93cycpKSBjb250aW51ZTsNCgkJCQl9DQoJCQkJcmVsYXRpdmU9IiRwYXJlbnROYW1lLyRuYW1lIg0KCQkJCWN1cj1wYXJhbS5hZGROb2RlKCkNCgkJCQljdXIud2l0aCh0eXBlLCBuYW1lLCByZWxhdGl2ZSwgY3JlYXRlRHQpDQoJCQkJY3VyLmNoaWxkRm9sZGVyQ291bnQ9QGZzLmdldENoaWxkQ291bnQoZnVsbFBhdGgpDQoJCQkJcGFyc2UoZnVsbFBhdGgsIGN1ciwgZGVwdGgsIHBhdGhMZW4pDQoJCQl9DQoJCX0pDQoJCXJldHVybiBwYXJhbTsNCgl9DQoJDQoJZm9sZGVyTGlzdChyZXEscGFyYW0sJnVyaSkgew0KCQlDZi5pbmNsdWRlKCdkYXRhL2xpYnMvY29tbW9uL2ZzLmpzJykNCgkJbWF4RGVwdGg9dXJpLmZpbmRQb3MoJy8nKS50cmltKCkNCgkJZHJpdmU9dXJpLmZpbmRQb3MoJy8nKS50cmltKCkNCgkJcmVsYXRpdmU9dXJpLnRyaW0oKQ0KCQlwYXRoPSIkZHJpdmU6LyRyZWxhdGl2ZSI7DQoJCWZvPUJhcm8uZmlsZSgnZm9sZGVycycpDQoJCWZvLnZhcihmaWx0ZXIsJ2ZvbGRlcnMnKQ0KCQlmby52YXIoc29ydCwgJ25hbWUnKQ0KCQlpZiggbWF4RGVwdGg+NCApIG1heERlcHRoPTQ7DQoJCXJldHVybiBwYXJzZShmbywgcGF0aCwgcGFyYW0sIG1heERlcHRoKQ0KCQlwYXJzZSA9IGZ1bmMoZm8sIHBhdGgsIHBhcmVudCwgZGVwdGgsIHBhdGhMZW4pIHsNCgkJCWlmKGRlcHRoPD0wICkgcmV0dXJuIHBhcmVudDsNCgkJCWNoa1Jvb3Q9ZmFsc2U7DQoJCQlub3QocGF0aExlbiApIHsNCgkJCQlycz1yZWxhdGl2ZS5zaXplKCkNCgkJCQlwYXRoTGVuPXBhdGgubGVuZ3RoKCkNCgkJCQlpZihycz4wKSBwYXRoTGVuLT1yczsNCgkJCQlwcmludCgieHh4eCBmb2xkZXJMaXN0IHh4eCIsIHJzLCBwYXRoTGVuKQ0KCQkJCWNoa1Jvb3Q9dHJ1ZQ0KCQkJfQ0KCQkJZGVwdGgtPTE7DQoJCQlmby5saXN0KHBhdGgsZnVuYyhpbmZvKSB7DQoJCQkJd2hpbGUoaW5mby5uZXh0KCkpIHsNCgkJCQkJaW5mby5pbmplY3QodHlwZSwgbmFtZSwgZnVsbFBhdGgsIGNyZWF0ZUR0KQ0KCQkJCQlpZih0eXBlPT0nZmlsZScpIGNvbnRpbnVlDQoJCQkJCWlmKG5hbWUuZXEoJy4nLCcuLicpKSBjb250aW51ZQ0KCQkJCQlpZihjaGtSb290KSB7DQoJCQkJCQlpZihuYW1lLnN0YXJ0KCdQcm9ncmFtIEZpbGVzJykpIGNvbnRpbnVlOw0KCQkJCQkJaWYobmFtZS5lcSgnV2luZG93cycpKSBjb250aW51ZTsNCgkJCQkJfQ0KCQkJCQlyZWxhdGl2ZT1mdWxsUGF0aC52YWx1ZShwYXRoTGVuKQ0KCQkJCQljdXI9cGFyZW50LmFkZE5vZGUoKQ0KCQkJCQljdXIud2l0aCh0eXBlLCBuYW1lLCByZWxhdGl2ZSwgY3JlYXRlRHQpDQoJCQkJCW5vdChkZXB0aCkgY3VyLmNoaWxkRm9sZGVyQ291bnQ9QGZzLmdldENoaWxkQ291bnQoZnVsbFBhdGgpDQoJCQkJCXBhcnNlKGZvLCBmdWxsUGF0aCwgY3VyLCBkZXB0aCwgcGF0aExlbikNCgkJCQl9DQoJCQl9KQ0KCQl9Ow0KCX0NCgkvLyDsnITsoK/thZztlIzrpr8g7KCA7J6lDQoJYXBwbHlYVGVtcGxhdGUocmVxLCBwYXJhbSwgJnVyaSkgew0KCQlwYXJhbS5pbmplY3Qoc3JjLCB0YWcpCQkNCgkJY29uZigieHRlbXBsYXRlLiR7dGFnfSIsIHNyYy5lc2NhcGUoKSwgdHJ1ZSkNCgkJcGFyYW0uc3JjPSdvaycNCgkJcmV0dXJuIHBhcmFtOw0KCX0NCgkvLyDsnITsoK/thZztlIzrpr8g7LKY66asDQoJcGFyc2VYVGVtcGxhdGUocmVxLCBwYXJhbSwgJnVyaSkgew0KCQlzb3VyY2U9cGFyYW0uc3JjLmVzY2FwZSgpDQoJCWlmKHBhcmFtLm5hbWUpIHsNCgkJCWNvbmYoInRlc3Qjb3JpZ2luLiRuYW1lIiwgc291cmNlLCB0cnVlKQ0KCQl9DQoJCXJldHVybiBAdGVtcGxhdGUucGFyc2Uoc291cmNlLCAnJywgcGFyYW0pDQoJfQ0KDQoJLy8g7YyM7J28IOyXheuhnOuTnCDsspjrpqwNCgl1cGxvYWRGaWxlKHJlcSxwYXJhbSwmdXJpKSB7DQoJCXBhcmFtLmluamVjdCh1cGxvYWRLZXksIHVwbG9hZFBhdGgsIHVwbG9hZEZpbGVOYW1lLCB1cGxvYWRMYXN0KTsNCgkJaWYodXBsb2FkTGFzdD09J1knKSB7DQoJCQlyb290PXdlYlJvb3QoKQ0KCQkJc2F2ZVBhdGg9IiRyb290L3VwbG9hZCI7DQoJCQlpZih1cGxvYWRQYXRoKSB7DQoJCQkJbm90KHVwbG9hZFBhdGguY2goJy8nKSkgc2F2ZVBhdGguYWRkKCcvJyk7DQoJCQkJc2F2ZVBhdGguYWRkKHVwbG9hZFBhdGgpOw0KCQkJfQ0KCQkJaXNGb2xkZXIoc2F2ZVBhdGgsIHRydWUpDQoJCQlAYXBpLnVwbG9hZEZpbGVDb3B5KHVwbG9hZEtleSwgc2F2ZVBhdGgsIHVwbG9hZEZpbGVOYW1lKTsNCgkJfQ0KCQlyZXR1cm4gcGFyYW07DQoJfQ0KCS8vIGNtZCDsi6Ttlokg6rKw6rO87KCV67O0DQoJY21kUnVuKHJlcSwgcGFyYW0sICZ1cmkgKSB7DQoJCWNvbW1hbmQ9dXJpLnRyaW0oKQ0KCQlsb2dDbGFzcygnY21kJykudGltZW91dCgpDQoJCWNtZD1CYXJvLnByb2Nlc3MoJ2NtZCcpDQoJCWFyZ3M9Y21kLmFyZ3MNCgkJbm90KGNtZC5pcygpKSB7DQoJCQlDZi5wb3N0RXZlbnQoJ2NtZFN0YXJ0JywgY21kKQ0KCQkJcGFyYW0ubWVzc2FnZT0iY21kIO2UhOuhnOyEuOyKpOulvCDri6Tsi5wg7Iuk7ZaJ7ZWY7JiA7Iq164uI64ukLiDri6Tsi5wg7JqU7LKtIO2VmOyEuOyalCINCgkJCXJldHVybiBwYXJhbTsNCgkJfQ0KCQlub3QodHlwZW9mKGFyZ3MsJ25vZGUnKSkgew0KCQkJcGFyYW0ubWVzc2FnZT0iY21kIO2UhOuhnOyEuOyKpOulvCDrp6TqsJzrs4DsiJgg6rCd7LK07Jik66WYIg0KCQkJcmV0dXJuIHBhcmFtOw0KCQl9DQoJCWFyZ3Mud2l0aChyZXEscGFyYW0sY29tbWFuZCkNCgkJcGFyYW0udmFyKGNoZWNrU2VuZCwgdHJ1ZSkNCgkJQ2YucG9zdEV2ZW50KCdjbWRDb21tYW5kJywgY21kKQ0KCQlyZXR1cm4gcGFyYW07DQoJfQ0KCS8vIGpzaGludCDsi6Ttlokg6rKw6rO87KCV67O0IA0KCWpzaGludFVzZShyZXEsIHBhcmFtLCAmdXJpICkgew0KCQlzcmM9cGFyYW0uc3JjLmVzY2FwZSgpDQoJCWNtZD1CYXJvLnByb2Nlc3MoImNtZCIpOw0KCQljb21tYW5kQXJyYXk9Y21kLmFkZEFycmF5KCJjb21tYW5kQXJyYXkiKS5yZXVzZSgpDQoJCWFyZ3M9Y21kLmFyZ3M7DQoJCWFyZ3MudHlwZT0ianNoaW50IjsNCgkJcGFyc2Uoc3JjKQ0KCQlhcmdzLndpdGgocmVxLHBhcmFtLGNvbW1hbmQsY29tbWFuZEFycmF5KQ0KCQlwYXJhbS52YXIoY2hlY2tTZW5kLCB0cnVlKQ0KCQlyZXR1cm4gcGFyYW07DQoJCQ0KCQlwYXJzZT1mdW5jKCZzKSB7DQoJCQluPTAsIGlkeD0xLCBjbnRUb3Q9MDsNCgkJCXdoaWxlKHMudmFsaWQoKSkgew0KCQkJCWxlZnQ9cy5maW5kUG9zKCc8c2NyaXB0JywwLDEpDQoJCQkJY250QT1saW5lQ291bnQobGVmdCkNCgkJCQljbnRUb3QrPWNudEE7DQoJCQkJbm90KHMuY2goKSkgYnJlYWs7DQoJCQkJc3M9cy5tYXRjaCgnPHNjcmlwdCcsICc8L3NjcmlwdD4nKQ0KCQkJCWlmKHR5cGVvZihzcywnYm9vbCcpKSBicmVhazsNCgkJCQljbnRCPWxpbmVDb3VudChzcykNCgkJCQlzcy5maW5kUG9zKCc+JykNCgkJCQluYW1lPSIke2lkeH1fJHtjbnRUb3R9Ig0KCQkJCWZpbGVXcml0ZSgiZGF0YS90ZW1wLyR7bmFtZX0uanMiLCBzcykNCgkJCQljbnRUb3QrPWNudEI7DQoJCQkJY29tbWFuZEFycmF5LmFkZCgianNoaW50ICR7bmFtZX0uanMiKQ0KCQkJCWlkeCsrOw0KCQkJfQ0KCQl9Ow0KCQlsaW5lQ291bnQ9ZnVuYygmcykgew0KCQkJbj0wDQoJCQl3aGlsZShzLnZhbGlkKCkpIHsNCgkJCQlzLmZpbmRQb3MoIlxuIikNCgkJCQluKys7DQoJCQl9DQoJCQlyZXR1cm4gbjsNCgkJfTsNCgkJDQoJfQ0KCXNyY0xpc3QocmVxLCBwYXJhbSwgJnVyaSApIHsNCgkJZGI9QmFyby5kYignY29uZmlnJykNCgkJZGIuZmV0Y2hBbGwoInNlbGVjdCBncnAsIGNkLCB0bSwgcmVnZHQgZnJvbSBjb25mX2luZm8gd2hlcmUgZ3JwPSd0ZXN0I3NyYycgb3JkZXIgYnkgcmVnZHQgZGVzYyIsIHBhcmFtKQ0KCQl3aGlsZShjdXIsIHBhcmFtKSB7DQoJCQltb2RkdD1TeXN0ZW0uZGF0ZShjdXIudG0sJ3l5eXktTU0tZGQgaGg6bW0nKQ0KCQkJbm90ZT1jb25mKCJ0ZXN0I2Rlc2MuJHtjdXIuY2R9IikNCgkJCWN1ci53aXRoKG1vZGR0LCBub3RlKQ0KCQl9DQoJCXJldHVybiBwYXJhbQ0KCX0NCgl0ZXN0U291cmNlKHJlcSwgcGFyYW0sICZ1cmkgKSB7DQoJCW5hbWU9dXJpLnRyaW0oKTsNCgkJc3JjPWNvbmYoInRlc3Qjc3JjLiRuYW1lIikNCgkJbm90KHNyYykgc3JjPWNvbmYoInRlc3Qjb3JpZ2luLiRuYW1lIikNCgkJbm90KHNyYykgc3JjPSIkY2Qg7Y6Y7J207KeA7L2U65OcIOyhsO2ajCDsmKTrpZgiDQoJCXJldHVybiBzcmMNCgl9IA0KCQ0KCS8vIHZpY29uIOygleuztA0KCXZpY29uSW5mbyhyZXEsIHBhcmFtKSB7DQoJCWFycj1DZi5yb290Tm9kZSgpLmFkZEFycmF5KHZpY29ucyk7DQoJCW5vdChhcnIuc2l6ZSgpKSBwYXJzZShmaWxlUmVhZCgnd2ViL2Nzcy92aWNvbi5jc3MnKSk7DQoJCXBhcnNlPWZ1bmMoJnMpIHsgDQoJCQl3aGlsZShzLnZhbGlkKCkpIHsNCgkJCQlzLmZpbmRQb3MoJy54dWktaWNvbi4nKTsNCgkJCQluYW1lPXMuZmluZFBvcygneycpLnRyaW0oKTsNCgkJCQlub3QobmFtZSkgYnJlYWs7DQoJCQkJYXJyLmFkZChuYW1lKTsNCgkJCX0NCgkJfTsNCgkJcGFyYW0udHlwZT0ndmljb25MaXN0JzsNCgkJcGFyYW0udmljb25JbmZvPWFycjsNCgkJcmV0dXJuIHBhcmFtOw0KCX0NCg0KCS8vIGZhIOyVhOydtOy9mCDsoJXrs7Qg7Lac66ClDQoJaWNvbkluZm8ocmVxLCBwYXJhbSkgewkNCgkJYXJyPUNmLnJvb3ROb2RlKCkuYWRkQXJyYXkoZm9udGF3ZXNvbWVJY29ucyk7DQoJCWlmKGFyci5zaXplKCkpIGFycj1udWxsOw0KCQlwYXJzZShmaWxlUmVhZCgnd2ViL2Nzcy9mb250YXdlc29tZS5jc3MnKSk7DQoJCXBhcnNlPWZ1bmMoJnMpIHsNCgkJCXMuZmluZFBvcygnLmZhLWludmVyc2UnKTsNCgkJCXdoaWxlKHMudmFsaWQoKSkgew0KCQkJCXMuZmluZFBvcygnLmZhLScpOw0KCQkJCW5hbWU9cy5maW5kUG9zKCc6OicpLnRyaW0oKTsNCgkJCQlpZihuYW1lLmZpbmQoIlxuIikpIGNvbnRpbnVlOw0KCQkJCXMuZmluZFBvcygneycsMSwxKTsNCgkJCQlib2R5PXMubWF0Y2goKTsNCgkJCQlib2R5LmZpbmRQb3MoJyJcJyk7DQoJCQkJdmFsdWU9Ym9keS5maW5kKCciJykudHJpbSgpOw0KCQkJCWljb249ImZhLSRuYW1lIjsNCgkJCQlpZihhcnIpIGFyci5hZGQoaWNvbik7DQoJCQkJcGFyYW0uYWRkTm9kZSgpLndpdGgoaWNvbixuYW1lLCB2YWx1ZSk7DQoJCQl9DQoJCX07DQoJCXJldHVybiBwYXJhbTsNCgl9DQoJLy8g7J2066+47KeAIOumrOyCrOydtOymiA0KCXJlc2l6ZUltYWdlKHJlcSwgcGFyYW0sICZ2YXJzKSB7DQoJCWluY2x1ZGUoJ2FwcC9ldGMuanMnKTsNCgkJbm9kZT1vYmplY3QoJ29iai5pbWFnZXMnKS5yZW1vdmVBbGwodHJ1ZSk7DQoJCWZvPUJhcm8uZmlsZSgnY29udmVydCcpOw0KCQlzdWI9dmFycy50cmltKCk7DQoJCXBhdGg9U3lzdGVtLnBhdGgoKTsNCgkJdGFyZ2V0UGF0aD0iJHBhdGgvZGF0YS9pbWFnZXMiOw0KCQlpZihzdWIpIHRhcmdldFBhdGguYWRkKCIvJHN1YiIpOw0KCQlwcmludCgidGFyZ2V0IHBhdGggPT0gJHRhcmdldFBhdGgiLCBub2RlKTsNCgkJZm8ubGlzdCh0YXJnZXRQYXRoLCBmdW5jKGluZm8pIHsNCgkJCXdoaWxlKGluZm8ubmV4dCgpKSB7DQoJCQkJaW5mby5pbmplY3QodHlwZSwgbmFtZSwgZXh0KTsNCgkJCQlleHQ9ZXh0Lmxvd2VyKCk7DQoJCQkJaWYoZXh0LmVxKCdqcGcnLCdqcGVnJywncG5nJywnYm1wJywnZ2lmJykpIHsNCgkJCQkJbm9kZS5hZGROb2RlKCkud2l0aCh0YXJnZXRQYXRoLCBuYW1lLCB1c2VDb252ZXJ0OnRydWUpOw0KCQkJCX0NCgkJCX0NCgkJfSk7DQoJCXByb2M9b2JqZWN0RnVuYyhCYXJvLnByb2Nlc3MoJ21hZ2ljaycpLCBWWwkNCgkJCXJlc2l6ZSgpIHsNCgkJCQlwcm9jPXRoaXM7DQoJCQkJaWYocHJvYy5ydW4oKSkgcHJvYy5zdG9wKCk7DQoJCQkJbGlzdD1wcm9jLndvcmtMaXN0Ow0KCQkJCWN1cj1saXN0LmdldCgwKSBub3QoY3VyKSByZXR1cm47DQoJCQkJY3VyLnVzZUNvbnZlcnQ9dHJ1ZTsNCgkJCQljdXIuaW5qZWN0KHRhcmdldFBhdGgsIG5hbWUpOw0KCQkJCXBhdGg9U3lzdGVtLnBhdGgoKTsNCgkJCQlmbGFnPTI7DQoJCQkJcHJvYy5ydW4oIm1hZ2ljayAnJHt0YXJnZXRQYXRofS8ke25hbWV9JyAtcmVzaXplIDEwMCAnJHt0YXJnZXRQYXRofS90aHVtYi0ke25hbWV9JyIsIA0KCQkJCQl0aGlzLnJlc2l6ZVByb2MsIGZsYWcsICIkcGF0aC9wcm9ncmFtcy9tYWdpY2siIA0KCQkJCSk7DQoJCQkJcmV0dXJuIGN1cjsNCgkJCX07DQoJCQlyZXNpemVQcm9jKHR5cGUsZGF0YSkgew0KCQkJCXByb2M9dGhpczsNCgkJCQlsaXN0PXByb2Mud29ya0xpc3Q7DQoJCQkJcHJpbnQoInh4eHggJHR5cGU+PiAkZGF0YSIsIGxpc3QpOw0KCQkJCWlmKHR5cGU9PSdmaW5pc2gnKSB7IA0KCQkJCQljdXI9bGlzdC5nZXQoMCk7DQoJCQkJCWlmKGN1ciAmJiBjdXIudXNlQ29udmVydCkgew0KCQkJCQkJbGlzdC5wb3AoKTsNCgkJCQkJCXByaW50KCJmaW5zaCA9PT09PT09PT09ICRjdXIiLCBsaXN0KTsNCgkJCQkJCXByb2MucmVzaXplKCk7DQoJCQkJCX0gDQoJCQkJfQ0KCQkJfQ0KCQldLCB0cnVlKTsNCgkJcHJvYy53b3JrTGlzdD10ZW1wQXJyYXkobm9kZSk7DQoJCW5vdChwcm9jLnJlc2l6ZShsaXN0KSkgew0KCQkJbm9kZS5lcnJvcj0n67OA7ZmY7ZWgIOydtOuvuOyngOqwgCDsl4bsirXri4jri6QnOw0KCQl9IA0KCQlyZXR1cm4gbm9kZTsNCgl9DQoJLy8g67mE65SU7JikIOyOlOuEpOydvCDrp4zrk6TquLANCgl2aWRlb1RodW1iKHJlcSwgcGFyYW0sICZ2YXJzKSB7DQoJCWluY2x1ZGUoJ2FwcC9ldGMuanMnKTsNCgkJbm9kZT1vYmplY3QoJ29iai52aWRlb1RodW1iJyk7DQoJCWZvPUJhcm8uZmlsZSgnbWVkaWFDb252ZXJ0Jyk7DQoJCXN1Yj12YXJzLnRyaW0oKTsNCgkJcGF0aD1TeXN0ZW0ucGF0aCgpOw0KCQl0YXJnZXRQYXRoPSIkcGF0aC9kYXRhL21vdmllcyI7DQoJCWlmKHN1YikgdGFyZ2V0UGF0aC5hZGQoIi8kc3ViIik7DQoJCWZvLmxpc3QodGFyZ2V0UGF0aCwgZnVuYyhpbmZvKSB7DQoJCQl3aGlsZShpbmZvLm5leHQoKSkgew0KCQkJCWluZm8uaW5qZWN0KHR5cGUsIG5hbWUsIGV4dCk7DQoJCQkJZXh0PWV4dC5sb3dlcigpOw0KCQkJCWlmKGV4dC5lcSgnbXA0JykpIHsNCgkJCQkJbm9kZS5hZGROb2RlKCkud2l0aCh0YXJnZXRQYXRoLCBuYW1lLCB1c2VDb252ZXJ0OnRydWUpOw0KCQkJCX0NCgkJCX0NCgkJfSk7DQoJCUNmLnBvc3RFdmVudCgndmlkZW9UaHVtYicsIG5vZGUpOw0KCQlyZXR1cm4gbm9kZTsNCgl9DQoJDQo8L2Z1bmM+DQo=
+<func>
+	refresh(req, param, &uri) {
+		@router.makeUrlMap();
+		return param;
+	}
+	saveTestSrc(req, param, &uri) {
+		db=Baro.db('config')
+		param.inject(saveName, saveDesc, data)
+		param.data=''
+		cnt=db.value("select count(1) from conf_info where grp='test#src' and cd='$saveName'")
+		conf("test#src.$saveName", data.escape(), true)
+		if(cnt==0 ) 
+			param.message="$saveName 테스트 소스가 등록 되었습니다"
+		else 
+			param.message="$saveName 테스트 소스가 수정 되었습니다"
+		if(saveDesc) conf("test#desc.$saveName", saveDesc, true)
+		return param
+	}
+	saveNameCount(req, param, &uri) {
+		db=Baro.db('config')
+		name=uri.trim()
+		param.count=db.value("select count(1) from conf_info where grp='test#src' and cd='$name'")
+		return param;
+	}
+	readTestSrc(req, param, &uri ) {
+		db=Baro.db('config')
+		name=uri.trim()
+		cnt=db.value("select count(1) from conf_info where grp='test#src' and cd like '%$name%'")
+		if(cnt==0 ) {
+			return "$name 으로 검색되는 테스트 소스가 없습니다";
+		}
+		if(cnt==1 ) {
+			cnt=db.value("select count(1) from conf_info where grp='test#src' and cd ='$name'")
+			if(cnt==1 ) {
+				node=db.fetch("select data from conf_info where grp='test#src' and cd='$name'")
+				desc=conf("test#desc.$name");
+				return "[${desc}]${node.data}";
+			}
+		}
+		db.fetchAll("select grp, cd, regdt, tm from conf_info where grp='test#src' and cd like '%$name%'", param)
+		ss="$name 으로 등록된 테스트 소스";
+		while(cur, param) {
+			cur.inject(grp, cd, regdt, tm)
+			modifyDate=System.date(tm,'yyyy-MM-dd hh:mm')
+			regDate=regdt.value(0,16)
+			desc=conf("test#desc.$cd");
+			ss.add("\n- $cd $desc 등록일:$regDate 수정일:$modifyDate");
+		}
+		print(">>>", cnt, ss)
+		return ss;
+	}
+	routePage(req, param, &uri) {
+		// ex) localhost/api/conf/routePage
+		db=Baro.db('config')
+		aa=uri.findPos('/').trim()
+		if( aa=='save' ) {
+			savePath=uri.findPos('/').trim()
+			if(savePath) {
+				savePath=Cf.val(System.path(),'/',savePath)
+			} else {
+				savePath=conf('path.sourceSavePath')
+				not(savePath) {
+					savePath=System.path()
+					savePath.add('/data/temp')
+				}
+			}
+			cnt=0
+			while(cur, db.fetchAll("select grp, cd, data from conf_info where grp like 'urlMap#%'")) {
+				if(cur.cd=='/') cur.cd='/main'
+				fileWrite("${savePath}${cur.cd}.html", cur.data);
+				cnt++;
+			}
+			param.message = "$savePath 폴더에 $cnt 건 저장했습니다"
+		} 
+		if(aa=='list') {
+			db.fetchAll("select cd as page_code, tm, regdt from conf_info where grp like 'urlMap#%' order by regdt desc", param)
+			return param;
+		}
+		// 소스 문자열 리턴
+		group=aa
+		bb=uri.findPos('/').trim()
+		if(bb) {
+			cd="/$bb"
+		} else {
+			if(group) {
+				if(group=='main') cd='/' else cd="/$group"
+			} else {
+				group='main'
+				cd='/'
+			}
+		}
+		node=db.fetch("select data from conf_info where grp='urlMap#$group' and cd='$cd'")
+		if(node) return node.data
+		param.error = "GROUP:$group CODE:$cd 정보를 불러올수 없습니다"
+		return param;
+	}
+	subPage(req, param, &uri) {
+		// ex) localhost/api/conf/subPage/[url,list,save,delete]
+		db=Baro.db('config')
+		aa=uri.findPos('/').trim()
+		if( aa=='save' ) {
+			savePath=
+			if(savePath) {
+				savePath=Cf.val(System.path(),'/',savePath)
+			} else {
+				savePath=conf('path.sourceSavePath')
+				not(savePath) {
+					savePath=System.path()
+					savePath.add('/data/temp')
+				}
+			}
+			cnt=0
+			while(cur, db.fetchAll("select grp, cd, data from conf_info where grp = 'src#pages'")) {
+				if(cur.cd=='/') cur.cd='/main'
+				fileWrite("${savePath}${cur.cd}.html", cur.data);
+				cnt++;
+			}
+			param.message = "$savePath 폴더에 $cnt 건 저장했습니다"
+			return param;
+		} 
+		if(aa=='list') {
+			// ex) http://localhost/api/conf/subPage/list
+			db.fetchAll("select cd as page_code, tm, regdt from conf_info where grp='src#pages' order by regdt desc", param)
+			return param;
+		}
+		if(aa=='delete') {
+			db.fetchAll("select cd as page_code, tm, regdt from conf_info where grp='src#pages' order by regdt desc", param)
+			return param;
+		}
+		// 소스 문자열 리턴
+		cd=aa;
+		bb=uri.trim()
+		if(bb) cd.add('/',bb)
+		node=db.fetch("select data from conf_info where grp='src#pages' and cd='$cd'")
+		if(node) {
+			if(node.data) return node.data
+			node.error ="URI $cd 페이지 소스 내용이 없습니다"
+		}
+		param.error = "URI $cd 페이지 정보를 찾을 수 없습니다"
+		return param;
+	}
+	data(req, param, &uri) {
+		db=Baro.db('config')
+		a=uri.findPos('/').trim()
+		b=uri.trim()
+		node=db.fetch("select data from conf_info where grp='$a' and cd='$b'")
+		print("node=>$node", a,b)
+		return when(node,node.data,"nodata")
+	}
+	makePathTree(req, param, &uri) {
+		type=uri.findPos('/').trim()
+		switch(type) {
+		case js: 
+			path=System.path();
+			path.add("/web/js");
+			return make(path, object('path.js').removeAll());
+		default:
+		}		
+		make=func(path, root, baseLen ) {
+			not(baseLen) baseLen=path.size()+1;
+			fo=Baro.file()
+			fo.var(sort,'type,name')
+			fo.list(path, func(info) {
+				while(info.next()) {
+					info.inject(type, fullPath, name, modifyDt, createDt)
+					if(type=='folder') {
+						relative=fullPath.value(baseLen)
+						print(type, name, relative)
+						cur=root.addNode().with(type, name, relative, modifyDt, createDt)
+						make(fullPath, cur, baseLen)
+					}
+				}
+			})
+			return root;
+		};
+	}
+	subPageSave(req, param, &uri) {
+		param.inject(apiUri, src)
+		apiUri.ref()
+		print("xxxxxxxxxxx", param, apiUri )
+		if(apiUri.ch('/')) apiUri.incr();
+		a=apiUri.findPos('/').trim();
+		b=apiUri.trim() 
+		if(service && subPageCode ) {
+			conf("src#${a}.${b}", src.escape(), true);
+		}
+		param.src=''
+		return param
+	}
+	// ace 경로 xui.define 설정
+	aceReplace() {
+		fo=Baro.file()
+		parse=func(&s) {
+			rst=''
+			while(s.valid(), n) {
+				left=s.findPos('ace.define')
+				rst.add(left)
+				not(s.ch()) break
+				rst.add('xui.define')
+			}
+			return rst
+		};
+		parseRequire=func(&s) {
+			rst=''
+			while(s.valid(), n) {
+				left=s.findPos('ace.require')
+				rst.add(left)
+				not(s.ch()) break
+				rst.add('xui.require')
+			}
+			return rst
+		};
+		fo.list('C:\BARO\web\js\ace\worker', func(info) {
+			while(info.next() ) {
+				info.inject(type, fullPath)
+				if(type=='file') {
+					src=parse(fileRead(fullPath))
+					if(src.find('ace.require')) {
+						src=parseRequire(src)
+					}
+					fileWrite(fullPath, src)
+				}
+			}
+		})
+	}
+	driveList(req,param) {
+		param.driveList=System.driveList()
+		return param
+	}
+	folderChild(req,param,&uri) {
+		drive=uri.findPos('/').trim()
+		parentName=uri.trim()
+		path="$drive:/$parentName";
+		print("xxxxx", drive, parentName)
+		fo=Baro.file('folders')
+		fo.var(filter,'folders')
+		fo.var(sort, 'name')
+		fo.list(path,func(info) {
+			while(info.next()) {
+				info.inject(type, name, fullPath, createDt)
+				if(type=='file') continue
+				if(name.eq('.','..')) continue
+				if(chkRoot) {
+					if(name.start('Program Files')) continue;
+					if(name.eq('Windows')) continue;
+				}
+				relative="$parentName/$name"
+				cur=param.addNode()
+				cur.with(type, name, relative, createDt)
+				cur.childFolderCount=@fs.getChildCount(fullPath)
+				parse(fullPath, cur, depth, pathLen)
+			}
+		})
+		return param;
+	}
+	
+	folderList(req,param,&uri) {
+		Cf.include('data/libs/common/fs.js')
+		maxDepth=uri.findPos('/').trim()
+		drive=uri.findPos('/').trim()
+		relative=uri.trim()
+		path="$drive:/$relative";
+		fo=Baro.file('folders')
+		fo.var(filter,'folders')
+		fo.var(sort, 'name')
+		if( maxDepth>4 ) maxDepth=4;
+		return parse(fo, path, param, maxDepth)
+		parse = func(fo, path, parent, depth, pathLen) {
+			if(depth<=0 ) return parent;
+			chkRoot=false;
+			not(pathLen ) {
+				rs=relative.size()
+				pathLen=path.length()
+				if(rs>0) pathLen-=rs;
+				print("xxxx folderList xxx", rs, pathLen)
+				chkRoot=true
+			}
+			depth-=1;
+			fo.list(path,func(info) {
+				while(info.next()) {
+					info.inject(type, name, fullPath, createDt)
+					if(type=='file') continue
+					if(name.eq('.','..')) continue
+					if(chkRoot) {
+						if(name.start('Program Files')) continue;
+						if(name.eq('Windows')) continue;
+					}
+					relative=fullPath.value(pathLen)
+					cur=parent.addNode()
+					cur.with(type, name, relative, createDt)
+					not(depth) cur.childFolderCount=@fs.getChildCount(fullPath)
+					parse(fo, fullPath, cur, depth, pathLen)
+				}
+			})
+		};
+	}
+	// 위젯템플릿 저장
+	applyXTemplate(req, param, &uri) {
+		param.inject(src, tag)		
+		conf("xtemplate.${tag}", src.escape(), true)
+		param.src='ok'
+		return param;
+	}
+	// 위젯템플릿 처리
+	parseXTemplate(req, param, &uri) {
+		source=param.src.escape()
+		if(param.name) {
+			conf("test#origin.$name", source, true)
+		}
+		return @template.parse(source, '', param)
+	}
+
+	// 파일 업로드 처리
+	uploadFile(req,param,&uri) {
+		param.inject(uploadKey, uploadPath, uploadFileName, uploadLast);
+		if(uploadLast=='Y') {
+			root=webRoot()
+			savePath="$root/upload";
+			if(uploadPath) {
+				not(uploadPath.ch('/')) savePath.add('/');
+				savePath.add(uploadPath);
+			}
+			isFolder(savePath, true)
+			@api.uploadFileCopy(uploadKey, savePath, uploadFileName);
+		}
+		return param;
+	}
+	// cmd 실행 결과정보
+	cmdRun(req, param, &uri ) {
+		command=uri.trim()
+		logClass('cmd').timeout()
+		cmd=Baro.process('cmd')
+		args=cmd.args
+		not(cmd.is()) {
+			Cf.postEvent('cmdStart', cmd)
+			param.message="cmd 프로세스를 다시 실행하였습니다. 다시 요청 하세요"
+			return param;
+		}
+		not(typeof(args,'node')) {
+			param.message="cmd 프로세스를 매개변수 객체오류"
+			return param;
+		}
+		args.with(req,param,command)
+		param.var(checkSend, true)
+		Cf.postEvent('cmdCommand', cmd)
+		return param;
+	}
+	// jshint 실행 결과정보 
+	jshintUse(req, param, &uri ) {
+		src=param.src.escape()
+		cmd=Baro.process("cmd");
+		commandArray=cmd.addArray("commandArray").reuse()
+		args=cmd.args;
+		args.type="jshint";
+		parse(src)
+		args.with(req,param,command,commandArray)
+		param.var(checkSend, true)
+		return param;
+		
+		parse=func(&s) {
+			n=0, idx=1, cntTot=0;
+			while(s.valid()) {
+				left=s.findPos('<script',0,1)
+				cntA=lineCount(left)
+				cntTot+=cntA;
+				not(s.ch()) break;
+				ss=s.match('<script', '</script>')
+				if(typeof(ss,'bool')) break;
+				cntB=lineCount(ss)
+				ss.findPos('>')
+				name="${idx}_${cntTot}"
+				fileWrite("data/temp/${name}.js", ss)
+				cntTot+=cntB;
+				commandArray.add("jshint ${name}.js")
+				idx++;
+			}
+		};
+		lineCount=func(&s) {
+			n=0
+			while(s.valid()) {
+				s.findPos("\n")
+				n++;
+			}
+			return n;
+		};
+		
+	}
+	srcList(req, param, &uri ) {
+		db=Baro.db('config')
+		db.fetchAll("select grp, cd, tm, regdt from conf_info where grp='test#src' order by regdt desc", param)
+		while(cur, param) {
+			moddt=System.date(cur.tm,'yyyy-MM-dd hh:mm')
+			note=conf("test#desc.${cur.cd}")
+			cur.with(moddt, note)
+		}
+		return param
+	}
+	testSource(req, param, &uri ) {
+		name=uri.trim();
+		src=conf("test#src.$name")
+		not(src) src=conf("test#origin.$name")
+		not(src) src="$cd 페이지코드 조회 오류"
+		return src
+	} 
+	
+	// vicon 정보
+	viconInfo(req, param) {
+		arr=Cf.rootNode().addArray(vicons);
+		not(arr.size()) parse(fileRead('web/css/vicon.css'));
+		parse=func(&s) { 
+			while(s.valid()) {
+				s.findPos('.xui-icon.');
+				name=s.findPos('{').trim();
+				not(name) break;
+				arr.add(name);
+			}
+		};
+		param.type='viconList';
+		param.viconInfo=arr;
+		return param;
+	}
+
+	// fa 아이콘 정보 출력
+	iconInfo(req, param) {	
+		arr=Cf.rootNode().addArray(fontawesomeIcons);
+		if(arr.size()) arr=null;
+		parse(fileRead('web/css/fontawesome.css'));
+		parse=func(&s) {
+			s.findPos('.fa-inverse');
+			while(s.valid()) {
+				s.findPos('.fa-');
+				name=s.findPos('::').trim();
+				if(name.find("\n")) continue;
+				s.findPos('{',1,1);
+				body=s.match();
+				body.findPos('"\');
+				value=body.find('"').trim();
+				icon="fa-$name";
+				if(arr) arr.add(icon);
+				param.addNode().with(icon,name, value);
+			}
+		};
+		return param;
+	}
+	// 이미지 리사이즈
+	resizeImage(req, param, &vars) {
+		include('app/etc.js');
+		node=object('obj.images').removeAll(true);
+		fo=Baro.file('convert');
+		sub=vars.trim();
+		path=System.path();
+		targetPath="$path/data/images";
+		if(sub) targetPath.add("/$sub");
+		print("target path == $targetPath", node);
+		fo.list(targetPath, func(info) {
+			while(info.next()) {
+				info.inject(type, name, ext);
+				ext=ext.lower();
+				if(ext.eq('jpg','jpeg','png','bmp','gif')) {
+					node.addNode().with(targetPath, name, useConvert:true);
+				}
+			}
+		});
+		proc=objectFunc(Baro.process('magick'), V[	
+			resize() {
+				proc=this;
+				if(proc.run()) proc.stop();
+				list=proc.workList;
+				cur=list.get(0) not(cur) return;
+				cur.useConvert=true;
+				cur.inject(targetPath, name);
+				path=System.path();
+				flag=2;
+				proc.run("magick '${targetPath}/${name}' -resize 100 '${targetPath}/thumb-${name}'", 
+					this.resizeProc, flag, "$path/programs/magick" 
+				);
+				return cur;
+			};
+			resizeProc(type,data) {
+				proc=this;
+				list=proc.workList;
+				print("xxxx $type>> $data", list);
+				if(type=='finish') { 
+					cur=list.get(0);
+					if(cur && cur.useConvert) {
+						list.pop();
+						print("finsh ========== $cur", list);
+						proc.resize();
+					} 
+				}
+			}
+		], true);
+		proc.workList=tempArray(node);
+		not(proc.resize(list)) {
+			node.error='변환할 이미지가 없습니다';
+		} 
+		return node;
+	}
+	// 비디오 쎔네일 만들기
+	videoThumb(req, param, &vars) {
+		include('app/etc.js');
+		node=object('obj.videoThumb');
+		fo=Baro.file('mediaConvert');
+		sub=vars.trim();
+		path=System.path();
+		targetPath="$path/data/movies";
+		if(sub) targetPath.add("/$sub");
+		fo.list(targetPath, func(info) {
+			while(info.next()) {
+				info.inject(type, name, ext);
+				ext=ext.lower();
+				if(ext.eq('mp4')) {
+					node.addNode().with(targetPath, name, useConvert:true);
+				}
+			}
+		});
+		Cf.postEvent('videoThumb', node);
+		return node;
+	}
+	
+</func>
