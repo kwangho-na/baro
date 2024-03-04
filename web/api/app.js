@@ -33,29 +33,37 @@
 
 
 <func note="깃요청 처리">
+	ts(o) { return toString(o, true) }
+	
 	@git.proc(type, data) {
 		if(type=='read') {
 			this.appendText('result', data)
 		}
-		if(type=='finish') {
-			print("git call finished")
+		if(type=='error') {
+			url=this.url;
+			print("git 요청오류 $url");
+			this.result=''
 		}
 	}
 	@git.call(url, method, data) {
+		not(method) method='GET';
 		w=Baro.web('git')
 		w.data=data
 		w.result=''
 		h=w.addNode('@header').reuse()
 		h.set('Accept', 'application/vnd.github+json')
 		h.set('X-GitHub-Api-Version', '2022-11-28')
-		h.set('Authorization', 'Bearer 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')
+		h.set('Authorization', 'Bearer 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')
 		logWriter('git').appendLog("@@GIT URL CallStart $url")
 		w.call(url,method, @git.proc)
 		logWriter('git').appendLog(w.result)
 		return w.result		
 	} 
 	@git.addFile(path, gitPath, commitMessage) {
-		node=object('git.tree')
+		node=object('git.tree').removeAll(true)
+		ss=@git.call('https://api.github.com/repos/kwangho-na/baro/git/trees/na') not(ss) return print("$path 깃파일추가 오류")
+		node.parseJson(ss)
+		
 		fo=Baro.file()
 		fileData=fo.readBase64(path)
 		not(fileData) return print("$path 경로 파일 읽기오류");
@@ -64,15 +72,18 @@
 	"content": "${fileData}",
 	"encoding": "base64"
 }]
-		ss=@git.call('https://api.github.com/repos/kwangho-na/baro/git/blobs','post',data)
+		ss=@git.call('https://api.github.com/repos/kwangho-na/baro/git/blobs','POST',data)
 		blobs=node.addNode('blobs').parseJson(ss)
 		blobs.path=gitPath
 
-		ss=@git.call('https://api.github.com/repos/kwangho-na/baro/git/trees/na')
-		node.parseJson(ss)
 		/*
-		ss=@git.call('https://api.github.com/repos/kwangho-na/baro/git/refs/heads/na')
-		refs=node.addNode('refs').parseJson(ss)
+			ss=@git.call('https://api.github.com/repos/kwangho-na/baro/git/refs/heads/na')
+			refs=node.addNode('refs').parseJson(ss)
+			100644 for file (blob), 
+			100755 for executable (blob), 
+			040000 for subdirectory (tree), 
+			160000 for submodule (commit), or 
+			120000 for a blob that specifies the path of a symlink.
 		*/
 		data=
 #[{
@@ -104,4 +115,6 @@
 		sub.parseJson(ss)
 		return sub;
 	}
+	
+	
 </func>
