@@ -1,4 +1,3 @@
-
 	exports.groupBy = (data, key) => {
 		return data.reduce(function (carry, el) {
 			var group = el[key];
