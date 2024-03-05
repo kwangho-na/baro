@@ -24,7 +24,7 @@
 		case read: this.appendText('result', data)
 		case finish:
 			param=this.postParam;
-			fc=param.finishCallback not(typeof(fc,'func')) fc=this.finishCallback
+			fc=when(param, param.finishCallback) not(typeof(fc,'func')) fc=this.finishCallback
 			if(typeof(fc,'func') ) {
 				fc()
 			}
