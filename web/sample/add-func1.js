@@ -1,3 +1,4 @@
+
 	exports.groupBy = (data, key) => {
 		return data.reduce(function (carry, el) {
 			var group = el[key];
@@ -5,15 +6,14 @@
 			if (carry[group] === undefined) {
 				carry[group] = []
 			}
-
 			carry[group].push(el)
 			return carry
 		}, {})
 	};
 	exports.strcmp(a, b) {
 		a = a.toString(), b = b.toString();
-		c=111
 		for (var i=0,n=Math.max(a.length, b.length); i<n && a.charAt(i) === b.charAt(i); ++i);
+		d=222
 		if (i === n) return 0;
 		return a.charAt(i) > b.charAt(i) ? -1 : 1;
 	}
