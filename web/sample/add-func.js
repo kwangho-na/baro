@@ -28,11 +28,16 @@
 			if(typeof(fc,'func') ) {
 				fc()
 			}
-			if(param && param.type.eq('pandding') ) { 
-				param.result=this.result;
-				next=param.index()+1
-				cur=param.parentNode().child(next)
-				if(cur.command) Cf.postEvent('gitCommand', cur);
+			if(param && param.isset(type) ) {
+				if( param.type.eq('pandding') ) {
+					param.result=this.result;
+					next=param.index()+1
+					cur=param.parentNode().child(next)
+					if(cur.command) Cf.postEvent('gitCommand', cur);
+				} else {
+					print("git run finish type error [type==${param.type}] ");
+				}
+				
 			}
 		default:
 		}
