@@ -192,13 +192,32 @@
 		}
 		return param; 
 	}
-	gitFile(req, param, &uri) {
+	 
+	
+	
+	gitDownFile(req, param, &uri) {
 		name=uri.trim();
 		w=Baro.web('down')
 		w.result=''
 		w.call("https://raw.githubusercontent.com/kwangho-na/baro/na/$name", func(type,data) {
 			if(type=='read') this.appendText('result',data)
 		})
-		path=webRoot();
+		path=System.path();
 		fileWrite("$path/$name", w.result)
+		return "$path/$name"
+	}
+	gitPush(req,param,&uri) {
+		git=Baro.process('git')
+		fc=@git.cbPush
+		pandding=object('git.pandding').removeAll(true)
+		pandding.addNode().with(command:'add .', type:'pandding')
+		pandding.addNode().with(command:'commit -m "commit test"', type:'pandding');
+		pandding.addNode().with(command:'push', finishCallback:fc)
+		Cf.postEvent("gitCommand", pandding.child(0)); 
+		ss=''
+		while(cur, pandding, n) {
+			if(n) ss.add("\r\n")
+			ss.add(cur.result)
+		}
+		return ss;
 	}
