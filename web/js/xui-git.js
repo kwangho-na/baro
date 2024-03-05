@@ -1,5 +1,5 @@
 xui.define("xui/git", function(require, exports, module) {	
-	const githubAccessToken='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'
+	const githubAccessToken='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'
 	const branchName='na'
 	
 	const createGithubFileBlob = async (content, encoding) => {
