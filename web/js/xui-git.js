@@ -1,6 +1,6 @@
 xui.define("xui/git", function(require, exports, module) {	
 	const githubAccessToken='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'
-	const branchName='na'
+	const branchName='na-test'
 	
 	const createGithubFileBlob = async (content, encoding) => {
 		const blobResp = await fetch(`https://api.github.com/repos/kwangho-na/baro/git/blobs`,
