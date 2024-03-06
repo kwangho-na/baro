@@ -37,22 +37,24 @@
 				} else {
 					print("git run finish type error [type==${param.type}] ");
 				}
-				
 			}
+			if(this.finishCallback) this.finishCallback=null;
 		default:
 		}
 	}
-	git.postFuncAdd() {
-		// @@ postEvent에 함수 여러개 등록할수 있도록 개선
-		Cf.postEvent(func(type,param) {
-			switch(type) {
-			case gitCommand: 
-				git=Baro.process('git')
-				git.postParam=param;
-				git.run("git ${param.command}", @git.runProc)
-			default:
-			}
-		});
+	git.eventFuncs(type,param) {
+		switch(type) {
+		case gitCommand: 
+			git=Baro.process('git')
+			git.postParam=param;
+			git.run("git ${param.command}", @git.runProc)
+		default:
+		}
+	}
+	git.postEventAdd() {
+		git=Baro.process('git')
+		not(git.var(workPath)) git.path(conf('git#path.kwangho-na/na'))
+		Cf.getObject().set('@postEvent_gitEvent', @git.eventFuncs);
 	}
 	@git.cbLogs() {
 		this.inject(req,param)
@@ -139,14 +141,20 @@
 </func>
 
 ## api GIT
-	gitCommit(req,param,&uri) {
+	gitPush(req,param,&uri) {
 		git=Baro.process('git')
 		fc=@git.cbPush
-		padding=object('git.pandding').removeAll(true)
-		padding.addNode().with(command:'add .', type:'pandding')
-		padding.addNode().with(command:'commit -m "commit test"', type:'pandding');
-		padding.addNode().with(command:'push', finishCallback:fc)
-		Cf.postEvent("gitCommand", padding.child(0)); 
+		pandding=object('git.pandding').removeAll(true)
+		pandding.addNode().with(command:'add .', type:'pandding')
+		pandding.addNode().with(command:'commit -m "commit test"', type:'pandding');
+		pandding.addNode().with(command:'push', finishCallback:fc)
+		Cf.postEvent("gitCommand", pandding.child(0)); 
+		ss=''
+		while(cur, pandding, n) {
+			if(n) ss.add("\r\n")
+			ss.add(cur.result)
+		}
+		return ss;
 	}
 	gitCommand(req,param,&uri) {
 		git=Baro.process('git')
