@@ -1,120 +1,254 @@
-<func note="앱웹 공통함수 모음">
-	@app.clipboardChange(type,&data,&str) {
-		use=conf("prop.clipboardUse")
-		if( use.eq('N') ) return;
-		switch(type) {
-		case image:
-			ss=data.value(0,10)
-			tm=System.localtime()
-			fullPath="data/clipboard_captures/${tm}.png";
-			if(ss.find("PNG")) {
-				logWriter('app').appendLog("##> clipboard [image] copyed::$fullPath\r\n")
-				fileWrite(fullPath, data)
-			}
-		case text:
-			if(data.start('file:///')) {
-				logWriter('app').appendLog("##> clipboard [file] copyed::$data\r\n")
-			} else {
-				logWriter('app').appendLog("##> clipboard [text] copyed::$data\r\n")
-			}
-		case html:
-			htmlUse=conf("prop.clipboardHtmlUse")
-			if( str && htmlUse.eq('N') ) {
-				logWriter('app').appendLog("##> clipboard [text] copyed::$str\r\n")
-			} else {
-				logWriter('app').appendLog("##> clipboard [html] copyed::$data\r\n")
-			}
-		default:
-			print("clipboard copy type error", data)
+<api>
+	components(req,param,&uri) {
+		ss='';
+		path=webRoot();		
+		while(uri.valid()) {
+			name=uri.findPos("/").trim();
+			not(name) break;
+			fullPath="$path/template/components/${name}.html"			
+			not(isFile(fullPath)) return "$fullPath 파일을 찾을수 없습니다"
+			src=fileRead(fullPath)
+			ss.add(parse(src,name))
 		}
+		return ss;
+		parse=func(&s, name) {
+			use(param)
+			ss='';
+			s.findPos('<def ',0,1)
+			src=s.match('<def ','</def>')
+			if(typeof(src,'bool')) return;
+			name=src.findPos('>').trim()
+			ss.add("<def $name>")
+			ss.add(parseScript(src,param));
+			ss.add("</def>");
+			if(param.all) ss.add(@template.parse(s,"",param))
+			return ss;
+		};
+		parseScript = func(&s, param) {
+			ss='', param.actions='', param.computed='', param.src='';
+			while(s.valid()) {
+				left=s.findPos('<script',0,1)
+				ss.add(left);
+				not(s.ch()) break;
+				src=s.match('<script', '</script>');
+				if(typeof(src,'bool')) break;
+				prop=src.findPos('>').trim();
+				ss.add(parseSrc(src, param, prop));
+			}
+			return ss;
+		};
+		parseSrc = func(&s, param, prop) {
+			ss='';
+			while(s.valid()) {
+				c=s.ch();
+				not(c) break;
+				if(c.eq(',')) {
+					s.incr();
+					continue;
+				}
+				if(c.eq('/')) {
+					c=s.ch(1)
+					if(c.eq('/')) s.findPos("\n")
+					else s.match();
+					continue;
+				}
+				name=s.move()
+				c=s.ch()
+				if(s.start('=>', true)) {
+					if( s.ch('{') ) {
+						a=s.match(1)
+						param.appendText('computed', "$name: ()=>{$a},");
+					} else {
+						a=s.findPos("\n").trim();
+						param.appendText('computed', "$name: ()=>$a,");
+					}
+					continue;
+				}
+				fparam='', fsrc='';
+				if(c.eq('=')) {
+					c=s.incr().ch()
+					if(c.eq('(')) {
+						fparam=s.match();
+						s.start('=>',true);
+					} else if(lineCheck(s,'=>')) {
+						fparam=s.findPos("=>").trim();
+					}
+					c=s.ch();
+					not(c.eq('{')) {
+						a=s.findPos("\n").trim();
+						fsrc="return $a";
+					}
+				} else if(c.eq('(')) {
+					fparam=s.match();
+				} 				
+				not( prop.eq('actions')) prop='src'
+				not( fsrc ) {
+					c=s.ch();
+					not(c.eq('{')) {
+						param.appendText(prop,"// $name 함수 시작오류");
+						break;
+					}
+					fsrc=s.match(1)
+				}
+				param.appendText(prop, "${name}(${fparam}){${fsrc}},");
+			}
+			if(param.computed) {
+				ss.add("<script computed>${param.computed}</script>");
+			} 
+			if(param.actions) {
+				ss.add("<script actions>${param.actions}</script>");
+			} 
+			if(param.src) {
+				ss.add("<script>${param.src}</script>");
+			}
+			return ss;
+		};
 	}
-	
-</func>
-
-
-<func note="깃요청 처리">
-	ts(o) { return toString(o, true) }
-	
-	@git.proc(type, data) {
-		if(type=='read') {
-			this.appendText('result', data)
-		}
-		if(type=='error') {
-			url=this.url;
-			print("git 요청오류 $url");
-			this.result=''
-		}
-	}
-	@git.call(url, method, data) {
-		not(method) method='GET';
-		w=Baro.web('git')
-		w.data=data
-		w.result=''
-		h=w.addNode('@header').reuse()
-		h.set('Accept', 'application/vnd.github+json')
-		h.set('X-GitHub-Api-Version', '2022-11-28')
-		h.set('Authorization', 'Bearer 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')
-		logWriter('git').appendLog("@@GIT URL CallStart $url")
-		w.call(url,method, @git.proc)
-		logWriter('git').appendLog(w.result)
-		return w.result		
-	} 
-	@git.addFile(path, gitPath, commitMessage) {
-		node=object('git.tree').removeAll(true)
-		ss=@git.call('https://api.github.com/repos/kwangho-na/baro/git/trees/na') not(ss) return print("$path 깃파일추가 오류")
-		node.parseJson(ss)
-		
+	iconList(req, param, &uri) {
+		path=webRoot()
 		fo=Baro.file()
-		fileData=fo.readBase64(path)
-		not(fileData) return print("$path 경로 파일 읽기오류");
-		data=
-#[{
-	"content": "${fileData}",
-	"encoding": "base64"
-}]
-		ss=@git.call('https://api.github.com/repos/kwangho-na/baro/git/blobs','POST',data)
-		blobs=node.addNode('blobs').parseJson(ss)
-		blobs.path=gitPath
-
-		/*
-			ss=@git.call('https://api.github.com/repos/kwangho-na/baro/git/refs/heads/na')
-			refs=node.addNode('refs').parseJson(ss)
-			100644 for file (blob), 
-			100755 for executable (blob), 
-			040000 for subdirectory (tree), 
-			160000 for submodule (commit), or 
-			120000 for a blob that specifies the path of a symlink.
-		*/
-		data=
-#[{
-	"base_tree": "${node.sha}",
-	"tree": [{
-		"path": "${blobs.path}",
-		"mode": "100644",
-		"type": "blob",
-		"sha": "${blobs.sha}"
-	}]
-}]
-		ss=@git.call('https://api.github.com/repos/kwangho-na/baro/git/trees','post',data)
-		currentTree=node.addNode("currentTree").parseJson(ss)
-		data=
-#[{
-	"message": "${commitMessage}",
-	"tree": "${currentTree.sha}",
-	"parents": ["${node.sha}"]
-}]
-		ss=@git.call('https://api.github.com/repos/kwangho-na/baro/git/commits', 'post', data)
-		commits=node.addNode('commits')
-		commits.parseJson(ss)
-		data=#[{
-			"sha": "${commits.sha}",
-			"force": false
-		}]
-		ss=@git.call('https://api.github.com/repos/kwangho-na/baro/git/refs/heads/na', 'patch', data)
-		sub=node.addNode('updatePatch')
-		sub.parseJson(ss)
-		return sub;
+		fo.var(nameFilter, "*.png")
+		fo.list("$path/images/icons",
+		func(info){
+			while(info.next()) {
+				info.inject(type,name)
+				if(type=='folder') continue
+				param.addNode().with(name)
+			}
+		})
+		return param;
+	}
+	icon(req, param, &uri) {
+		path=webRoot()
+		name=uri.trim()
+		not( req.sendFile("$path/images/icons/$name") ) req.close()
+		return;
+	}
+	pythonUse(req, param, &uri) {
+		path=conf('path.python')
+		cmd=Baro.process('cmd')
+		cmd.args.command="cd $path"
+		logClass('cmd').timeout()
+		Cf.postEvent('cmdExec', cmd)
+		while(10) {
+			System.sleep(100)
+			out=logClass('cmd').timeout()
+			if(out) {
+				driveCheck(path, out)
+				return out;
+			}
+		}
+		return "cd $path 실행오류";
+		
+		driveCheck = func(&a, &b) {
+			use(cmd)
+			pythonDriver=a.value(0,2)
+			c=b.ch()
+			if(c.eq('#')) {
+				b.incr()
+				b.findPos('#')
+			}
+			curPath=b.findPos('>').trim()
+			curDriver=curPath.value(0,2)
+			if(curDirver!=pythonDriver ) {
+				cmd.args.command=pythonDriver
+				Cf.postEvent('cmdExec', cmd)
+			}
+			print("driverCheck ", cmd, curDriver, pythonDriver)
+		};
+	}
+	pythonRunTest(req, param, &uri) { 
+		cmd=Baro.process('cmd')
+		cmd.args.command="python src/test.py"
+		Cf.postEvent('cmdExec', cmd)
+		logClass('cmd').timeout()
+		while(250) {
+			System.sleep(100)
+			out=logClass('cmd').timeout()
+			if(out) {
+				c=out.ch(-1,true)
+				if(c.eq('>')) return cmd.commandResult;
+			}
+		}
+		return "pythonRunTest 실행오류";
+	}
+	pythonLibs(req, param, &uri) {
+		cmd=Baro.process('cmd')
+		cmd.args.command="python Lib/site-packages/pip freeze"
+		Cf.postEvent('cmdExec', cmd)
+		logClass('cmd').timeout()
+		while(250) {
+			System.sleep(100)
+			out=logClass('cmd').timeout() 
+			if(out) {
+				c=out.ch(-1,true) 
+				if(c.eq('>')) {
+					return parse(cmd.commandResult);
+				}
+			}
+		}
+		param.error="pythonLibs 실행오류"
+		return param;
+		
+		parse=func(&s) {
+			use(param)
+			while(s.valid()) {
+				line=s.findPos("\n");
+				not(line.find('==')) continue;
+				name=line.findPos('==').trim()
+				version=line.trim();
+				param.addNode().with(name,version)
+			}
+			return param
+		}
+	}
+	pythonInstall(req, param, &uri) {
+		name=uri.trim()
+		cmd=Baro.process('cmd')
+		cmd.args.command="python Lib/site-packages/pip install $name"
+		Cf.postEvent('cmdExec', cmd)
+		logClass('cmd').timeout()
+		while(500) {
+			System.sleep(1000)
+			out=logClass('cmd').timeout() 
+			if(out) {
+				c=out.ch(-1,true) 
+				if(c.eq('>')) {
+					param.result=cmd.commandResult
+					return param;
+				}
+			}
+		}
+		param.error="pythonInstall 실행오류"
+		return param;
+	}
+	pythonRun(req, param, &uri) {
+		name=uri.trim()
+		cmd=Baro.process('cmd')
+		cmd.args.command="python Lib/site-packages/pip $name"
+		Cf.postEvent('cmdExec', cmd)
+		logClass('cmd').timeout()
+		while(250) {
+			System.sleep(100)
+			out=logClass('cmd').timeout()
+			if(out) {
+				c=out.ch(-1,true)
+				if(c.eq('>')) return out;
+			}
+		}
+		return "pythonLibs 실행오류";
+	}
+	readBase64(req, param, &uri) {
+		fnm=uri.trim()
+		not(isFile(fnm)) return print("$fnm 파일을 읽을수 없습니다")
+		data=Baro.file().readBase64(fnm);
+		return data;
+		
+	}
+	readFile(req, param, &uri) {
+		fnm=uri.trim()
+		not(isFile(fnm)) return print("$fnm 파일을 읽을수 없습니다")
+		return fileRead(fnm)
 	}
 	
-	
-</func>
+</api>
