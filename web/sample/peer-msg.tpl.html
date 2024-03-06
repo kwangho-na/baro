@@ -1,0 +1,105 @@
+<div class="full flex flex-col flex-center" style="gap:8px">
+	<div class="chat">
+		{{ store.chatDataArray }}
+	</div>
+	<video :ref="el=>store.localVideo=el" autoplay playsinline muted></video>
+	<video :ref="el=>store.remoteVideo=el" autoplay playsinline muted></video>
+	<input v-model="store.message">
+	<button @click="store.clickSend">send</button>
+	<button @click="store.clickCall">call</button>
+	<button @click="store.clickHangUp">hangup</button>
+</div>
+
+<script>
+	xui.loadModule('peer', res=>store.initPeer() )
+	store.peerId='';
+	store.chatDataArray=[];
+	store.peer=null;
+	store.conn=null;
+	store.callRemote=null;
+	store.initPeer = () => {
+		const peerNode=xui.require("peer");
+		store.peer=new peerNode.Peer({port: 9000, path: '/'})
+		clog("init peer >> ", peerNode)
+		store.peer.on('open', id=>store.peerId=id)
+		store.peer.on('connection', conn=>store.handleConnection(conn))
+		store.peer.on('error', err=>store.peerError(err))
+	}
+	
+	store.handleConnection = conn => {
+		clog("[handleConnection start]")
+		conn.on('open', ()=>{
+			clog("connection open", conn)
+			conn.on('data', msg=>store.recvMsg(msg))
+		})
+		conn.on('close', res=>store.connClose(conn))
+		conn.on('error', err=>store.connError(err))
+		store.conn=conn;
+	}
+	store.connClose = res => clog("close client")
+	store.connError = err => clog("client error", err)
+	
+	store.handleMessage = msg => {
+		store.conn.send(msg);
+	}
+	store.recvMsg = msg => {
+		clog("connection message ", msg)
+		store.chatDataArray.push(msg)
+	}
+	store.clickSend = () => {
+		clog("send conn >> ", store.conn );
+		if(store.conn && store.message ) {
+			store.conn.send(store.message)	
+		}
+	}
+	store.peerError = err => {
+		clog("peer error >> ", err)
+	}
+	Vue.watch(()=>store.peerId, id=>{
+		clog("peer id change [id=="+id+"]")
+	})
+	navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+		store.localVideo.srcObject = stream;
+        store.localStream = stream;
+        // Listen for incoming call
+        store.peer.on("call", (call) => {
+            call.answer(localStream);
+            call.on("stream", (remoteStream) => {
+                store.remoteVideo.srcObject = remoteStream;
+            });
+        });
+	})
+	
+	store.clickCall = e => {
+		const remotePeerID = prompt("Enter ID of remote peer:");
+		// Call remote peer
+		store.callRemote = peer.call(remotePeerID, store.localStream);
+		// Add stream to remote video element
+		store.callRemote.on("stream", (remoteStream) => {
+			store.remoteVideo.srcObject = remoteStream;
+		});
+ 
+	}
+	store.clickHangUp = e => {
+		if( store.callRemote ) store.callRemote.close()
+	}
+
+	const createPeerConnection = () => {
+	  // Initialize PeerConnection
+	  peerConnection = new RTCPeerConnection();
+
+	  // On ICE candidate event
+	  peerConnection.onicecandidate = event => {
+		if (event.candidate) {
+		  console.log(`Sending ICE candidate to remote peer: ${JSON.stringify(event.candidate)}`);
+		  peerConnection.send(JSON.stringify({ 'ice': event.candidate }));
+		}
+	  };
+
+	  // On track event
+	  peerConnection.ontrack = event => {
+		console.log('Remote stream received!');
+		remoteVideo.srcObject = event.streams[0];
+	  };
+	}
+</script>

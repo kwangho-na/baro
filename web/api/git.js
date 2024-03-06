@@ -9,7 +9,7 @@
 		pathApp=System.path()
 		src=fileRead("$pathApp/$name");
 		fileWrite("$pathGit/$name", src)
-		return "$pathApp/$name => $pathGit/$name $src";
+		return "$pathApp/$name => $pathGit/$name";
 	}
 	
 	gitPush(req,param,&uri) {
@@ -57,10 +57,12 @@
 			git.finishCallback=@git.cbTrees
 		case addAll:
 			param.command='add .';
+		case config:
+			param.command='git config --list';
 		default:
 		}
 		print("git $cmd start")
-		Cf.postEvent("gitCommand", 'gitEvent', param); 
+		Cf.postEvent("gitCommand", 'git', param); 
 		n=0;
 		while(250) {
 			System.sleep(150)
@@ -111,7 +113,7 @@
 		default:
 		}
 	}
-	@git.eventFuncs(type,param) {
+	@git.postEventFuncs(type,param) {
 		switch(type) {
 		case gitCommand: 
 			git=Baro.process('git')
@@ -123,7 +125,7 @@
 	@git.postEventAdd() {
 		git=Baro.process('git')
 		not(git.var(workPath)) git.path(conf('git#path.kwangho-na/na'))
-		Cf.getObject().set('@postEvent_gitEvent', @git.eventFuncs);
+		Cf.getObject().set('@postEvent_git', @git.postEventFuncs);
 		return git;
 	}
 	@git.cbLogs() {
