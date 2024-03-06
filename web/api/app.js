@@ -251,4 +251,22 @@
 		return fileRead(fnm)
 	}
 	
+	screenRectPos(req, param, &uri) {
+		rc=@app.screenRectPos()
+		return "screen rect $rc"
+	}
 </api>
+
+
+<func>
+	@app.screenRectPos(pos) {
+		not(pos) pos=System.info('cursor')
+		rcScreen=null
+		cnt=System.info('screenCount')
+		while(n=0, n<cnt, n++) {
+			rc=System.info('screenRect', n)
+			if(rc.contains(pos)) return rc;
+		}
+		return;
+	}
+</func>
