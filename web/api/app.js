@@ -124,15 +124,20 @@
 		not( req.sendFile("$path/images/icons/$name") ) req.close()
 		return;
 	}
+	parsePython(req, param, &uri) {
+		src=param.src.escape()
+		print("parse python src==$src")
+		return src;
+	}
 	pythonUse(req, param, &uri) {
 		path=conf('path.python')
-		cmd=Baro.process('cmd')
-		cmd.args.command="cd $path"
-		logClass('cmd').timeout()
-		Cf.postEvent('cmdExec', cmd)
+		python=Baro.process('python')
+		python.args.command="cd $path"
+		logClass('python').timeout()
+		Cf.postEvent('pythonExec', python)
 		while(10) {
 			System.sleep(100)
-			out=logClass('cmd').timeout()
+			out=logClass('python').timeout()
 			if(out) {
 				driveCheck(path, out)
 				return out;
@@ -141,7 +146,7 @@
 		return "cd $path 실행오류";
 		
 		driveCheck = func(&a, &b) {
-			use(cmd)
+			use(python)
 			pythonDriver=a.value(0,2)
 			c=b.ch()
 			if(c.eq('#')) {
@@ -151,39 +156,39 @@
 			curPath=b.findPos('>').trim()
 			curDriver=curPath.value(0,2)
 			if(curDirver!=pythonDriver ) {
-				cmd.args.command=pythonDriver
-				Cf.postEvent('cmdExec', cmd)
+				python.args.command=pythonDriver
+				Cf.postEvent('pythonExec', python)
 			}
-			print("driverCheck ", cmd, curDriver, pythonDriver)
+			print("driverCheck ", python, curDriver, pythonDriver)
 		};
 	}
 	pythonRunTest(req, param, &uri) { 
-		cmd=Baro.process('cmd')
-		cmd.args.command="python src/test.py"
-		Cf.postEvent('cmdExec', cmd)
-		logClass('cmd').timeout()
+		python=Baro.process('python')
+		param.command="python src/test.py"
+		Cf.postEvent('python', 'pythonExec', param)
+		logClass('python').timeout()
 		while(250) {
 			System.sleep(100)
-			out=logClass('cmd').timeout()
+			out=logClass('python').timeout()
 			if(out) {
 				c=out.ch(-1,true)
-				if(c.eq('>')) return cmd.commandResult;
+				if(c.eq('>')) return param.result;
 			}
 		}
 		return "pythonRunTest 실행오류";
 	}
 	pythonLibs(req, param, &uri) {
-		cmd=Baro.process('cmd')
-		cmd.args.command="python Lib/site-packages/pip freeze"
-		Cf.postEvent('cmdExec', cmd)
-		logClass('cmd').timeout()
+		python=Baro.process('python')
+		python.args.command="python Lib/site-packages/pip freeze"
+		Cf.postEvent('pythonExec', python)
+		logClass('python').timeout()
 		while(250) {
 			System.sleep(100)
-			out=logClass('cmd').timeout() 
+			out=logClass('python').timeout() 
 			if(out) {
 				c=out.ch(-1,true) 
 				if(c.eq('>')) {
-					return parse(cmd.commandResult);
+					return parse(python.commandResult);
 				}
 			}
 		}
@@ -204,17 +209,17 @@
 	}
 	pythonInstall(req, param, &uri) {
 		name=uri.trim()
-		cmd=Baro.process('cmd')
-		cmd.args.command="python Lib/site-packages/pip install $name"
-		Cf.postEvent('cmdExec', cmd)
-		logClass('cmd').timeout()
+		python=Baro.process('python')
+		python.args.command="python Lib/site-packages/pip install $name"
+		Cf.postEvent('pythonExec', python)
+		logClass('python').timeout()
 		while(500) {
 			System.sleep(1000)
-			out=logClass('cmd').timeout() 
+			out=logClass('python').timeout() 
 			if(out) {
 				c=out.ch(-1,true) 
 				if(c.eq('>')) {
-					param.result=cmd.commandResult
+					param.result=python.commandResult
 					return param;
 				}
 			}
@@ -224,13 +229,13 @@
 	}
 	pythonRun(req, param, &uri) {
 		name=uri.trim()
-		cmd=Baro.process('cmd')
-		cmd.args.command="python Lib/site-packages/pip $name"
-		Cf.postEvent('cmdExec', cmd)
-		logClass('cmd').timeout()
+		python=Baro.process('python')
+		python.args.command="python Lib/site-packages/pip $name"
+		Cf.postEvent('pythonExec', python)
+		logClass('python').timeout()
 		while(250) {
 			System.sleep(100)
-			out=logClass('cmd').timeout()
+			out=logClass('python').timeout()
 			if(out) {
 				c=out.ch(-1,true)
 				if(c.eq('>')) return out;
@@ -259,6 +264,17 @@
 
 
 <func>
+	@app.reloadApi(name) {
+		fo=Baro.file("api")
+		path=webRoot()
+		filePath="$path/api/${name}.js"
+		serviceNode=Cf.getObject("api", name, true);
+		modifyTm=fo.modifyDate(filePath);
+		not(modifyTm.eq(serviceNode.lastModifyTm)) { 
+			@api.addServiceFunc(serviceNode, fileRead(filePath));
+			serviceNode.lastModifyTm=modifyTm;
+		}
+	}
 	@app.screenRectPos(pos) {
 		not(pos) pos=System.info('cursor')
 		rcScreen=null
@@ -268,5 +284,95 @@
 			if(rc.contains(pos)) return rc;
 		}
 		return;
+	}
+	@app.cmdPanddingNode(pid) {
+		if(@app.cmdRunCheck(pid)) return;
+		node=object("pandding.$pid").removeAll()
+		node.var(tag, pid)
+		return node;
+	}
+	@app.cmdPythonStart() {
+		p=Baro.process('python')
+		p.path(conf('path.python'))
+		not(p.run()) {
+			p.run('cmd', @app.cmdProc)
+			Cf.postEvent('python', @app.cmdPostEvent);
+		}
+	}
+	@app.cmdFinishFunc() {
+		cmd=this;
+		param=cmd.postParam;
+		print("cmd finished ", cmd, param)
+	}
+	@app.cmdRunCheck(pid, reset) {
+		while(cur, object("pandding.$pid")) {
+			not(cur.startTick) continue;
+			not(cur.finishFlag) return true;
+		}
+		if(reset) object("pandding.$pid").removeAll()
+		return false;
+	}
+	@app.cmdParam(pid, command, finishCallback ) {
+		finishFlag=false;
+		node = object("pandding.$pid")
+		param = node.addNode().with(pid, command, finishCallback, finishFlag)
+		if( @app.cmdRunCheck(pid)) {
+			param.type = 'padding'
+		} else if(finishCallback) {
+			Cf.postEvent(pid,"cmdExec", param);
+		}
+		return param;
+	}
+	@app.cmdPostEvent(type,param) {
+		param.inject(pid, command)
+		cmd = Baro.process(pid)
+		cmd.postParam = param;
+		switch(type) {
+		case cmdStart:
+			if( cmd.is()) {
+				print("cmd가 이미 실행중입니다");
+				return;
+			}
+			cmd.run("cmd", @app.cmdProc)
+			logClass('cmd').timeout()
+		case cmdExec:
+			not(command) return print("cmd 실행오류 컨멘드가 업습니다");
+			param.startTick=System.tick()
+			cmd.write(command)
+		default:
+		}
+	}
+	@app.cmdProc(type, data) {
+		switch(type) {
+		case write:
+			this.cmdStart=true
+		case read:
+			c=data.ch(-1)
+			if(c.eq('>')) {
+				param=this.postParam;
+				fc=when(param, param.finishCallback) not(typeof(fc,'func')) fc=this.finishCallback
+				if(typeof(fc,'func') ) {
+					fc(param)
+				}
+				if(param && param.isset(type) ) {
+					if( param.type.eq('pandding') ) {
+						param.result=this.result;
+						next=param.index()+1
+						cur=param.parentNode().child(next)
+						if(cur.command) Cf.postEvent('cmd','cmdExec', cur);
+					}
+				}
+				if(param) param.finishFlag=true;
+				this.postParam=null
+				if(this.finishCallback) this.finishCallback=null;
+			} else {
+				if(this.cmdStart) {
+					this.result=''
+					this.cmdStart=false
+				}
+				this.appendText('result', data.utf8())
+			}
+		default:
+		}
 	}
 </func>
