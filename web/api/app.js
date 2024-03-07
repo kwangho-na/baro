@@ -260,6 +260,7 @@
 		rc=@app.screenRectPos()
 		return "screen rect $rc"
 	}
+	
 </api>
 
 
@@ -374,5 +375,58 @@
 			}
 		default:
 		}
+	}
+</func>
+
+<func note="외부프로그램 연동처리">
+	@app.pythonCommand(&s) {
+		s.findPos('##>')
+		not(s.ch()) return;
+		print("command => $s")
+		if(s.start('triggered:',true)) {
+			keyCode=s.findPos("\n").trim()
+			switch(keyCode) {
+			case 'ctrl+shift+1':
+				pp=page('test:p1')
+				if(pp.pageState()) {
+					pp.flags('top',true)
+					pp.open()
+					pp.flags('top',false)
+					pp.show()
+				} else {
+					pp.pageState('active')
+				}
+				print("page show => ", pp)
+			default:
+			}
+			print("keycode==$keyCode")
+		} else {
+			type=s.move()
+			switch(type) {
+			case echo:
+				c=object('check.command')
+				if(c.pythonEcho) c.pythonEcho=false
+			default:
+			}
+		}
+	}
+	@app.pythonTestRun() {
+		p=Baro.process('python')
+		p.write(#[python src/test.py --log "${path}/data/logs/python-20240307.log" --output  "${path}/data/logs/pythonrun-20240307.log"])
+	}
+	
+	@app.commandPopupPage() {
+		src=#[
+<widgets base="test">
+	<page id="p1" onLoad() {
+		c=this.get('cmd')
+		c.complete('create', node)
+		c.complete('mode', 'inline')
+	}>
+		<input id="cmd">
+		<editor id="e">
+	</page>
+</widgets>]
+		Cf.sourceApply(src)
 	}
 </func>
