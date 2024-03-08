@@ -56,11 +56,11 @@
 	} 
 	fileChunkStart(req, param, &uri, data) {
 		param.parseJson(data)
-		param.inject(userId, totalCount, savePath)
+		param.inject(fid, totalCount, savePath)
 		not(typeof(totalCount,'num')) return print("file chunk start error [totalCount not defined]");
 		path=System.path()
 		map=object("map.filechunk")
-		infoPath="${path}/data/filechunkInfo/${param.userId}.inf"
+		infoPath="${path}/data/filechunkInfo/${fid}.inf"
 		fileWrite(infoPath, data)
 		hash=Baro.file().fileHash(infoPath)
 		node=map.addNode(hash).with(infoPath, userId, totalCount, savePath)
@@ -68,7 +68,7 @@
 			node.addNode().with(idx)
 		}
 		node.startTick=System.tick()
-		param.chunkHas=hash
+		param.fileHash=hash
 		return param
 	}
 	fileChunk(req, param, &uri, data) {
@@ -98,25 +98,30 @@
 	}
 </api>
 
-<func>
-	@data.fileChunkCallback(type, data) {
-		switch(type) {
-		case read: this.appendText('result', data)
-		case finish:
-			target=this.target
-			if( target.tag=='chunk-root' ) {
-				target.parseJson(this.result)
-				parent=target;
-			} else {				
-				parent=target.parentNode()
-			}
-			if( parent.tag=='chunk-root' ) {
-				this.target.checkFinished=true
-				@data.fileChunkUpload(parent);
-			}
-		case error: this.target.error=data
+<func note="공통함수">
+	_ts(o) { return toString(o, true) }
+	_name(&s) {
+		a=s.findLast('/');
+		b=when(a, a.right(), s);
+		return b.findPos('.').trim();
+	} 
+	_json() {
+		node=_node().parseJson(this.result)
+		switch(args.size()) {
+		case 0:
+			return node
+		case 1:
+			args(id)
+			return node.get(id)
+		default:
+			arr=_arr()
+			while(key, node.keys()) arr.add(node.get(key))
+			return arr;
 		}
 	}
+</func>
+
+<func> 
 	@data.fileChunkUpload(param, filePath, savePath) {
 		if(filePath ) {
 			fid='';
@@ -140,14 +145,24 @@
 				web.data=@json.nodeStr(node)
 				header=web.addNode('@header')
 				header.set('Content-Type', 'application/data')
-				web.call("http://localhost/api/data/fileChunkStart", "POST", @data.fileChunkCallback)
+				web.call("http://localhost/api/data/fileChunkStart", "POST", func(type, data) {
+					switch(type) {
+					case read: this.appendText('result', data)
+					case finish:
+						target=this.target
+						target.fileHash=_json("fileHash")
+						@data.fileChunkUpload(target);
+					case error: this.target.error=data
+					}
+				});
 			}
 			return;
 		}
 		node=param;
+		total=node.childCount();
 		if(node.tag != 'chunk-root' ) return print("file chunk upload root node tag error [node:${node}]");
 		if(total != node.totalCount ) return print("file chunk upload total count error [${total} == ${node.totalCount}]");
-		total=node.childCount();
+		fileHash=node.fileHash;
 		callCnt=0;
 		while(cur, node, idx) {
 			n=idx%4
@@ -159,30 +174,39 @@
 			web.data=node.data
 			web.target=node
 			node.idx=idx;
-			web.call("http://localhost/api/data/fileChunk/$idx/$fileHash", "POST", @data.fileChunkCallback)
+			web.call("http://localhost/api/data/fileChunk/$idx/$fileHash", "POST", func(type, data) {
+				switch(type) {
+				case read: this.appendText('result', data)
+				case finish:
+					root=this.target.parentNode()
+					@data.fileChunkUpload(root);
+				case error: this.target.error=data
+				}
+			});
 			callCnt++;
 		}
 		return callCnt;
 	}
 	@data.fileChunk(path, node, chunkSize) {
+		// 파일을 chunk 단위로 나눠서 노드에 저장한다
 		not(node) node=_node()
 		not(chunkSize) chunkSize=1048576
 		fo=Baro.file('api')
 		not(fo.open(path,'read')) return print("file chunk error [path:$path]")
 		not(node.tag) node.tag='chunk-root'
 		not(node.filePath) node.filePath=path;
-		sz=fo.size()
-		last=sz/chunkSize
+		fsize=fo.size()
+		last=fsize/chunkSize
 		cnt=last+1
 		while(n=0, n<cnt, n++) {
 			cur=node.addNode() 
 			if(n==last) {
-				cur.data=fo.read(sz)
+				cur.data=fo.read(fsize)
 			}	else {
 				cur.data=fo.read(chunkSize)
 			}
 			cur.sendFlag=false;
-			sz-=chunkSize
+			fsize-=chunkSize
 		}
 		fo.close()
 		return node
@@ -200,11 +224,3 @@
 	
 </func>
 
-<func note="공통함수">
-	_ts(o) { return toString(o, true) }
-	_name(&s) {
-		a=s.findLast('/');
-		b=when(a, a.right(), s);
-		return b.findPos('.').trim();
-	} 
-</func>
