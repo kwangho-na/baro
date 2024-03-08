@@ -11,10 +11,7 @@ xui.define("xui/ws", function(require, exports, module) {
 		} else if (charCode < 0xd800 || charCode >= 0xe000) {
 		  utf8.push(0xe0 | (charCode >> 12), 0x80 | ((charCode >> 6) & 0x3f), 0x80 | (charCode & 0x3f));
 		} else {
-		  ii++;
-		  // Surrogate pair:
-		  // UTF-16 encodes 0x10000-0x10FFFF by subtracting 0x10000 and
-		  // splitting the 20 bits of 0x0-0xFFFFF into two halves
+		  ii++; 
 		  charCode = 0x10000 + (((charCode & 0x3ff) << 10) | (str.charCodeAt(ii) & 0x3ff));
 		  utf8.push(
 			0xf0 | (charCode >> 18),
@@ -79,10 +76,10 @@ xui.define("xui/ws", function(require, exports, module) {
 			}
 		}
 	}
-	const wsOpen 	= e => clog("websocket open =>", e.target )
-	const wsClose 	= e => checkDelete(websocketId(e.target))
+	const wsOpen 	= e => openWs(e.target)
+	const wsClose 	= e => closeWs(e.target)
 	const wsMsg 	= e => parseMessage(e.target, e.data)
-	const wsErr 	= e => clog("websocket error =>", e, websocketId(e.target) )
+	const wsErr 	= e => errorWs(e)
 	const connect = (id, host, port) => {
 		let ws=checkDelete(id)
 		if(ws) return ws;
@@ -106,59 +103,73 @@ xui.define("xui/ws", function(require, exports, module) {
 		}
 		return null
 	}
-	 
-	const sendWs = (id, serviceId, header, contentType, info, data) => {
-		const ws=this.websocket(id)
-		if(ws && ws.readyState==1 ) {
-			if(!info) info=''
-			size=getByteLength(data)
-			ws.send('@'+serviceId+':'+header+'\r\n'+contentType+','+size+','+info+'\r\n'+data);
-		}
+	const openWs = ws => {
+		const tm=new Date().getTime()
+		sendPacket(ws, getPacket('login', 'websocket', 'start', JSON.stringify(ws.infoNode)))
 	}
-	const sendMessage = (id, msg) => {
-		const ws=this.websocket(id)
+	const closeWs = ws => {
+		const id=websocketId(ws);
+		clog("close websocket id=="+id)
+		ws.close()
+		checkDelete(id)
+	}
+	const errorWs = e => {
+		clog("websocket error ", e);
+	}
+	const sendWs = (id, serviceId, header, contentType, info, data) => {
+		const ws=websocket(id)
+		sendPacket(ws, getPacket(serviceId, header, contentType, info, data))
+	}
+	const getPacket = (serviceId, header, contentType, info, data) => {
+		if(!info) info=''
+		if(!data) data='';
+		const size=getByteLength(data)
+		return '@'+serviceId+':'+header+'\r\n'+contentType+','+size+','+info+'\r\n\r\n'+data
+	}
+	const sendPacket = (ws, msg) => {
 		if(ws && ws.readyState==1 ) {
 			ws.send(msg);
+		} else {
+			clog("websocket send message error data=="+msg)
 		}
 	}
 	const parseMessage = (ws, data) => {
-		let sp=0, ep=data.indexOf("\r\n");
-		if( ep==-1 ) return clog("websocket recive start error", data)
+		let sp=0, ep=data.indexOf("\r\n"), headerEndPos=0;
+		if( ep==-1 ) return clog("websocket 1 start error", data)
 		const line = data.substring(sp,ep);
 		sp=ep+2;
 		ep=data.indexOf("\r\n\r\n", sp)
-		if( ep==-1 ) return clog("websocket recive header end error", data)
-		if( line.charAt(0)!='@') return clog("websocket recive start char error", line)
+		if( ep==-1 ) return clog("websocket 2 header end error", data)
+		headerEndPos=ep+4;	
+		if( line.charAt(0)!='@') return clog("websocket 3 start char error", line)
 		const info = data.substring(sp,ep);
 		sp=1, ep=line.indexOf(':',sp)
-		if( ep==-1 ) return clog("websocket recive service type parse error", line)
+		if( ep==-1 ) return clog("websocket 4 service type parse error", line)
 		
 		const type= line.substring(sp,ep);
 		const errorCode=line.substring(ep+1).trim()
 		sp=0,ep=info.indexOf(',',sp)
-		if( ep==-1 ) return clog("websocket recive content type parse error", info)
+		if( ep==-1 ) return clog("websocket 5 content type parse error", info)
 		const contentType=info.substring(sp,ep).trim()
 		sp=ep+1,ep=info.indexOf(',',sp)
-		if( ep==-1 ) return clog("websocket recive size parse error", info)
+		if( ep==-1 ) return clog("websocket 6 size parse error", info)
 		const size=info.substring(sp,ep).trim()
-		if(isNum(size)) return clog("websocket recive size is not number", info) 
+		if(!isNum(size)) return clog("websocket 7 size is not number", info) 
+		sp=ep+1,ep=info.indexOf(',',sp)
+		if( ep==-1 ) return clog("websocket 8 result parse error", info)
+		const result=info.substring(sp,ep).trim()
 		const message=info.substring(ep+1).trim()
-		
 		if(typeof exports.messageProc=='function') {
-			exports.messageProc(type, errorCode, contentType, result, message, data)
+			exports.messageProc(type, errorCode, contentType, size, result, message, data.substring(headerEndPos))
 		} else {
-			clog('meesageProc callback function not defined : ',type, errorCode, contentType, result, message, data)
+			clog('meesageProc callback function not defined : ',type, errorCode, contentType, size, result, message, data.substring(headerEndPos))
 		}
 	}
-	const node = {wsMap, connect, websocket, websocketId, sendWs, sendMessage, parseMessage }
-	for(let key in node ) {
-		exports[key]=node[key]	
-	}
+	const node = {wsMap, connect, websocket, websocketId, sendWs, closeWs, sendPacket, getPacket, parseMessage }
+	for(let key in node ) exports[key]=node[key]
 });
 
-
 <func note="WEB Socket SERVICE function">
-	 
 	@wss.start(port) {
 		not(port) port=8092
 		server=Baro.server('websocket')
@@ -266,6 +277,9 @@ xui.define("xui/ws", function(require, exports, module) {
 		}
 		@wss.socketMessageApply(client, type, header, contentType, data, info)
 	}
+	@wss.fileHash(path) {
+		return Baro.file().fileHash(path)
+	}
 	@wss.socketMessageApply(client, type, &header, &contentType, &data, &info) {
 		print("socketMessageApply", type, header, data.size() );
 		if( type=='api') {
@@ -288,6 +302,19 @@ xui.define("xui/ws", function(require, exports, module) {
 				contentType='text'
 			}
 			@wss.sendService(client, type, 200, contentType, "ok", uri, data)
+		} else if(type=='login') {
+			conf=client.config()
+			cur=conf.addNode('userInfo').parseJson(info)
+			userId=cur.id
+			if(userId) {
+				path=System.path();
+				filePath="$path/data/loginInfo/${userId}.inf"
+				fileWrite(filePath, info)
+				token=@wss.fileHash(filePath)
+			} else {
+				token=''
+			}
+			@wss.sendService(client, 'login', 200, contentType, "ok", token)
 		} else if(type=='echo') {
 			@wss.sendService(client, 'echo', 200, 'echo', 'ok', info, data)
 		} else if(type=='imageSend') {
@@ -303,7 +330,7 @@ xui.define("xui/ws", function(require, exports, module) {
 	@wss.sendService(client, type, errorCode, contentType, result, message, data) {
 		not(type) return;
 		size=data.size();
-		client.sendWs("@${type}:${errorCode}\r\n${contentType}, ${size},${result},${message}\r\n\r\n${data}");
+		client.sendWs("@${type}:${errorCode}\r\n${contentType},${size},${result},${message}\r\n\r\n${data}");
 	}
 	@wss.sendAddminMessage(type, errorCode, contentType, result, message, data) {
 		server=Baro.server('websocket')
@@ -352,5 +379,3 @@ xui.define("xui/ws", function(require, exports, module) {
 		return param;
 	}
 </func>
-
-
