@@ -57,7 +57,16 @@ class WebEnginePage(QtWebEngineWidgets.QWebEnginePage):
 
     def add_object(self, obj):
         self._objects.append(obj)
+    def javaScriptConsoleMessage(self, level, msg, linenumber, source_id):
+        try:
+            print('%s:%s: %s' % (source_id, linenumber, msg))
+        except OSError:
+            pass
 
+    @QtCore.pyqtSlot(str)
+    def print(self, text):
+        print('From JS:', text)
+        
     @QtCore.pyqtSlot(bool)
     def onLoadFinished(self, ok):
         if ok:
