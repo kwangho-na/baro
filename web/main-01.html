@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TEST 개발페이지</title>
+	<link rel="stylesheet" href="../css/quasar.min.css">
+	<link rel="stylesheet" href="../css/fontawesome.css">
+	<link rel="stylesheet" href="../css/material-icons.css">
+	<link rel="stylesheet" href="../css/xui.css">
+	<script src="../js/jquery.js"></script>
+	<script src="../js/vue3.js"></script>
+	<script src="../js/tailwind.min.js"></script>
+	<script src="../js/common.js"></script>
+</head>
+
+<body style="overflow:hidden;" onload="initPage()">
+	<div id="app-main" style="width:100%;height:100vh;"></div>
+	<script>
+		function initPage() {
+			const jsPath='/js', storePath='/js/stores';
+			xui.loadModule({
+				pinia:				jsPath+'/pinia.js',
+				quasar:				jsPath+'/quasar.umd.js',
+				'xui/config':		jsPath+'/xui-config.js',
+				'xui/pageSource':	jsPath+'/xui-pageSource.js',
+			}, () => {
+				const cf=xui.require('config');
+				const paths = {
+					'store/global': 		storePath+'/store-global.js',
+					'store/test': 			storePath+'/store-test.js',
+				}
+				// paths[subPageCode] = jsPath+'/'+subPageCode+'.js';
+				cf.createMainApp(jsPath, storePath)
+				if( cf.tailwindUse && window.tailwind ) tailwind.config={ plugins: [initPlugIn()] }
+				clog("init page path ==> ", paths);
+				xui.loadModule(paths, () => xui.store('global').loadRoutePage(getEl('app-main'), getTemplateSource()) )
+			})
+		}
+	</script>
+</body>
+<template>
+	 <div class="page-top"></div>
+	 <q-carousel
+		v-model="store.pageCode"
+		animated
+		transition-prev="jump-down"
+		transition-next="jump-up"
+		:padding="store.pageStyle.padding"
+		:vertical="store.pageStyle.vertical"
+		:arrows="store.pageStyle.arrows"
+		:navigation="store.pageStyle.navigation"
+		class="page-content"
+	>
+	<q-carousel-slide v-for="cur in store.pages" :name="cur.name">
+		<component :is="cur.page"/>
+	</q-carousel-slide>
+	</q-carousel>
+
+	<script vars>
+		store.pageStyle={padding:false, vertical:false,arrow:false,navigation:false}
+	</script>
+
+	<script>
+		/* [transitions]
+		slide-right, slide-left, slide-up, slide-down
+		fade, scale, rotate, 
+		flip-right, flip-left, flip-up, flip-down
+		jump-right, jump-left, jump-up, jump-down
+		*/
+		store.pageCode=''
+		store.pages=[]
+		store.addPage = (name,url,change) => {
+			const node = {name, url, page:null}
+			global.loadPage(url, store, page=>{
+				node.page=page
+				store.pages.push(node)
+				if(change) store.pageCode=name
+			})
+		}
+		store.addPage('aa02','/sample/aa02.html')
+		store.addPage('aa03','/sample/aa03.html', true)
+	</script>
+
+	<style>
+		.page-top {
+			height:45px;
+			border-bottom:1px solid #aaa;
+		}		
+		.page-content { 
+			padding:0px;
+			height:calc(100vh - 45px);
+		}
+		.q-carousel__slide {
+			padding:0px;
+			overflow:auto;
+		}
+	</style>
+</template>
+</html>
