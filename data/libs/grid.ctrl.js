@@ -63,14 +63,28 @@ g[
 	onSort(a,b,c) {
 		this.var(numSort, a)
 	}
-	onDrawHeader(dc, text, idx, sort) {
-		rc=dc.rect()
-		dc.rectLine(rc.incr(1), 0, '#aaa',1, 'dot')
-		num=this.var(numSort)
-		if(idx==num ) {
-			print("xxxxxxxx", idx, num, sort )
+	
+	onDrawHeader(dc, text, idx, asc) {
+		rc=dc.rect(), fields=this.fields();
+		last=fields.childCount()-1;
+		if(last.eq(idx)) {
+			dc.rectLine(rc, 4,'#a0a0a0');
+		} else {
+			dc.rectLine(rc, 34,'#a0a0a0');
 		}
-		dc.text(text,'center')
+		sortIdx=this.var(numSort
+		if(this.is('sortEnable') && idx.eq(sort) ) {
+			if(asc) {
+				icon="vicon.bullet_arrow_up";
+			} else {
+				icon="vicon.bullet_arrow_down";
+			}
+			rcIcon=rc.rightCenter(16,16,-5);
+			dc.text(rc.incrX(10), text );
+			dc.image(rcIcon, icon);
+		} else {
+			dc.text(rc, text, 'center');
+		}
 	}
 ]
 ~~
