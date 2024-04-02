@@ -66,3 +66,16 @@ module.exports = merge(common, {
     }
 })
 ```
+```c
+TreeNode* baroWidgetApply(LPCC tag, LPCC id, StrVar* var, int sp, int ep, LPCC classId ) {
+    bool pageCheck=ccmp(tag,"page") || ccmp(tag,"dialog") || ccmp(tag,"main");
+    bool widgetCheck=false;
+    if( !pageCheck ) {
+		widgetCheck=ccmp(tag,"widget") || ccmp(tag,"tree") || ccmp(tag,"grid") || ccmp(tag,"canvas") || ccmp(tag,"input") ||
+        ccmp(tag,"editor") || ccmp(tag,"combo") || ccmp(tag,"input") || ccmp(tag,"video") || ccmp(tag,"webview") ||
+        ccmp(tag,"button") || ccmp(tag,"check") || ccmp(tag,"radio") || ccmp(tag,"context") ||
+        ccmp(tag,"calendar") || ccmp(tag,"spin") || ccmp(tag,"date") || ccmp(tag,"time") || ccmp(tag,"label") ||
+        ccmp(tag,"group") || ccmp(tag,"tab") || ccmp(tag,"div") ||
+        ccmp(tag,"table") || ccmp(tag,"widget") || ccmp(tag,"progress") || ccmp(tag,"toolbutton") || ccmp(tag,"splitter");
+    }
+```
