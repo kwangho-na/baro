@@ -17,12 +17,10 @@ p=page('dev:dbFields')
 p.open()
 
 g=p.get('g')
-g.model('')
 g.is('stretchLast', true)
 g.is('selection','single')
 g.is('resizeWidth', true)
-
-g.fields('field:필드명#120, type:필드타입, size:크기, def:기본값, note:설명, nullCheck:NULL체크')
+g.model('field:필드명#120, type:필드타입, size:크기, def:기본값, note:설명, nullCheck:NULL체크')
 
 
 a=object('@inc.userFunc').get('hbox')
