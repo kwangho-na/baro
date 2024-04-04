@@ -39,9 +39,41 @@ g.model(root)
 c=root.addNode().with(field:'aaa', type:'text')
 
 g.update()
-
-cur=g.lastNode(true)
-
+last=g.lastNode(true)
+~~
+onKeyDown(k,c) {
+	g=this
+	checkSort=false
+	if(k==KEY.Up) {
+		cur=g.current()
+		not(cur) return;
+		prev=g.prevNode(cur)
+		if(prev) {
+			idx=prev.idx;
+			prev.idx=cur.idx
+			cur.idx=idx
+			checkSort=true
+		}
+	} else if(k==KEY.Down) {
+		cur=g.current()
+		not(cur) return;
+		next=g.nextNode(cur)
+		print("keydown==>",cur, next)
+		if(next) {
+			idx=next.idx
+			next.idx=cur.idx
+			cur.idx=idx
+			checkSort=sort;
+		}
+	} else {
+		print("key down >>",k,c)
+	}
+	if(checkSort) {
+		g.update()
+		g.sort(0)
+		return true
+	}
+}
 ~~
 root.parseJson(#[[
 	{field:bbb, type:varchar, size:200, nullCheck:true},
