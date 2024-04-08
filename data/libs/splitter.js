@@ -36,6 +36,27 @@ s=p.get('panels')
 s.addPage(page('dev:treePanel'))
 s.addPage(page('dev:content'))
 
+~~ actions
+node=object("app.actions")
+node.parseJson(#[
+	[
+		{id: 'func.addFunc',	text: 함수추가,		icon:icons/application_edit.png },
+		{id: 'func.reload',	text: 새로고침,		icon:icons/arrow_rotate_clockwise.png },
+		{id: 'func.deleteFunc',	text: 함수삭제,		icon:icons/vicon.delete_default.png },
+	]
+])
+p.action(node.var(array))
+p[
+	onContextMenu(pos) {
+		print("context pos==$pos")
+		this.menu('func.addFunc, func.reload, -, func.deleteFunc', pos.incrY(4) );
+	} 
+	onAction(act) {
+		id=act.id
+		print("action ", id)
+	}
+]	
+~~
 search(node) {
 	this[maxCode]= null;
 	root = this[grid].rootNode();
@@ -108,16 +129,7 @@ tree.onContextMenu() {
 tree.onChange() { 
 	this.search( @node );
 } 
-
-actionAddCode() {
-	this.addCode();
-}
-actionReload() {
-	this.reloadTree();
-}
-actionDeleteCode() {
-	
-}
+ 
 grid.onDraw() {
 	this.drawGrid(@draw, @node );
 }
