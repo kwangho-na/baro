@@ -39,38 +39,82 @@ c=root.addNode().with(field:'aaa', type:'text')
 g.update()
 last=g.lastNode(true)
 ~~
+g.is('sortEnable', false)
+
+onSort(idx,a,b) {
+	return a.idx.gt(b.idx)
+}
 onKeyDown(k,c) {
 	g=this
 	checkSort=false
 	if(k==KEY.Up) {
-		cur=g.current()
-		not(cur) return;
-		prev=g.prevNode(cur)
-		if(prev) {
-			idx=prev.idx;
-			prev.idx=cur.idx
-			cur.idx=idx
+		c=g.current()
+		idx=c.idx
+		d=g.prevNode(c)
+		if(d) {
+			c.idx=d.idx
+			d.idx=idx
 			checkSort=true
 		}
 	} else if(k==KEY.Down) {
-		cur=g.current()
-		not(cur) return;
-		next=g.nextNode(cur)
-		print("keydown==>",cur, next)
-		if(next) {
-			idx=next.idx
-			next.idx=cur.idx
-			cur.idx=idx
-			checkSort=sort;
+		c=g.current()
+		idx=c.idx
+		d=g.nextNode(c)
+		if(d) {
+			c.idx=d.idx
+			d.idx=idx
+			checkSort=true
 		}
 	} else {
 		print("key down >>",k,c)
 	}
 	if(checkSort) {
 		g.update()
-		g.sort(0)
 		return true
 	}
+}
+ff(&s) {
+	fn=Cf.funcNode('parent')
+	a=args(1)
+	ss=''
+	while(s.valid()) {
+		left=s.findPos('{')
+		ss.add(left)
+		not(s.valid()) break;
+		k=s.findPos('}').trim()
+		if(typeof(k,'num')) ss.add(a.get(k))
+		else ss.add(fn.get(k))
+	}
+	return ss
+}  
+baseId() {
+	not(this.var(baseId)) {
+		p=this.pageNode()
+		base=p.var(baseCode).replace(':','_')
+		base.add('_',this.id)
+		this.var(baseId, base)
+	}
+	return this.var(baseId)	
+}
+setInputFields() {
+	base=this.baseId()
+	arr=this.get('@inputFields')
+	not(valid(arr)) {
+		fa=this.fields()
+		src='';
+		while(c,fa) {
+			c.inject(field, text)
+			src.add( ff('<input id="{0}"></input>', field) )
+		}
+		Cf.sourceApply( ff('<widgets base="{base}">{src}</widgets>') )
+		arr=this.addArray('@inputFields')
+		while(c,fa) {
+			c.inject(field, text)
+			input=object('input.{0}:{1}',base, field)
+			arr.add(input)
+		}
+	}
+	return arr
 }
 ~~
 root.parseJson(#[[
