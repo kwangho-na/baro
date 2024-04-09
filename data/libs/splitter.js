@@ -35,17 +35,44 @@ p.open()
 s=p.get('panels')
 s.addPage(page('dev:treePanel'))
 s.addPage(page('dev:content'))
-
+~~
+<func>
+	addSubPage(div, page, main) {
+		size=args().size()
+		if(size>3) {
+			args(3,a,b)
+			div.addPage(paeg,a,b)
+		} else {
+			div.addPage(page)	
+		}
+		not(main) main = div.pageNode()
+		page.var(mainPage, main)
+	}
+	mainPage() {
+		p=page()
+		return nvl(p.var(mainPage), p)
+	}
+	getActions(&s, node) {
+		not(node) node=this
+		not(typeof(node,'node'))) return print("get action node error")
+		
+		while(s.valid()) {
+			line=s.findPos("\n")
+			not(line.ch()) continue;
+			id=line.findPos(',')
+			text=line.findPos(',')
+			icon=line.findPos(',')
+		}
+	}
+</func>
+	
 ~~ actions
-node=object("app.actions")
-node.parseJson(#[
-	[
-		{id: 'func.addFunc',	text: 함수추가,		icon:icons/application_edit.png },
-		{id: 'func.reload',	text: 새로고침,		icon:icons/arrow_rotate_clockwise.png },
-		{id: 'func.deleteFunc',	text: 함수삭제,		icon:icons/vicon.delete_default.png },
-	]
-])
-p.action(node.var(array))
+acts= [
+	{id: 'func.addFunc',	text: 함수추가,		icon:icons/application_edit.png },
+	{id: 'func.reload',	text: 새로고침,		icon:icons/arrow_rotate_clockwise.png },
+	{id: 'func.deleteFunc',	text: 함수삭제,		icon:icons/vicon.delete_default.png },
+]
+p.action(acts)
 p[
 	onContextMenu(pos) {
 		print("context pos==$pos")
