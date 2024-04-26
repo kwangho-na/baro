@@ -30,6 +30,9 @@ class QWebView(QWebEngineView):
         if url:
             self.load(QUrl.fromUserInput(f'{PDFJS}?file={url}'))
         self.loadFinished.connect(self._on_load_finished)
+        self.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True)
+        self.settings().setAttribute(QWebEngineSettings.PdfViewerEnabled, True)
+   
 
     def _on_load_finished(self):
         print("Url Loaded")
