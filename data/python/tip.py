@@ -1,3 +1,9 @@
+##
+sudo mplayer -vo fbdev2:/dev/fb0 -zoom -x 1024 -y 768 video.mp4
+$ sudo apt install mpv
+$ mpv --vo=drm video.mp4
+
+##
 def toQImage(self, im, copy=False):
     if im is None:
         return QImage()
