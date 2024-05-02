@@ -1,0 +1,245 @@
+<div style="width:100%;height:100%;background:#ccc;padding:8px;">
+	<table class="q-table" id="tableHeader">
+		<thead class="text-left">
+	      <tr>
+	        <th>Index</th>
+	        <th v-for="col in store.columns">
+	          {{ col.name }}
+	        </th>
+	      </tr>
+		</thead>
+	</table>
+	<q-virtual-scroll
+	  type="table"
+	  :style="{height: store.tableHeight}"
+	  :virtual-scroll-item-size="48"
+	  :virtual-scroll-sticky-size-start="48"
+	  :virtual-scroll-sticky-size-end="32"
+	  :items="store.list"
+	> 
+	  <template v-slot="{ item: row, index }">
+	    <tr :key="index" @click.stop="el=>store.clickEditCheck(row,el)" @mouseup.stop="store.log('tr up')">
+	      <td>#{{ index }}</td>
+	      <td v-for="column in store.columns">
+	      	<div v-if="row.editRowCheck && column.useEdit">
+	      		<input v-model="row[column.prop]" 
+	      			@keyup.enter="e=>store.listKeyEnter(row,column, e)" @mouseup.stop="store.log('input up')">
+	      	</div>
+	        <span v-else style="postion:relative;">
+	        	{{ row[column.prop] }}
+	        </span>
+	      </td>
+	    </tr>
+	  </template>
+	</q-virtual-scroll>
+	<div style="height:36px;">
+		<q-btn @click.stop="store.clickTest">test</q-btn>
+	</div>
+</div>
+
+<script vars>
+	store.onResize = e => {
+		store.setTableHeight()
+		clog("window resize " + store.tableHeight )
+	}
+	store.onMouseup = e => {
+		if(store.currentRow) {
+			store.currentRow.editRowCheck=false
+			store.currentRow=null
+		}
+	}
+</script>
+
+<script>
+store.log = (s,e) => clog("xx log xx",s,e)
+store.setTableHeight = () => {
+	const hh=$('#tableHeader').height() + 55
+	store.tableHeight=($(window).height() - hh)+'px'
+}
+store.setTableHeight()
+
+store.clickTest = e => {
+	clog("click test ")
+}
+store.clickEditCheck = (row, e) => {
+	const tr=$(e.target).closest('tr')
+	if(store.currentRow) store.currentRow.editRowCheck=false
+	row.editRowCheck=true
+	store.currentRow=row;
+	setTimeout(()=> {
+		for(const td of tr.children() ) {
+			const input = $(td).find('input')
+			if(input[0]) {
+				input.focus();
+				return true;
+			}
+		}
+	}, 250)
+}
+store.listKeyEnter = (row,c,e) => {
+	clog("key enter ",row, c)
+	if(c.prop=='name') {
+		const td=$(e.target).closest('td')
+		const input=td.next().find('input')
+		clog("xxxx input xxx", td[0], input)
+		input.focus()
+	} else {
+		row.editRowCheck=false;
+	}
+	
+}
+var arr=[
+  {
+    name: 'Frozen Yogurt',
+    calories: 159,
+    fat: 6.0,
+    carbs: 24,
+    protein: 4.0,
+    sodium: 87,
+    calcium: '14%'
+  },
+  {
+    name: 'Ice cream sandwich',
+    calories: 237,
+    fat: 9.0,
+    carbs: 37,
+    protein: 4.3,
+    sodium: 129,
+    calcium: '8%'
+  },
+  {
+    name: 'Eclair',
+    calories: 262,
+    fat: 16.0,
+    carbs: 23,
+    protein: 6.0,
+    sodium: 337,
+    calcium: '6%'
+  }
+]
+store.list = [];
+for(var n=0;n<100;n++) {
+	for(const row of arr) {
+		store.list.push(ASS({},row) );
+	}
+}
+
+store.columns = [
+  { name: 'Dessert (100g serving)', prop: 'name', useEdit:true },
+  { name: 'Calories', prop: 'calories', useEdit:true },
+  { name: 'Fat (g)', prop: 'fat' },
+  { name: 'Carbs (g)', prop: 'carbs' },
+  { name: 'Protein (g)', prop: 'protein' },
+  { name: 'Sodium (mg)', prop: 'sodium' },
+  { name: 'Calcium (%)', prop: 'calcium' }
+]
+</script>
+
+
+<template note="DIV flex 스크롤">
+<div style="width:100%;height:100%;background:#fff;padding:8px;">
+	<div class="flex">
+		<div style="width:60px">순번</div>
+		<div v-for="column in store.columns" class="cellHeader" :style="store.cellStyle(column)">
+		 	{{column.name}}
+		</div>
+	</div>
+	<q-virtual-scroll
+	  type="list"
+	  :style="{height: store.tableHeight}"
+	  :virtual-scroll-item-size="48"
+	  :virtual-scroll-sticky-size-start="48"
+	  :virtual-scroll-sticky-size-end="32"
+	  :items="store.list"
+	> 
+	  <template v-slot="{ item: row, index }">
+	  	<div class="flex">
+		  	<div style="width:60px">#{{ index }}</div>
+		  	<div v-for="column in store.columns" class="cellBody" :style="store.cellStyle(column)">
+		  		<span style="postion:relative;width:100%;height:100%;">
+		        	{{ row[column.prop] }}
+		        </span>
+		  	</div>
+		</div>
+	  </template>
+	</q-virtual-scroll>
+	<div style="height:36px;">
+		<q-btn @click.stop="store.clickTest">test</q-btn>
+	</div>
+</div>
+
+<script vars>
+	store.onResize = e => {
+		store.setTableHeight()
+		clog("window resize " + store.tableHeight )
+	}
+	store.onMouseup = e => {
+		if(store.currentRow) {
+			store.currentRow.editRowCheck=false
+			store.currentRow=null
+		}
+	}
+</script>
+
+<script>
+store.cellStyle = c => c.flex? 'flex:'+c.flex: c.width? 'width:'+c.width: 'width:80px';
+store.list = [
+  {
+    name: 'Frozen Yogurt',
+    calories: 159,
+    fat: 6.0,
+    carbs: 24,
+    protein: 4.0,
+    sodium: 87,
+    calcium: '14%'
+  },
+  {
+    name: 'Ice cream sandwich',
+    calories: 237,
+    fat: 9.0,
+    carbs: 37,
+    protein: 4.3,
+    sodium: 129,
+    calcium: '8%'
+  },
+  {
+    name: 'Eclair',
+    calories: 262,
+    fat: 16.0,
+    carbs: 23,
+    protein: 6.0,
+    sodium: 337,
+    calcium: '6%'
+  }
+];
+store.columns = [
+  { name: 'Dessert (100g serving)', prop: 'name', useEdit:true, flex:1 },
+  { name: 'Calories', prop: 'calories', useEdit:true, width:'100px' },
+  { name: 'Fat (g)', prop: 'fat', width:'80px' },
+  { name: 'Carbs (g)', prop: 'carbs', width:'80px' },
+  { name: 'Protein (g)', prop: 'protein', width:'100px' },
+  { name: 'Sodium (mg)', prop: 'sodium', width:'100px' },
+  { name: 'Calcium (%)', prop: 'calcium', width:'80px' }
+]
+</script> 
+
+<style>
+	.empty-element {
+		position:relative;
+		width:300px;
+		height: 28px;
+		padding: 4px;
+	}
+	.empty-element.show:after {
+		position:absolute;
+		content:'';
+		 top:0;
+		 right:0;
+		 width:0px;
+		 height:0px;
+		 border:10px solid;
+		 border-color: red red transparent transparent;
+		 border-width: 0 10px 10px 10px;
+	}
+</style>
+</template>
