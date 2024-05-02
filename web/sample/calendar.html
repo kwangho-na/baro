@@ -1,62 +1,53 @@
 ## 
 <div>
 	<table>
-		<tr v-for="row in @@.data">
-			<td v-for="node in row" style="@@.cellStyle(node)">{{ node.date.getDate()}}</td>
+		<tr v-for="row in store.data">
+			<td v-for="node in row" style="store.cellStyle(node)">{{ node.date.getDate()}}</td>
 		</tr>
 	</table>
-
 </div>
 
-<vars>
-@@={
-	data: [],
-	setDate: params => {
-		const util = xui.require('util');
-		const date = params ? util.parseDate(params) : new Date()
-		const first = new Date(date.getTime());
-		const first.setDate(1);
-		const firstday=first.getDay();
-		clog("xxxxxxx set date xxxxxxxx", util, global, "this>>", this);
-		
-		const days=[];
-		let day = new Date(first.getTime())
-		for(const n=firstDay; n>0; n-- ) {
-			day.setDate(day.getDate() - n);
-			day.setHours(0, 0, 0, 0);
-			days.push({type:'prevMonth', valid:0, date:new Date(day.getTime())});
-		}
-		day = new Date(first.getTime())
-		do {
-			days.push({type:'curMonth', valid:1, date:new Date(day.getTime())});
-			day.setDate(day.getDate() + 1);
-			day.setHours(0, 0, 0, 0);
-		} while (day.getDate() !== 1);
-		
-		let next = 42 - days.length;
-		while (next > 0) {
-			days.push({type:'nextMonth', valid:0, date:new Date(day.getTime())}); 
-			day.setDate(day.getDate() + 1);
-			day.setHours(0, 0, 0, 0); 
-			next --;
-		}
-		const data=[];
-		let n=0, arr=null;
-		for(d of days) {
-			if(n++%7==0 ) {
-				arr=[];
-				data.push(arr)
-			}
-			arr.push(d)
-		}
-		widget.data = ASS([],data);
-	},
-	cellStyle: node => node.valid? '#999': '#ccc',
-}
-</vars>
+<script vars>
+	store.data=[]
+</script>
 
-<script>
-	@@.setDate('2023-12-01')
+<script> 
+	const date = new Date()
+	const dateFirst = new Date(date.getTime());
+	dateFirst.setDate(1);			// 현재달의 1일
+	const firstDay=dateFirst.getDay();		// 요일 
+	const days=[];
+	let day = new Date(dateFirst.getTime())
+	for(var n=firstDay; n>0; n-- ) {
+		day.setDate(day.getDate() - n);
+		day.setHours(0, 0, 0, 0);
+		days.push({type:'prevMonth', valid:0, date:new Date(day.getTime())});
+	}
+	day = new Date(dateFirst.getTime())
+	do {
+		days.push({type:'curMonth', valid:1, date:new Date(day.getTime())});
+		day.setDate(day.getDate() + 1);
+		day.setHours(0, 0, 0, 0);
+	} while (day.getDate() !== 1);
+	
+	let next = 42 - days.length;
+	while (next > 0) {
+		days.push({type:'nextMonth', valid:0, date:new Date(day.getTime())}); 
+		day.setDate(day.getDate() + 1);
+		day.setHours(0, 0, 0, 0); 
+		next --;
+	}
+	const data=[];
+	let idx=0, arr=null;
+	for(d of days) {
+		if(idx++%7==0 ) {
+			arr=[];
+			data.push(arr)
+		}
+		arr.push(d)
+	}
+	store.data = ASS([],data);
+	store.cellStyle = node => node.valid? '#999': '#ccc'
 </script>
 ##
 <div class="q-pa-md">
