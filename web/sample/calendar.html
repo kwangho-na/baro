@@ -1,0 +1,61 @@
+<div class="q-pa-md">
+    <div class="q-pb-sm">
+      <q-badge color="teal">
+        Model: {{ store.date }}
+      </q-badge>
+    </div>
+
+    <q-date 
+    	v-model="store.date" title="날짜선택" :subtitle="store.date" today-btn
+    	:locale="global.calendarLocale" 
+    	mask="YYYY-MM-DD"/>
+  </div>
+  <div>
+  	{{global.calendarLocale}}
+  </div>
+  
+<script vars>
+  	global.calendarLocale={
+		/* starting with Sunday */
+		days: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+		daysShort: ['일', '월', '화', '수', '목', '금', '토'],
+		months: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+		monthsShort: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+		firstDayOfWeek: 1, // 0 - Sunday, 1 Monday, ...
+		format24h: true,
+		pluralDay: 'dias'
+	} 
+</script>
+<script>
+	store.date='2024-01-22';
+	$('.q-date__calendar-weekdays').children().last().css({color:'red'})
+</script>
+
+<style>
+.q-date__header {
+	border-top-left-radius: inherit;
+	color: #fff;
+	background-color: #405b75;
+	padding: 4px 8px;
+}
+.q-date--portrait-standard .q-date__header {
+	border-top-right-radius: inherit;
+	height: 66px;
+}
+</style>
+
+##
+<q-btn label="test" :ref="el=>store.btn=el"/>
+<q-popup-proxy v-model="store.calendarOpenFlag" cover transition-show="scale" transition-hide="scale" :target="store.btn">
+	<q-date v-model="store.date">
+	  <div class="row items-center justify-end">
+		<q-btn v-close-popup label="Close" color="primary" flat />
+	  </div>
+	</q-date>
+</q-popup-proxy>
+
+<script vars>
+	store.btn=null;
+	store.calendarOpenFlag=true;
+</script>
+
