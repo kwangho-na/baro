@@ -33,3 +33,30 @@ vbox(rect, &info, result ) {
 hbox(rect, &info, gap) {
 	return @ui.boxRect(false, rect, info, result );
 }
+rcSize(rc) {
+	return rc.size()
+}
+class WbsCharts {
+	sx=0, sy=0 // 스크롤 위치
+	rcHeader=null
+	rcTask=null
+	rcCharts=null
+	unitType='' // month, week, days, quatar
+	taskData=null
+	setTask(num, type) {
+		not(type) type='month'
+		node=memberNode('taskData')
+		while(n=0,n<num,n++) {
+			cur=node.addNode()
+			taskName()
+		}
+		taskName=func() {
+			switch(type) {
+			case month:
+				cur.name=when(n,"M+$n", "M")
+			default:
+			}
+		};
+	}
+}
+
