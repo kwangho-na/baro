@@ -20,6 +20,126 @@
 	</page>
 </widgets>
 
+	layout.classNode(name) {
+		while(cur, object('map.classes')) {
+			if(cur.cmp('name',name)) return cur;
+		}
+		return;
+	}
+
+classLoad(name ) { 
+	path=System.path()
+	if(name.ch('/')) {
+		ss=name.ref()
+		a=ss.findLast('/')
+		relative=a.trim();
+		name=a.right();
+		pathBase=Cf.val(path, relative);
+	} else {
+		pathBase=Cf.val(path,"/data/libs/classes")
+	}
+	if(name.find('.')) {
+		pathFile="${pathBase}/${name}";
+	} else {
+		pathFile="${pathBase}/${name}.js";
+	}
+	print("pathFile == $pathFile")
+	not( isFile(pathFile) ) return print("$name class 로딩오류 [$pathFile 파일없음]");
+	map=object('map.classes');
+	src=stripJsComment(fileRead(pathFile))
+	parse = func(&s) {
+		while(s.valid() ) {
+			not(checkClass(s)) {
+				if(s.ch()) {
+					line=s.findPos("\n");
+					print("class load match error line=$line");
+					return;						
+				}
+			}
+			s.next().ch()
+			className=s.findPos('{',0,1).trim()
+			node=map.get(className)
+			not( typeof(node,'node') ) {
+				node=map.addNode(className)
+				node.name=className
+			}
+			node.path=pathFile
+			node.modifyDate=Baro.file().modifyDate(pathFile) 
+			src=s.match(1)
+			src=s.match(1)
+			conf("class.$className", src, true)
+			print("class $className loaded")
+		}
+	};
+	checkClass = func(&s) {
+		type=s.move()
+		not(type.eq('class')) return false;
+		c=s.next().ch()
+		while(c.eq('-')) c=s.next().ch()
+		if(c.eq('{')) return true;
+		return false;
+	};		
+	return parse(src)
+}
+
+
+class() {
+	if(args().size()==1) {
+		args(param)
+		obj=object("class.$param")
+	} else {
+		args(obj,param)
+	}
+	not(typeof(obj,'node'))  return print("class 객체 미설정")
+	not(param) return print("class 매개변수 미설정")
+	if(typeof(param,'array') ) pa=param;
+	else pa=split(param)
+	while(name, pa) {
+		src=conf("class.$name")
+		not(src) return print("class $name 클래스 소스 미등록")
+		parse(obj, src)
+	}
+	return obj;
+	parse=func(obj, &s) {			
+		init='', funcs='';
+		n=0;		
+		while(s.valid()) {
+			if(funcCheck(s)) {
+				sp=s.cur()
+				s.next().ch()
+				s.match()
+				s.match(1)
+				src=s.value(sp, s.cur(), true)
+				funcs.add(src)
+				c=s.ch()
+				if(c.eq(',',';')) s.incr();
+				continue;
+			} 
+			line=s.findPos("\n").trim()
+			if(n) init.add("\n")
+			init.add(line)
+			n++;
+		}
+		if(init) {
+			src="onInit() {$init}"
+			obj[$src]
+		}
+		if(funcs) {
+			obj[$funcs]
+		}
+	};
+	funcCheck = func(&s) {
+		not(s.ch()) return false;
+		c=s.next().ch()
+		if(c.eq('(')) {
+			s.match()
+			c=s.ch()
+			if(c.eq('{')) return true
+		}
+		return false
+	};
+}
+
 class SourceEditor {
 	editPanel=page("dev:editPanel");
 	logPanel=page("dev:logPanel");
