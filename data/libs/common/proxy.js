@@ -1,3 +1,32 @@
+## 파일나누기 합치기
+f=Baro.file'test')
+f.open('c:/Baro/baro.exe','read')
+size=f.size()
+chunck=1024*1024
+while(size.gt(0)) {
+	d=f.read(chunck)
+	not(d.size()) break;
+	size-=d.size()
+	print("size==$size")
+	idx++;
+	fileWrite("c:/Temp/c-${idx}.data", d)
+}
+f.seek(0)
+f.close()
+~~
+fa=Baro.file('append')
+fa.open('c:/Temp/aa.exe', 'append')
+f.var(nameFilter,'c-*.data')
+f.var(sort,'name')
+f.list('c:/Temp', func(info) {
+	while(info.next()) {
+		info.inject(type, name, fullPath)
+		fa.append(fileRead(fullPath))
+	}
+})
+fa.close()
+
+## 프록시 서버 구현
 class ProxyClient {
 	workers=_arr('proxyWorkers')
 	start(clientId, ip, port, timeout) {
@@ -13,6 +42,14 @@ class ProxyClient {
 			worker.start(func() { client.clientProc(this) }, true, 100)
 		})
 	} 
+	send(type, prop, data) {
+		not(prop) {
+			tm=System.localtime()
+			prop="tm:$tm"
+		}
+		size=data.size()
+		socket.sendData("##>$type:$size{$prop}\r\n$data")
+	}
 	clientProc(worker) {
 		not(socket) {
 			return System.sleep(1000);
@@ -33,11 +70,8 @@ class ProxyClient {
 		}
 		not(socket.isConnect()) {
 			print("socket connect start", ip, port);
-			if(socket.connect(ip,port,timeout)) {
-				print("socket connect ok");
-				tm=System.localtime();
-				size=clientId.size();
-				if( socket.sendData("##>login:$size{tm:$tm}\r\n$clientId") ) {
+			if(socket.connect(ip,port,timeout)) { 
+				if( this.send("login",clientId) ) {
 					if(socket.isRead(500)) {
 						result=socket.recvData();
 						print("connect result == $result");
