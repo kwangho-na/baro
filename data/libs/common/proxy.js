@@ -1,3 +1,123 @@
+class ProxyClient {
+	workers=_arr('proxyWorkers')
+	start(clientId, ip, port, timeout) {
+		not(clientId) return print("장치아이디를 등록하세요");
+		not(ip) ip='localhost';
+		not(port) port=8093;
+		not(timeout) timeout=2500;
+		call(func() {
+			client=this;
+			socket=Baro.socket(clientId)
+			worker=Baro.worker(clientId)
+			workers.add(worker)
+			worker.start(func() { client.clientProc(this) }, true, 100)
+		})
+	} 
+	clientProc(worker) {
+		not(socket) {
+			return System.sleep(1000);
+		}
+		if( socket.isRead(500) ) {
+			data=socket.recvData();
+			print("proxy recv data==$data"); 
+			if(typeof(data,'bool')) {
+				socket.close();
+				print("proxy read data error", this);
+				return;
+			}
+			not(data) {
+				socket.close()
+				return;
+			}
+			this.clientParse(socket, data);
+		}
+		not(socket.isConnect()) {
+			print("socket connect start", ip, port);
+			if(socket.connect(ip,port,timeout)) {
+				print("socket connect ok");
+				tm=System.localtime();
+				size=clientId.size();
+				if( socket.sendData("##>login:$size{tm:$tm}\r\n$clientId") ) {
+					if(socket.isRead(500)) {
+						result=socket.recvData();
+						print("connect result == $result");
+					} else {
+						print("connect recv timeout", socket);
+					}
+				}
+			}
+		}
+	}
+	clientParse(socket, &data) {
+		print("PROXY CLIENT PARSE data==$data")
+		str=data;
+		data.findPos('##>');
+		line=data.findPos("{",1,1);
+		not(data.ch('{')) {
+			return print("proxy client recv protocal error DATA:$str");
+		}
+		type=line.findPos(':').trim();
+		size=line.findPos(':').trim();
+		props=data.match(1);
+		data.findPos("\r\n");
+		param=this.addNode("param").removeAll(true);
+		param.parseJson(props);
+		result=null;
+		if(type=='api') {
+			uri=line;
+			if(uri.ch('/')) uri.incr();
+			service=uri.findPos('/').trim();
+			name=null, vars=null;
+			if(uri.find('/') ) {
+				name=uri.findPos('/').trim();
+				fileName="web/api/${service}.${name}.js";
+				if(isFile(fileName)) {
+					name=uri.findPos('/').trim();
+				} else {
+					fileName="web/api/${service}.js";
+				}
+				vars=uri.trim();
+			} else {
+				name=uri.trim();
+				fileName="web/api/${service}.js";
+			}
+			serviceNode=object("api.${service}");
+			modifyTm=Baro.file('proxy').modifyDate(fileName);
+			not(modifyTm.eq(serviceNode.lastModifyTm)) {
+				@api.addServiceFunc(serviceNode, fileRead(fileName));
+				serviceNode.lastModifyTm=modifyTm;
+			}
+			fc=serviceNode.get(name);			
+			if( param.get("range")) {
+				socket.setValue("Range", param.get("range"));
+			} else {
+				socket.socketClear("Range","rangeStart","rangeEnd");
+			}
+			if(typeof(fc,'function')) {
+				result=fc(socket, param, vars, data);
+			}
+			not(result) {
+				result=param;
+				result.error="$service $name API호출 오류(URI:$line)";
+			}		
+		} else {
+			result=param;
+			result.error="PROXY 타입오류 (타입:$type)";
+		}
+		conf=socket.config()
+		conf.var(sendCheck, false);
+		if( typeof(result,'node')) {
+			if(result.var(checkSend)) return;
+			socket.send(@json.listData(result) );
+		} else {
+			socket.send(result);
+		}
+		print("proxy client send ok")
+	}
+}
+
+
+
 <func note="PROXY SERVICE function">
 	proxyController(req, param, &url, proxy ) {
 		print("PROXY CONTROL START URL:$url")
