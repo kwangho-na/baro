@@ -1,3 +1,33 @@
+c=_node()
+c.id='id_ccc'
+c.test() 
+c[
+	onInit() {
+		xxx='test_c'
+		workers=this.addArray('@workers')
+	}
+	clientProc(worker) {
+		fn=Cf.funcNode('parent')
+		funcVars=when(fn, fn.get())
+		this.incrNum('ccc')
+		print("xxxxxxx client xxxxxxx", this.ccc, client, xxx, funcVars)
+	}
+	test(ip, port) {
+		// 선언된변수를 call 함수에 넣어준다... ip, port
+		fn=call(func() {
+				id='aaa'
+				name='ccc'
+				worker=Baro.worker(xxx)
+				this.member(workers).add(worker)
+				worker.start(this.clientProc, true, 10000)
+				print("worker start", this, this.member(), xxx )
+		});
+		// 자동실행 처리 fn()
+		this.member(callback, fn)
+	}
+]
+
+
 ## 파일나누기 합치기
 f=Baro.file'test')
 f.open('c:/Baro/baro.exe','read')
