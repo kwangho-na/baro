@@ -1,22 +1,4 @@
 class func {
-	setCallback(name, val) {
-		if(typeof(name,'bool','null')) {
-			val=name
-			name=null
-		}
-		not(name) {
-			name="callback"
-		}
-		if(typeof(val,'null')) {
-			return this.member(name, null)
-		}
-		fn=Cf.funcNode("parent")
-		if( typeof(val,'bool') && val) {
-			prev=this.member(name)
-			prev.delete()
-		}
-		this.member(name, fn)
-	}
 	proxyController(req, param, &url, proxy ) {
 		print("PROXY CONTROL START URL:$url")
 		not(url.start('/proxy/',true)) return @proxy.sendError(req, param, "proxy client start error [URL:$url]");

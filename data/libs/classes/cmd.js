@@ -49,3 +49,29 @@ class cmd {
 		print("parse result == $s", this.member() );
 	}
 }
+
+class programRun {
+	run(name, program) {
+		not(name) name="app"
+		cb=call(func() {
+			self=this
+			proc=Baro.process(name)
+			proc.run(program, self.programProc)
+		})
+		return cb
+	}
+	programProc(type, data) {
+		print("programProc >> ", type, data)
+		if(type=='finish') {
+			print("xxxx finish xxxx", self, this, name, program)
+		}
+	}
+	explore(path, files) {
+		System.openExplore(path, files)
+	}
+	editor(path) {
+		program='C:\Program Files\Notepad++\notepad++.exe'
+		if(path) program.add(#[ "${path}"])
+		return this.run('notepad', program)
+	}
+}
