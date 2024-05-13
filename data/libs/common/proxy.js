@@ -66,7 +66,24 @@ class func {
 			return str;
 		}
 	}
-
+	setCallback(name, val) {
+		if(typeof(name,'bool','null')) {
+			val=name
+			name=null
+		}
+		not(name) {
+			name="callback"
+		}
+		if(typeof(val,'null')) {
+			return this.member(name, null)
+		}
+		fn=Cf.funcNode("parent")
+		if( typeof(val,'bool') && val) {
+			prev=this.member(name)
+			prev.delete()
+		}
+		this.member(name, fn)
+	}
 	proxyController(req, param, &url, proxy ) {
 		print("PROXY CONTROL START URL:$url")
 		not(url.start('/proxy/',true)) return @proxy.sendError(req, param, "proxy client start error [URL:$url]");
@@ -369,11 +386,14 @@ class ProxyData {
 		not(fp.open(path,"read")) return print("파일조각 만들기 실패 ($path 파일읽기 오류)");
 		pathTemp=Cf.val(System.path(),"/data/temp");
 		idx=0
-		while(size=fp.size(), size.gt(0)) {
-			data=fp.read(chunSize)
-			not(data.size()) break;
-			size-=data.size()
-			num=lpad(idx++, 4)
+		size=fp.size()
+		while(size.gt(0)) {
+			data=fp.read(chunSize) 
+			read=data.size()
+			not(read) break;
+			size.incr(read, false)
+			idx.incr()
+			num=lpad(idx, 4)
 			fileWrite("${pathTemp}/${ref}-${num}.data", data)
 		}
 		fp.close()
@@ -421,8 +441,33 @@ class ProxyData {
 		})
 		return ret;
 	}
-	chunckSendOk(name, ref) {
-		
+	chunckSendOk(client, name, ref) {
+		sendMaps.set(name,"ok")
+		pathTemp=Cf.val(System.path(),"/data/temp");
+		Baro.file().delete("$pathTemp/$name")
+		next=this.nextChunckSend(this, ref)
+		not(next) this.fileSendEnd(name, ref)
+	} 
+	gitFileDownload(client, name, path) {
+		this.webDownload("https://raw.githubusercontent.com/kwangho-na/baro/na/$name", path)
+	}
+	webDownload(client, url, path, callback) {
+		not(isFile(path)) return print("웹다운로드 파일오류 ($path 파일을 찾을 수 없습니다)")
+		call(func() {
+			web=Baro.web("down") 
+			web.download(url, path, this.webDownloadProgress)
+			setCallback('webDownload', true)
+		})
+	}
+	webDownloadProgress(type) {
+		if(type=='progress') {
+			args(1,sp,ep)
+			if(ep<0) ep=0
+			if(client) client.send("downloadProgress", url, "sp:$sp,ep:$ep");
+		}
+		if( type=='finish') {
+			setCallback('webDownload', null)
+		}
 	}
 }
 
@@ -435,10 +480,47 @@ class ProxyFileChunck {
 	}
 	fileChunckOkCall(&uri, &data, param) {
 		param.inject(name, ref)
-		map=proxyData.member(sendMaps)
-		map.set(name,"ok")
-		pathTemp=Cf.val(System.path(),"/data/temp");
-		Baro.file().delete("$pathTemp/$name")
-		proxyData.nextChunckSend(this, ref)
+		proxyData.chunckSendOk(this, name, ref)
+	}
+	fileSendEnd(name, ref) {
+		
 	}
 }
+
+##
+number incr 함수 수정
+	case 808: { // incr
+			bool positive=true;
+			if( arr ) {
+				sv=arr->get(1)
+				if(SVCHK('3',0)) positive=false;
+			}
+            if( ch=='0' ) {
+                int num = toInteger(var), p=1;
+                if( arrs ) {
+                    p=toInteger(arrs->get(0));
+                }
+                rst->setVar('0',0).addInt(num);
+                if(positive) num+=p;
+				else num-=p
+                var->setVar('0',0).addInt(num);
+            } else if( ch=='1') {
+                UL64 num = toUL64(var), p=1;
+                if( arrs ) {
+                    p=toUL64(arrs->get(0));
+                }
+                rst->setVar('1',0).addUL64(num);
+                if(positive) num+=p;
+				else num-=p
+                var->setVar('1',0).addUL64(num);
+            } else if( ch=='4') {
+                double num = toDouble(var), p=1;
+                if( arrs ) {
+                    p=toDouble(arrs->get(0));
+                }
+                rst->setVar('4',0).addInt(num);
+                if(positive) num+=p;
+				else num-=p
+                var->setVar('4',0).addDouble(num);
+            }
+        } break;
