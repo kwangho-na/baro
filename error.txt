@@ -1,3 +1,31 @@
 serverRecvData Thread error params:{(type:0,state:0)
 
 <<warning>> var already setting (var:callback, type:func)
+
+
+recv data socket error
+[start] proxy recv data==false
+[start] proxy read data error
+        self={childCount: 1,
+        start: func,
+        stop: func,
+        send: func,
+        clientProc: func,
+        clientRecv: func,
+        onInit: func,
+        apiCall: func,
+        param: {node: childCount: 0}
+}
+
+client read proc tick:251140 idx:2 FLAG:0x4538
+recv data error:0 next close
+proxy client close UID: test
+proxy client close UID: test
+[start] socket connect start
+        ip=localhost
+        port=8093
+
+@@ client connect: 127.0.0.1
+client read proc tick:47 idx:3 FLAG:0x4530
+recv data start recv:31 total==0
+[send] PROXY SERVER DISPATCH START TYPE:login
