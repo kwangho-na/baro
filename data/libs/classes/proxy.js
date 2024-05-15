@@ -29,95 +29,93 @@ class func {
 			recv=client.recvData()
 			while(recv) {
 				result.add(recv)
-				remain=client.config('@remain')
-				print(">> ######" , result.size(), remain);
-				not(remain) break
 				recv=client.recvData()
 			}
-			print("result==========", result.size())
+			print("proxy web read size == ", result.size())
 			not(req.isConnect() ) {
-				print("################# web closed !!! ")
+				print("proxy web closed !!! ")
 			}
-			if(result) {
-				req.sendData(result)
-				ok=true;
-			}
+			not(result) result=@proxy.errorData()
+			req.send(result)
 		} else {
 			print("read timeout");
 		}
-		not(ok) req.send("error")
 	}
-	@proxy.serverStart() {
-		was=class(Baro.was("proxy"), "ProxyServer")
-		was.start()
-		return was;
+	@proxy.errorData() {
+		data="proxy api error: $client $packet"
+		return data;
 	}
 }
 
 class ProxyServer {
+	server=Baro.was("proxy")
 	callback=null
 	start(port) {
 		not(port) port=8093
-		call(func() { 
-			server=this
-			server.startServer(port, this.clientDispatch, "proxy", 2500)
-			print("proxy server started ", server)
-			this.member("callback", Cf.funcNode())
-		});
+		server.var(module, this)
+		server.startServer(port, 
+			func(client, proxy) {
+				server=client.server()
+				print("proxy dispatch ", client, server)
+				if( client.isCall()) {
+					print("clientDispatch 프록시 클라이언트 처리중")
+					return;
+				}
+				data=client.recvData();
+				if( typeof(data,'bool')) {
+					client.close();
+					return;
+				}
+				server.var(module).dispatch(client,proxy,data)		
+			}, 
+			"proxy", 2500
+		);
+		print("proxy server started ", server)
 	}
 	stop() {
-		if( this.member("callback") ) {
-			print("stop proxy server ", name, server)
-			this.stop()
-			callback.delete()
-			this.member("callback", null)
-		}
+		server.stop()
 	}
-	send(client, type, data, prop) {
-		not(prop) {
+	send(client, type, uri, data, props) {
+		not(props) {
 			tm=System.localtime()
-			prop="tm:$tm"
+			props="tm:$tm"
 		}
 		size=data.size()
-		client.sendData("##>$type:$size{$prop}\r\n$data")
+		client.sendData("##>$type:$size:$uri{$props}\r\n$data")
 	}
-	clientDispatch(client, proxy) {
-		server=client.server()
-		print("proxy dispatch ", client, server)
-		if(client.isCall()) {
-			print("clientDispatch 프록시 클라이언트 처리중")
-			return;
-		}
-		data=client.recvData();
-		if(typeof(data,'bool')) {
-			client.close();
-			return;
-		}
-		data.ref()
-		data.findPos('##>')
-		line=data.findPos("{",1,1) not(data.ch('{')) return print("PROXY SERVER protocal error $data")
+	dispatch(client,proxy,&data) {
+		line=data.findPos('##>') if(line.size() > 32 ) return print("PROXY SERVER dispatch start error line=$line")
+		line=data.findPos("{",1,1) not(data.ch('{')) return print("PROXY SERVER protocal error line=$line")  
 		type=line.findPos(':').trim()
 		size=line.findPos(':').trim()
+		uri=line.trim()
 		props=data.match()
 		data.findPos("\r\n")
+		not(data.size().eq(size)) {
+			remain=data.size() - size;
+			print("proxy server dispatch not match recv size ", data.size(), size, remain)
+			if(remain) {
+				data.add(client.recvData(remain))
+			}
+		}
 		print("PROXY SERVER DISPATCH START TYPE:$type", proxy)
-		if(type=='login') {
-			uid=data.trim();
-			server.login(client, uid, proxy)			
+		if(type=='login') { 
+			this.login(client, proxy, uri, props, data, size)
 		} else {
 			name="${type}Call"
-			fc=server.get(name)
+			fc=this.get(name)
 			if(typeof(fc,"func")) {
-				call(fc, server, client, proxy, line, data, props)
+				call(fc, this, client, proxy, uri, props, data, size)
 			} else {
-				server.send(client, type, "$type not definded", "error:type not defined")
+				this.send(client, type, uri, "$type not definded", "error:type not defined")
 			}
 		}
 	}
-	login(client, uid, proxy) {
-		prev=proxy.get(uid);
+	login(client, proxy, uri, props, data, size) {
+		uid=data.trim()
+		prev=proxy.get(uid)
 		if(prev) {
-			print("prev==", prev.getValue());
+			print("login prev==", prev.getValue())
 			if( prev==client) {
 				msg='error:already connect';
 			} else {
@@ -129,20 +127,18 @@ class ProxyServer {
 			client.setValue('@uid', uid);
 			proxy.set(uid, client);
 		}
-		this.send(client,"login", msg)
+		this.send(client,"login", uri, msg)
 	}
 	apiCall(client, proxy, &uri, &data, &props) {
 		conf=client.config()
 		param=conf.addNode("param").removeAll(true)
 		if(props) param.parseJson(props)
-		class("ProxyData").apiResult(uri, data, param)
-		this.send(client, "apiCall", result, conf)
+		result=class("ProxyData").apiResult(uri, data, param)
+		this.send(client, "apiCallOk", uri, result)
 	}
 }
 
 class ProxyClient {
-	socket=null
-	callback=null
 	workers=_arr('proxyWorkers')
 	start(clientId, ip, port, timeout) {
 		not(clientId) return print("장치아이디를 등록하세요");
@@ -150,36 +146,51 @@ class ProxyClient {
 		not(port) port=8093;
 		not(timeout) timeout=2500;
 		call(func() {
-			self=this;
+			self=this
 			socket=Baro.socket(clientId)
 			worker=Baro.worker(clientId)
-			worker.start(self.clientProc, true, 100)
-			this.member("socket", socket)
-			this.member("callback", Cf.funcNode())
-			not(workers.find(worker)) workers.add(worker)
-		})
+			worker.start(this.socketProc, true, 100)
+			idx=workers.find(worker)
+			if(idx.eq(-1)) {
+				idx=worker.size()
+				workers.add(worker)
+			}
+			worker.funcNode=Cf.funcNode()
+		});
 	}
-	stop() {
-		if( this.member("callback") ) {
-			callback.inject(worker, socket, clientId, ip, port)
-			print("ProxyClient stop ", worker, clientId, ip, port)
-			worker.close()
-			socket.close()
-			this.member("socket", null)
-			this.member("callback", null)
+	funcNode(id) {
+		while(w, workers) {
+			not(w.funcNode) continue
+			w.funcNode.inject(clientId, socket)
+			if(id.eq(clientId)) return w.funcNode;
 		}
+		return;
 	}
-	send(type, data, prop) {
-		not(prop) {
+	isConnect(id) {
+		fn=this.funcNode(id) not(fn) return;
+		fn.inject(socket, worker)
+		return socket.isConnect()
+	}
+	closeClient(id) {
+		fn=this.funcNode(id) not(fn) return;
+		fn.inject(socket, worker)
+		idx=workers.find(worker)
+		not(idx.eq(-1)) workers.remove(idx)
+		worker.stop()
+		socket.close()
+		fn.delete()
+	}
+	send(socket, type, uri, data, props) {
+		not(props) {
 			tm=System.localtime()
-			prop="tm:$tm"
+			props="tm:$tm"
 		}
 		size=data.size()
-		socket.sendData("##>$type:$size{$prop}\r\n$data")
-	}
-	clientProc() {
+		socket.sendData("##>$type:$size:$uri{$props}\r\n$data")
+	}	
+	socketProc() {
 		not(socket) {
-			print("client proc not valid socket ", clientId, ip, port, socket)
+			print("client process socket is null", clientId, ip, port, socket)
 			return System.sleep(1000);
 		}
 		if( socket.isRead(500) ) {
@@ -195,7 +206,7 @@ class ProxyClient {
 			self.clientRecv(socket, data);
 		}
 		if( self.var(error) ) {
-			tick=selft.var(errorTick)
+			tick=self.var(errorTick)
 			if(tick) {
 				d=System.tick() - tick
 				if(d>1000) {
@@ -204,14 +215,15 @@ class ProxyClient {
 					self.var(errorTick, 0)
 				}
 			} else {
-				selft.var(errorTick, System.tick() )
+				self.var(errorTick, System.tick() )
 			}
 			return;
 		}
 		not(socket.isConnect()) {
-			print("socket connect start", ip, port);
+			fn=Cf.funcNode("parent");
+			print("socket connect start", clientId, ip, port, fn.get() );
 			if(socket.connect(ip,port,timeout)) { 
-				if( self.send("login",clientId) ) {
+				if( self.send(socket,"login","",clientId) ) {
 					if(socket.isRead(500)) {
 						result=socket.recvData();
 						print("connect result == $result");
@@ -235,6 +247,12 @@ class ProxyClient {
 		props=data.match(1)
 		data.findPos("\r\n")
 		param=paramNode(true, props)
+		not( size.eq(data.size()) ) {
+			remain=size-data.size()
+			if(remain.gt(0) ) {
+				data.add(socket.recvData(remain))
+			}
+		}
 		if(type=='api') {
 			this.apiCall(line, data, param)
 		} else {
@@ -253,7 +271,8 @@ class ProxyClient {
 		} else {
 			socket.socketClear("Range","rangeStart","rangeEnd");
 		}
-		result=class('ProxyData').apiResult(uri, data, param)
+		a=class('ProxyData').apiResult(uri, data, param)
+		result=when(typeof(a,'node'), @json.listData(a), a)
 		socket.send(result)
 	}
 }
@@ -401,41 +420,3 @@ class ProxyFileChunck {
 		
 	}
 }
-
-##
-number incr 함수 수정
-	case 808: { // incr
-			bool positive=true;
-			if( arr ) {
-				sv=arr->get(1)
-				if(SVCHK('3',0)) positive=false;
-			}
-            if( ch=='0' ) {
-                int num = toInteger(var), p=1;
-                if( arrs ) {
-                    p=toInteger(arrs->get(0));
-                }
-                rst->setVar('0',0).addInt(num);
-                if(positive) num+=p;
-				else num-=p
-                var->setVar('0',0).addInt(num);
-            } else if( ch=='1') {
-                UL64 num = toUL64(var), p=1;
-                if( arrs ) {
-                    p=toUL64(arrs->get(0));
-                }
-                rst->setVar('1',0).addUL64(num);
-                if(positive) num+=p;
-				else num-=p
-                var->setVar('1',0).addUL64(num);
-            } else if( ch=='4') {
-                double num = toDouble(var), p=1;
-                if( arrs ) {
-                    p=toDouble(arrs->get(0));
-                }
-                rst->setVar('4',0).addInt(num);
-                if(positive) num+=p;
-				else num-=p
-                var->setVar('4',0).addDouble(num);
-            }
-        } break;
