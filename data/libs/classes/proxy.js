@@ -142,7 +142,8 @@ class ProxyServer {
 		conf=client.config()
 		param=conf.addNode("param").removeAll(true)
 		if(props) param.parseJson(props)
-		result=class("ProxyData").apiResult(uri, data, param)
+		a=class("ProxyData").apiResult(uri, data, param)
+		result=when(typeof(a,'node'), @json.listData(a), a)
 		this.send(client, "apiResult_OK", uri, result)
 	}
 }
@@ -305,7 +306,8 @@ class ProxyClient {
 		}
 		a=class('ProxyData').apiResult(uri, data, param)
 		result=when(typeof(a,'node'), @json.listData(a), a)
-		socket.send(result)
+		
+		socket.sendData(result)
 	}
 	apiResult_OK(socket, &uri, &data, param) {
 		print("api 호출 응답 ", uri, data, param);
