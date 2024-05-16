@@ -292,7 +292,10 @@ class ProxyClient {
 		}
 	}
 	errorRecv(socket, &uri, &data, param) {
-		print("client error recv ", uri, data, param);
+		print("에러처리 응답", uri, data, param);
+	}
+	loginCall(socket, &uri, &data, param) {
+		print("로그인 처리응답 ", uri, data, param);
 	}
 	apiCall(socket, &uri, &data, param) {
 		if( param.get("range")) {
@@ -303,6 +306,9 @@ class ProxyClient {
 		a=class('ProxyData').apiResult(uri, data, param)
 		result=when(typeof(a,'node'), @json.listData(a), a)
 		socket.send(result)
+	}
+	apiResult_OK(socket, &uri, &data, param) {
+		print("api 호출 응답 ", uri, data, param);
 	}
 }
 
