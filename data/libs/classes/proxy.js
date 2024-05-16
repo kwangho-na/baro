@@ -99,17 +99,26 @@ class ProxyServer {
 			}
 		}
 		print("PROXY SERVER DISPATCH START TYPE:$type", proxy)
+		if(type=='error') { 
+			return this.errorRecv(client, proxy, uri, props, data, size)
+		} 
 		if(type=='login') { 
-			this.login(client, proxy, uri, props, data, size)
+			return this.login(client, proxy, uri, props, data, size)
+		} 
+		if(type.find('_OK') ) {
+			name=type
 		} else {
 			name="${type}Call"
-			fc=this.get(name)
-			if(typeof(fc,"func")) {
-				call(fc, this, client, proxy, uri, props, data, size)
-			} else {
-				this.send(client, type, uri, "$type not definded", "error:type not defined")
-			}
 		}
+		fc=this.get(name)
+		if(typeof(fc,"func")) {
+			call(fc, this, client, proxy, uri, props, data, size)
+		} else {
+			print("프록시 서버 응답함수 오류 [ProxyServer $name 함수 미정의]")
+		}
+	}
+	errorRecv(client, proxy, uri, props, data, size) {
+		print("server recv error ", uri, data, props)
 	}
 	login(client, proxy, uri, props, data, size) {
 		uid=data.trim()
@@ -134,9 +143,10 @@ class ProxyServer {
 		param=conf.addNode("param").removeAll(true)
 		if(props) param.parseJson(props)
 		result=class("ProxyData").apiResult(uri, data, param)
-		this.send(client, "apiCallOk", uri, result)
+		this.send(client, "apiResult_OK", uri, result)
 	}
 }
+
 
 class ProxyClient {
 	workers=_arr('proxyWorkers')
@@ -176,17 +186,24 @@ class ProxyClient {
 		fn.inject(socket, worker)
 		idx=workers.find(worker)
 		not(idx.eq(-1)) workers.remove(idx)
-		worker.stop()
+		worker.close()
 		socket.close()
 		fn.delete()
 	}
 	send(socket, type, uri, data, props) {
+		not(socket.isConnect()) return print("proxy send not connect $type");
 		not(props) {
 			tm=System.localtime()
 			props="tm:$tm"
 		}
 		size=data.size()
 		socket.sendData("##>$type:$size:$uri{$props}\r\n$data")
+	}	
+	sendClient(id, type, uri, data, props) {
+		fn=this.funcNode(id)
+		not(fn) return print("send client error [$id client not found]");
+		fn.inject(socket, worker)
+		this.send(socket, type, uri, data, props)
 	}	
 	socketProc() {
 		not(socket) {
@@ -234,7 +251,9 @@ class ProxyClient {
 			}
 		}
 	}
+	
 	clientRecv(socket, &data) {
+		not(data.ch()) return print("proxy client recv data error", socket);
 		print("PROXY CLIENT PARSE data==$data")
 		str=data
 		data.findPos('##>')
@@ -253,19 +272,29 @@ class ProxyClient {
 				data.add(socket.recvData(remain))
 			}
 		}
+		uri=line.trim()
+		if(type=='error') {
+			return this.errorRecv(socket, uri, data, param)
+		} 
 		if(type=='api') {
-			this.apiCall(line, data, param)
+			return this.apiCall(socket, uri, data, param)
+		} 
+		if(type.find('_OK') ) {
+			name=type
 		} else {
 			name="${type}Call"
-			func=this.get(name)
-			if(typeof(func,"func")) {
-				call(func, this, line, data, param)
-			} eles {
-				this.send("error", "PROXY 타입오류 (타입:$type)")
-			}
+		}
+		func=this.get(name)
+		if(typeof(func,"func")) {
+			call(func, this, socket, uri, data, param)
+		} else {
+			print("프록시 응답 처리오류 [ProxyClient $name 함수 미정의]")
 		}
 	}
-	apiCall(&uri, &data, param) {
+	errorRecv(socket, &uri, &data, param) {
+		print("client error recv ", uri, data, param);
+	}
+	apiCall(socket, &uri, &data, param) {
 		if( param.get("range")) {
 			socket.setValue("Range", param.get("range"));
 		} else {
