@@ -16,6 +16,14 @@
 		}
 		return obj
 	}
+	toLong(s) {
+		a=when(typeof(s,'number'),"$s",s)
+		return a.toLong()
+	}
+	toDouble(s) {
+		a=when(typeof(s,'number'),"$s",s)
+		return a.toDouble()		
+	}
 	setCallback(name, val) {
 		if(typeof(name,'bool','null')) {
 			val=name
@@ -118,7 +126,16 @@
 				node.path=pathFile
 				node.modifyDate=modify 
 				src=s.match(1)
-				if(className.eq("func")) {
+				if(typeof(src,'bool')) {
+					node.error="클래스소스 매칭오류 (아이디:$mapId)"
+					return print(node.error);
+				}
+				if(className.eq("layout")) {
+					Cf.sourceApply(#[
+						<widgets base="${groupId}">${src}</widgets>
+					]);
+				} else if(className.eq("func")) {
+					node.src=src
 					Cf.sourceApply("<func>${src}</func>", mapId, true)
 				} else {
 					conf("class.$className", src, true)
