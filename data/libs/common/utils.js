@@ -24,6 +24,12 @@
 		a=when(typeof(s,'number'),"$s",s)
 		return a.toDouble()		
 	}
+	globalTimerStart(s) {
+		System.globalTimer(true)
+		src="onTimeout() { ${s} }";
+		root=Cf.rootNode()
+		root[$src]
+	}
 	setCallback(name, val) {
 		if(typeof(name,'bool','null')) {
 			val=name
@@ -134,6 +140,8 @@
 					Cf.sourceApply(#[
 						<widgets base="${groupId}">${src}</widgets>
 					]);
+				} else if(className.eq("conf")) {
+					setConfSrc(groupId,src)
 				} else if(className.eq("func")) {
 					node.src=src
 					Cf.sourceApply("<func>${src}</func>", mapId, true)
@@ -150,9 +158,38 @@
 			while(c.eq('-')) c=s.next().ch()
 			if(c.eq('{')) return true;
 			return false;
-		};		
+		};
+		setConfSrc = func( groupId, &s) {
+			while(s.valid()) {
+				c=s.ch()
+				not(c) break;
+				if(c.eq(',',';')) {
+					s.incr()
+					continue;
+				}
+				code=s.move()
+				c=s.ch()
+				not(c.eq(':')) break;
+				c=s.incr().ch()
+				if(c.eq()) {
+					v=s.match()
+				} else if( c.eq('<')) {
+					sp=s.cur()
+					c=s.incr().next().ch()
+					while(c.eq('-')) c=s.incr().next().ch()
+					tag=s.trim(sp+1,s.cur(),true)
+					s.pos(sp)
+					s.match("<$tag","</$tag>")
+					v=s.value(sp, s.cur(), true)
+				} else {
+					v=s.findPos("\n");
+				}
+				conf("${groupId}.${code}", v, true)
+			}
+		};
 		return parse(stripJsComment(src))
 	}
+
 	classReload(param) {
 		if(typeof(param,'node') && param.var(useClass) ) {
 			param.var(useClass,false)
