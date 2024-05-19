@@ -24,6 +24,12 @@
 		a=when(typeof(s,'number'),"$s",s)
 		return a.toDouble()		
 	}
+	globalTimerStart(s) {
+		System.globalTimer(true)
+		src="onTimeout() { ${s} }";
+		root=Cf.rootNode()
+		root[$src]
+	}
 	setCallback(name, val) {
 		if(typeof(name,'bool','null')) {
 			val=name
@@ -90,21 +96,8 @@
 		src=fileRead(pathFile)
 		classSource(src,pathFile)
 	}
-	classLayout(name, skip) {
-		map=object('map.classes')
-		node=map.get("${name}/layout")
-		not(node) return print("$name layout source 찾기오류");
-		not(skip) {
-			not(node.source) return print("$name layout source error");
-			Cf.sourceApply(node.source)
-		}
-		if(typeof(skip,'bool')) {
-			
-		}
-		return node;
-	}
 	classSource(src, pathFile, groupId) {
-		map=object('map.classes')
+		map=object('map.classes');
 		parse = func(&s) {
 			while(s.valid() ) {
 				c=s.ch()
@@ -128,30 +121,13 @@
 					mapId=className
 				}
 				modify=Baro.file().modifyDate(pathFile)
-				prev=conf("modify.$mapId")
-				if( prev==modify) {
-					node=map.get(mapId)
-					not(node) {
-						node=map.addNode(mapId)
-						node.groupId=groupId
-						node.name=className
-						node.path=pathFile
-						node.modifyDate=modify
-					}
-					return node;
-				}
-				conf("modify.$mapId", modify, true)
 				node=map.get(mapId)
 				if( typeof(node,'node') ) {
-					node.updateTm=System.localtime()
-					if(node.source ) {
-						node.source=''
-					}
+					if(modify==node.modifyDate ) return node;
 				} else {
 					node=map.addNode(mapId)
 					node.groupId=groupId
 					node.name=className
-					node.regTm=System.localtime()
 				}
 				node.path=pathFile
 				node.modifyDate=modify 
@@ -161,12 +137,9 @@
 					return print(node.error);
 				}
 				if(className.eq("layout")) {
-					src=#[<widgets base="${groupId}">${src}</widgets>];
-					if( node.source) {
-						node.appendText("source",src)
-					} else {
-						node.source=src;
-					}
+					Cf.sourceApply(#[
+						<widgets base="${groupId}">${src}</widgets>
+					]);
 				} else if(className.eq("conf")) {
 					setConfSrc(groupId,src)
 				} else if(className.eq("func")) {
@@ -216,6 +189,7 @@
 		};
 		return parse(stripJsComment(src))
 	}
+
 	classReload(param) {
 		if(typeof(param,'node') && param.var(useClass) ) {
 			param.var(useClass,false)
@@ -271,13 +245,7 @@
 			while(s.valid()) {
 				if(funcCheck(s)) {
 					sp=s.cur()
-					fnm=s.move()
-					if(fnm.eq('private','public')) {
-						sp=s.cur()
-						s.next().ch()
-					} else {
-						s.ch()
-					}
+					s.next().ch()
 					s.match()
 					s.match(1)
 					src=s.value(sp, s.cur(), true)
@@ -292,13 +260,8 @@
 				n++;
 			}
 			if(init) {
-				fn=Cf.funcNode('parent')
-				if(fn.isPersist() ) {
-					eval(init, true)
-				} else {
-					src="onInit() {$init}"
-					obj[$src]
-				}
+				src="onInit() {$init}"
+				obj[$src]
 			}
 			if(funcs) {
 				obj[$funcs]
@@ -306,12 +269,7 @@
 		};
 		funcCheck = func(&s) {
 			not(s.ch()) return false;
-			fnm=s.move()
-			if(fnm.eq('private','public')) {
-				c=s.next().ch()
-			} else {
-				c=s.ch()
-			}
+			c=s.next().ch()
 			if(c.eq('(')) {
 				s.match()
 				c=s.ch()
