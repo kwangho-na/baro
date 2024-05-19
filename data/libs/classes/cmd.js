@@ -1,3 +1,13 @@
+class func {
+	toLong(s) {
+		a=when(typeof(s,'number'),"$s",s)
+		return a.toLong()
+	}
+	toDouble(s) {
+		a=when(typeof(s,'number'),"$s",s)
+		return a.toDouble()		
+	}
+}
 class cmd {	
 	proc=null
 	cmdList=null
@@ -14,16 +24,12 @@ class cmd {
 		})
 	}
 	cmdAdd(cmd, run) {
+		state=this.member("state");
 		cmdList.add(cmd)
 		if(run) this.cmdRun()
 	}
 	cmdRun() {
 		not(this.member("proc")) return print("cmd 실행오류 프로세스가 시작되지 않았습니다");
-		state=this.member("state");
-		if(state=='start') {
-			print("run skip cmd started ", cmdList);
-			return;
-		}
 		cmd=cmdList.pop()
 		if(cmd) {
 			this.member("state", "start")
@@ -38,9 +44,8 @@ class cmd {
 			self.appendText('result', data);
 			c=data.ch(-1,true);
 			if(c=='>') {
-				result=self.get('result').utf8()
 				self.member("state", "stay")
-				self.parseResult(result);
+				self.parseResult(self.ref(result));
 				self.cmdRun()
 			}
 		}
@@ -53,8 +58,8 @@ class cmd {
 class programRun {
 	run(name, program) {
 		not(name) name="app"
+		self=this
 		cb=call(func() {
-			self=this
 			proc=Baro.process(name)
 			proc.run(program, self.programProc)
 		})

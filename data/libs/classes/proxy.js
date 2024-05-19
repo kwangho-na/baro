@@ -24,12 +24,13 @@ class func {
 		}
 		ok=false;
 		client.sendData(packet)
+		print("web => client send packet ", packet)
 		if( client.isRead(5000) ) {
 			result='';
-			recv=client.recvData()
-			while(recv) {
-				result.add(recv)
+			while(true) {
 				recv=client.recvData()
+				not(recv) break;
+				result.add(recv)
 			}
 			print("proxy web read size == ", result.size())
 			not(req.isConnect() ) {
@@ -100,15 +101,15 @@ class ProxyServer {
 		}
 		print("PROXY SERVER DISPATCH START TYPE:$type", proxy)
 		if(type=='error') { 
-			return this.errorRecv(client, proxy, uri, props, data, size)
+			return this.error_req(client, proxy, uri, props, data, size)
 		} 
 		if(type=='login') { 
-			return this.login(client, proxy, uri, props, data, size)
+			return this.login_req(client, proxy, uri, props, data, size)
 		} 
-		if(type.find('_OK') ) {
+		if(type.find('_ok') ) {
 			name=type
 		} else {
-			name="${type}Call"
+			name="${type}_req"
 		}
 		fc=this.get(name)
 		if(typeof(fc,"func")) {
@@ -117,10 +118,10 @@ class ProxyServer {
 			print("프록시 서버 응답함수 오류 [ProxyServer $name 함수 미정의]")
 		}
 	}
-	errorRecv(client, proxy, uri, props, data, size) {
+	error_req(client, proxy, uri, props, data, size) {
 		print("server recv error ", uri, data, props)
 	}
-	login(client, proxy, uri, props, data, size) {
+	login_req(client, proxy, uri, props, data, size) {
 		uid=data.trim()
 		prev=proxy.get(uid)
 		if(prev) {
@@ -136,15 +137,15 @@ class ProxyServer {
 			client.setValue('@uid', uid);
 			proxy.set(uid, client);
 		}
-		this.send(client,"login", uri, msg)
+		this.send(client,"login_ok", uri, msg)
 	}
-	apiCall(client, proxy, &uri, &data, &props) {
+	api_req(client, proxy, &uri, &data, &props) {
 		conf=client.config()
 		param=conf.addNode("param").removeAll(true)
 		if(props) param.parseJson(props)
 		a=class("ProxyData").apiResult(uri, data, param)
 		result=when(typeof(a,'node'), @json.listData(a), a)
-		this.send(client, "apiResult_OK", uri, result)
+		this.send(client, "apiResult_ok", uri, result)
 	}
 }
 
@@ -190,6 +191,15 @@ class ProxyClient {
 		worker.close()
 		socket.close()
 		fn.delete()
+	}
+	closeAll() {
+		while(w, workers) {
+			not(w.funcNode) continue
+			w.funcNode.inject(clientId, socket, worker)
+			worker.close()
+			socket.close()
+		}
+		workers.reuse()
 	}
 	send(socket, type, uri, data, props) {
 		not(socket.isConnect()) return print("proxy send not connect $type");
@@ -275,15 +285,15 @@ class ProxyClient {
 		}
 		uri=line.trim()
 		if(type=='error') {
-			return this.errorRecv(socket, uri, data, param)
+			return this.error_res(socket, uri, data, param)
 		} 
 		if(type=='api') {
-			return this.apiCall(socket, uri, data, param)
+			return this.api_res(socket, uri, data, param)
 		} 
-		if(type.find('_OK') ) {
+		if(type.find('_ok') ) {
 			name=type
 		} else {
-			name="${type}Call"
+			name="${type}_res"
 		}
 		func=this.get(name)
 		if(typeof(func,"func")) {
@@ -292,13 +302,7 @@ class ProxyClient {
 			print("프록시 응답 처리오류 [ProxyClient $name 함수 미정의]")
 		}
 	}
-	errorRecv(socket, &uri, &data, param) {
-		print("에러처리 응답", uri, data, param);
-	}
-	loginCall(socket, &uri, &data, param) {
-		print("로그인 처리응답 ", uri, data, param);
-	}
-	apiCall(socket, &uri, &data, param) {
+	api_res(socket, &uri, &data, param) {
 		if( param.get("range")) {
 			socket.setValue("Range", param.get("range"));
 		} else {
@@ -309,7 +313,13 @@ class ProxyClient {
 		
 		socket.sendData(result)
 	}
-	apiResult_OK(socket, &uri, &data, param) {
+	error_res(socket, &uri, &data, param) {
+		print("에러처리 응답", uri, data, param);
+	}
+	login_ok(socket, &uri, &data, param) {
+		print("로그인 처리응답 ", uri, data, param);
+	}
+	apiResult_ok(socket, &uri, &data, param) {
 		print("api 호출 응답 ", uri, data, param);
 	}
 }
