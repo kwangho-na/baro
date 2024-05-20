@@ -90,19 +90,36 @@
 		src=fileRead(pathFile)
 		classSource(src,pathFile)
 	}
+	classFuncLoad(name) {
+		db=Baro.db('config')
+		node=db.fetchAll("select data from conf_info where grp='funcSource'")
+		src=''
+		while(cur, node) {
+			src.add(cur.data,"\n")
+		}
+		not(src) {
+			print("$name/func 함수정보가 없습니다")
+			return;
+		}
+		Cf.sourceApply("<func>${src}</func>", "${name}/func", true)
+	}
 	classLayout(name, skip) {
 		map=object('map.classes')
 		node=map.get("${name}/layout")
-		not(node) return print("$name layout source 찾기오류");
-		not(skip) {
-			not(node.source) return print("$name layout source error");
-			Cf.sourceApply(node.source)
-			while(cur,objectArray("page.$name:", "object")) {
-				if(cur.cmp('type','main')) {
-					return cur;
-				}
+		if(node) {
+			src=node.source
+		} else {
+			src=conf("layoutSource.${name}")
+		}
+		not(src) return print("$name layout source 오류");
+		Cf.sourceApply(#[
+			<widgets base="${name}">${src}</widgets>
+		]);
+		while(cur,objectArray("page.$name:", "object")) {
+			if(cur.cmp('type','main')) {
+				return cur;
 			}
-		} 
+		}
 		return node;
 	}
 	classSource(src, pathFile, groupId) {
@@ -130,8 +147,8 @@
 					mapId=className
 				}
 				modify=Baro.file().modifyDate(pathFile)
-				prev=conf("modify.$mapId")
-				if( prev==modify) {
+				prev=conf("classModify.$mapId")
+				if( prev && modify.gt(prev) ) {
 					node=map.get(mapId)
 					not(node) {
 						node=map.addNode(mapId)
@@ -142,7 +159,7 @@
 					}
 					return node;
 				}
-				conf("modify.$mapId", modify, true)
+				conf("classModify.$mapId", modify, true)
 				node=map.get(mapId)
 				if( typeof(node,'node') ) {
 					node.updateTm=System.localtime()
@@ -162,22 +179,27 @@
 					node.error="클래스소스 매칭오류 (아이디:$mapId)"
 					return print(node.error);
 				}
-				if(className.eq("layout")) {
-					layout=#[<widgets base="${groupId}">${src}</widgets>];
+				if( className.eq("layout","func")) {
 					if( node.source) {
-						node.appendText("source",layout)
+						node.appendText("source",src)
 					} else {
-						node.source=layout;
+						node.source=src;
 					}
 				} else if(className.eq("conf")) {
 					setConfSrc(groupId,src)
-				} else if(className.eq("func")) {
-					node.src=src
-					Cf.sourceApply("<func>${src}</func>", mapId, true)
 				} else {
 					conf("class.$className", src, true)
 					print("class $className loaded")
 				}
+			}
+			node=map.get("${groupId}/layout")
+			if(node) {
+				conf("layoutSource.$groupId", node.source, true)
+			}
+			node=map.get("${groupId}/func")
+			if(node) {
+				conf("funcSource.$groupId", node.source, true)
+				Cf.sourceApply("<func>${node.source}</func>", groupId, true)
 			}
 		};
 		checkClass = func(&s) {
@@ -493,23 +515,31 @@
 		});
 		return arr;
 	}
-	findTag(tag, root) {
-		not(root) root=this;
+	findField(root, field, val) {
 		while( cur, root ) {
-			if( cur.cmp("tag", tag) ) return cur;
+			if( cur.cmp(field, val) ) return cur;
 			if( cur.childCount() ) {
-				find=findTag(tag, cur);
+				find=findField(cur, val);
 				if( find ) return find;
 			}
 		}
 		return null;
 	}
-	findId(id, root) {
-		not(root) root=this;
+	findTag(root, tag) {
+		while( cur, root ) {
+			if( cur.cmp("tag", tag) ) return cur;
+			if( cur.childCount() ) {
+				find=findTag(cur,tag);
+				if( find ) return find;
+			}
+		}
+		return null;
+	}
+	findId( root, id) {
 		while(cur, root) {
 			if(cur.cmp("id",id))return cur;
 			if( cur.childCount() ) {
-				find=findId(id, cur);
+				find=findId(cur,id);
 				if( find ) return find;
 			}
 		}
