@@ -97,10 +97,12 @@
 		not(skip) {
 			not(node.source) return print("$name layout source error");
 			Cf.sourceApply(node.source)
-		}
-		if(typeof(skip,'bool')) {
-			
-		}
+			while(cur,objectArray("page.$name:", "object")) {
+				if(cur.cmp('type','main')) {
+					return cur;
+				}
+			}
+		} 
 		return node;
 	}
 	classSource(src, pathFile, groupId) {
@@ -161,11 +163,11 @@
 					return print(node.error);
 				}
 				if(className.eq("layout")) {
-					src=#[<widgets base="${groupId}">${src}</widgets>];
+					layout=#[<widgets base="${groupId}">${src}</widgets>];
 					if( node.source) {
-						node.appendText("source",src)
+						node.appendText("source",layout)
 					} else {
-						node.source=src;
+						node.source=layout;
 					}
 				} else if(className.eq("conf")) {
 					setConfSrc(groupId,src)
@@ -320,6 +322,21 @@
 			return false
 		};
 	}
+	objectArray(key, flag) {
+		arr=[]
+		not(flag) flag='name'
+		root=Cf.getObject()
+		while(name, root.keys()) {
+			if(name.start(key)) {
+				switch(flag) {
+				case name: arr.add(name)
+				case object: arr.add(root.get(name))
+				default: break;
+				}
+			}
+		}
+		return arr;
+	}
 	fn(name) {
 		fn=Cf.funcNode('parent')
 		while(fn) {
@@ -354,7 +371,7 @@
 		idx=arr.find(key);
 		return idx.ne(-1);
 	}
-	 
+	
 	isFile(fileName) {
 		fo=Baro.file();
 		return fo.isFile( localPath(fileName) );
@@ -704,6 +721,12 @@
 	stripJsComment(&s) {
 		rst=stripComment(s,1);
 		return stripComment(rst,2);
+	}
+	lastWith(&s, val) {
+		a=s.findLast(val)
+		not(a) return false;
+		s.pos(a.size())
+		return when(s.eq(val),true);
 	}
 	@util.nextParam() {
 		ty=typeof(vars)
