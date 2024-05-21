@@ -1,53 +1,9 @@
-<func note="위젯함수">
-	wparent(widget) {
-		not(typeof(widget,'node')) return;
-		not(typeof(widget,'widget')) return widget.parentNode();
-		p=widget.parentWidget() not(p) p=widget.parentNode(); 
-		return p;
-	}
-	wtick(code, bset) {
-		if(typeof(bset,"bool")) {
-			return this.set("@$code", when(bset,System.tick()-20,null));
-		}
-		prev=this.get("@$code") not(prev) return;
-		if(typeof(bset,"num")) {
-			dist=System.tick()-prev;
-			if( lt(dist,bset) ) return true;
-		}
-		return false;
-	}
-	findLayout(node) {
-		while(cur, node) {
-			if(typeof(cur,"layout")) return cur;
-			if(cur.childCount()) {
-				find=findLayout(cur);
-				if(find) return find;
-			}
-		}
-		return;
-	}
-	wtag(tag) { return findTag(tag,this) }
-	wid(id) { return this.get(id) }
-	parentTag(tag, parent) {
-		not(parent) parent=wparent(this)
-		while(parent) {
-			if(parent.cmp("tag",tag)) return parent;
-			parent=wparent(parent);
-		}
-		return;
-	}
-	pages(base, src) { Cf.sourceApply(fmt('<widgets base="${base}">${src}</widgets>')) }
-	page(name, funcNm, target) {
+<func note="위젯함수"> 
+	widget(tag, name, parent) {
 		not(name) {
 			p=this.parentWidget()
-			if(p) return p.pageNode();
-			return this.pageNode();
+			return when(p, p.pageNode(), this.pageNode());
 		}
-		if(name.eq('target')) {
-			page=this.pageNode();
-			return page.var(targetPage);
-		}
-		init=null;
 		not(name.find(':')) {
 			base=this.var(baseCode)
 			if(base) {
@@ -56,34 +12,15 @@
 				name=Cf.val('test:',name)
 			}
 		}
-		page=Cf.getObject("page", name) 
-		print("page name == $name created");
-		not(page) return print("$name 페이지 생성오류");
-		if(typeof(funcNm,'string')) {
-			init=call(funcNm);
-		} else if(typeof(funcNm,"function")) {
-			init=funcNm;
+		obj=Cf.getObject(tag, name) not(obj) return print("$name $tag 오류");
+		if(typeof(parent,'widget')) {
+			obj.parentWindow(parent)
 		}
-		if(typeof(init,"function")) {
-			init(page);
-			page.open();
-		}
-		if(typeof(target,'widget')) {
-			page.var(targetPage,target);
-		}
-		return page;
+		return obj;
 	}
-	pageFormData(page, form, update) {
-		while(code, form.keys()) {
-			w=page.get(code);
-			not(typeof(w,'widget')) continue;
-			if(update) {
-				form.set(code, w.value())
-			} else {
-				w.value(form.get(code))
-			}
-		}
-	}
+	page(name, parent) {
+		return widget('page', name, parent)
+	} 
 	widgetSub(parent, widget, rect) {
 		not(typeof(widget,"widget") ) return print("widgetSub widget error", args());
 		widget.parentWidget(parent);

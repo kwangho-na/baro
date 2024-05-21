@@ -1,37 +1,34 @@
-class eventCall {
-	onMouseDown(p,a) {
-		not(this.member(events)) return;
-		while(e,events) {
-			fc=e.onMouseDown
-			if(typeof(fc,'function')) fc(p,a)
+class eventSet {
+	isEventFunc(fnm) {
+		fn=this.get(fnm) ty=typeof(fn)
+		if(ty.eq('func')) {
+			return when(fn.isPersist(), true, false);
 		}
+		src=#[
+			${fnm}=event() {
+				fn=Cf.funcNode()
+				if(fn.eventFuncList()) {
+					fn.callFuncSrc()
+				}
+			}
+		]
+		this[$src]
+		fn=this.get(fnm)
+		return when(fn.isPersist(), true, false);
 	}
-	onMouseUp(p,a) {
-		not(this.member(events)) return;
-		while(e,events) {
-			fc=e.onMouseUp
-			if(typeof(fc,'function')) fc(p,a)
-		}
-	}
-	onMouseMove(p,a) {
-		not(this.member(events)) return;
-		while(e,events) {
-			fc=e.onMouseMove
-			if(typeof(fc,'function')) fc(p,a)
-		}
-	}
-	onDraw(dc, rc) {
-		
-	}
-	setEvent(e) {
+	setEvent(e,fc) {
 		if(typeof(e,'string')) {
-			e=class(e)
+			fnm=e
+			if(this.isEventFunc(fnm) ) {
+				fn.addFuncSrc(e.get(fnm))
+			} 
+		} else if(typeof(e,'node')) {
+			for(fnm, e.keys()) { 
+				if( this.isEventFunc(fnm) ) {
+					fn.addFuncSrc(e.get(fnm))
+				}
+			}
 		}
-		not(typeof(e,'node')) return print("setEvent 매개변수 오류");
-		not(this.member(events)) {
-			this.member(events, this.addArray('@events'))
-		}
-		events.add(e)
 	}
 }
 

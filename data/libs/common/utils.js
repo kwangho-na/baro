@@ -136,7 +136,7 @@
 			<widgets base="${name}">${src}</widgets>
 		]);
 		while(cur,objectArray("page.$name:", "object")) {
-			if(cur.cmp('type','main')) {
+			if(cur.cmp('id','main')) {
 				return cur;
 			}
 		}
@@ -286,7 +286,6 @@
 			args(obj,className)
 		}
 		not(typeof(obj,'node')) return print("class 객체 미설정")
-		if( obj.var(useClass) ) return obj
 		not(className) return print("class 매개변수 미설정")
 		arr=obj.addArray("@classNames")
 		if(typeof(className,'array') ) {
@@ -335,17 +334,18 @@
 				init.add(line)
 				n++;
 			}
+			if(funcs) {
+				obj[$funcs]
+			}
 			if(init) {
+				fnInit=Cf.funcNode(obj)
 				fn=Cf.funcNode('parent')
-				if(fn.isPersist() ) {
+				if(fnInit==fn) {
 					eval(init, true)
 				} else {
 					src="onInit() {$init}"
 					obj[$src]
 				}
-			}
-			if(funcs) {
-				obj[$funcs]
 			}
 		};
 		funcCheck = func(&s) {
