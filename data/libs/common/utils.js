@@ -16,6 +16,26 @@
 		}
 		return obj
 	}
+	setEvent(obj, name, fc) {
+	 	ty=typeof(fc)
+	 	print("$name event type fc == $ty $fc")
+	 	if(ty.eq('func')) {
+	 		fn=fc
+	 	} else if(ty.eq('funcRef') ) {
+	 		fn=call(fc)
+	 	}
+	 	prev=obj.get(name)
+	 	if(typeof(prev,'func')) {
+	 		prev.delete()
+	 	}
+	 	print("set event $name ", fn, obj)
+	 	obj.set(name, fn)
+	}
+	checkMember(a) {
+		fn=Cf.funcNode(this)
+		not(fn) return false;
+		return fn.isset(a);
+	}
 	toLong(s) {
 		a=when(typeof(s,'number'),"$s",s)
 		return a.toLong()
@@ -148,7 +168,7 @@
 				}
 				modify=Baro.file().modifyDate(pathFile)
 				prev=conf("classModify.$mapId")
-				if( prev && modify.gt(prev) ) {
+				if( prev && modify.ge(prev) ) {
 					node=map.get(mapId)
 					not(node) {
 						node=map.addNode(mapId)
