@@ -11,6 +11,36 @@ class widget {
 		base=this.base()
 		return conf("${base}.${name}")
 	}
+	getEventFunc(fnm) {
+		fn=this.get(fnm) ty=typeof(fn)
+		if(ty.eq('func')) {
+			return when(fn.isPersist(), true, false);
+		}
+		src=#[
+			${fnm}=event() {
+				fn=Cf.funcNode()
+				if(fn.eventFuncList()) {
+					fn.callFuncSrc()
+				}
+			}
+		]
+		this[$src]
+		fn=this.get(fnm)
+		return when(fn.isPersist(), true, false);
+	}
+	setEvent(e,fc) {
+		if(typeof(e,'string')) {
+			fnm=e
+			fn=this.getEventFunc(fnm)
+			if(fn ) fn.addFuncSrc(fc)
+		} else if(typeof(e,'node')) {
+			for(fnm, e.keys()) { 
+				if( this.isEventFunc(fnm) ) {
+					fn.addFuncSrc(e.get(fnm))
+				}
+			}
+		}
+	}
 }
 
  
