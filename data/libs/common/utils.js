@@ -124,13 +124,7 @@
 		Cf.sourceApply("<func>${src}</func>", "${name}/func", true)
 	}
 	classLayout(name, skip) {
-		map=object('map.classes')
-		node=map.get("${name}/layout")
-		if(node) {
-			src=node.source
-		} else {
-			src=conf("layoutSource.${name}")
-		}
+		src=conf("layoutSource.${name}")
 		not(src) return print("$name layout source 오류");
 		Cf.sourceApply(#[
 			<widgets base="${name}">${src}</widgets>
@@ -168,7 +162,7 @@
 				}
 				modify=Baro.file().modifyDate(pathFile)
 				prev=conf("classModify.$mapId")
-				if( prev && modify.ge(prev) ) {
+				if( prev && modify.le(prev) ) {
 					node=map.get(mapId)
 					not(node) {
 						node=map.addNode(mapId)
@@ -179,6 +173,7 @@
 					}
 					return node;
 				}
+				print("클래스소스 변경 ID:$mapId (변경:$modify)")
 				conf("classModify.$mapId", modify, true)
 				node=map.get(mapId)
 				if( typeof(node,'node') ) {
@@ -285,7 +280,7 @@
 		} else {
 			args(obj,className)
 		}
-		not(typeof(obj,'node')) return print("class 객체 미설정")
+		not(typeof(obj,'node')) return print("$className class 객체 미설정(obj:$obj)")
 		not(className) return print("class 매개변수 미설정")
 		arr=obj.addArray("@classNames")
 		if(typeof(className,'array') ) {
@@ -334,18 +329,16 @@
 				init.add(line)
 				n++;
 			}
-			if(funcs) {
-				obj[$funcs]
-			}
-			if(init) {
-				fnInit=Cf.funcNode(obj)
-				fn=Cf.funcNode('parent')
-				if(fnInit==fn) {
-					eval(init, true)
-				} else {
-					src="onInit() {$init}"
-					obj[$src]
-				}
+			 
+			fnInit=Cf.funcNode(obj)
+			if(fnInit) {
+				if(funcs) obj[$funcs]
+				eval(init, obj, fnInit, true)
+				print("onInit 이미 설정됨 eval 실행 $className", fnInit.get(), obj)
+			} else {
+				src="onInit() {$init} $funcs"
+				obj[$src]
+				obj.onInit()
 			}
 		};
 		funcCheck = func(&s) {

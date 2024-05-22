@@ -10,7 +10,7 @@ class layout {
 			<label id="editorTitle" stretch=1>
 			<label text="찾기: "><input id="searchInput" onEnter() { page().searchText(this)}>
 		</hbox>
-		<editor>
+		<editor id="editor">
 		<hbox>
 			<button id="btnRun" text="실행" onClick() { page().runScript() }>
 			<label id="editorInfo" stretch=1>
@@ -22,7 +22,7 @@ class layout {
 			<label id="logTitle" stretch=1>
 			<label text="찾기: "><input id="searchInput" onEnter() { page().searchText(this)}>
 		</hbox>
-		<editor>
+		<editor id="editor">
 		<hbox>
 			<button id="btnClear" text="지우기" onClick() { page().clearLog() }>
 			<label id="logInfo" stretch=1>
@@ -64,6 +64,7 @@ class layout {
 	</dialog>
 }
 
+
 class sourceEditorMain {
 	editPanel=page("editPanel")
 	logPanel=page("logPanel")
@@ -75,8 +76,6 @@ class sourceEditorMain {
 	widgetPositionLoad("sourceEditor");
 	logClass('sourceRun').timeout()
 	this.timer(200, this.setSplitterSize)
-	print("sourceEditorMain onInit ==========>", this);
-	this.open()
 	
 	onEvent(type, node) {
 		if(type.eq("logPrint")) logWriter('sourceRun').appendLog(node.eventData); 
@@ -111,10 +110,11 @@ class sourceEditorMain {
 
 class sourceEditorPanel {
 	this.put(editor, editorTitle, editorInfo, searchInput)
+	
 	class(editor,'editorSource')
-	editorTitle.value("소스테스트 실행창")
 	this.setEditorSyntax() 
 	this.setKeyMap()
+	editorTitle.value("소스테스트 실행창")
 	
 	runScript(key) {
 		sel=editor.is("select");
