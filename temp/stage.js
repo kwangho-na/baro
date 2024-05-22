@@ -1,123 +1,75 @@
 <div id="viewPort">
 </div>
 
-
 const Stage = window.Stage;
 const { h, app: mount } = hyperapp;
 /** @jsx h */
 
-const stageApp = Stage({
-  viewport: "#viewPort",
-  transition: "lollipop"
-});
-
+const stageApp = Stage({ viewport: "#viewPort", transition: "lollipop" });
 
 Stage.defineView({
   id: "main",
   template: '<div class="stage-view main"></div>',
-  factory: function(stageContext, viewUi) {
+  factory: function (stageContext, viewUi) {
     const actions = {};
-    let state = {
-      transition: "slide"
-    };
+    let state = {transition: "slide" };
     return {
       showAbout() {
-        // setTimeout(_ => {
-          stageContext.pushView("about", {
-            transition: state.transition
-          });
-        // }, 200)
+        stageContext.pushView("about", {transition: state.transition });
       },
       setTransition(t) {
-        state = {
-          ...state,
-          transition: t
-        };
+        state = {...state, transition: t };
         this.update(state);
         this.showAbout();
       },
       render(state) {
-        let items = [
-          "slide", "slide-up", "slide-down",
-          "fade", "fancy", "lollipop"
-        ].map(t => {
-          return (
-            <li class={state.transition === t ? "widget selected" : "widget"}
-              onclick={this.setTransition.bind(this, t)}>
-              {t.toUpperCase()}
-            </li>
-          );
-        });
-        return (
-          <div>
-            <div class="summary">
-              <h2>Main View</h2>
-              <p>{state.message}</p>
-            </div>
-            <ul class="items">
-              {items}
-            </ul>
-          </div>
+        let items = ["slide", "slide-up", "slide-down","fade", "fancy", "lollipop"].map(
+            t => h("li", { class: state.transition === t ? "widget selected" : "widget", onclick: this.setTransition.bind(this, t) }, t.toUpperCase()) 
         );
+        return (
+          h("div", null,
+          h("div", { class: "summary" },
+          h("h2", null, "Main View"),
+          h("p", null, state.message)),
+          h("ul", { class: "items" },  items))
+        )
       },
-
       // Stage app lifecycle functions. All are optional
       initialize(viewOpts) {},
       activate(viewOpts) {
-        state = {
-          ...state,
-          message: viewOpts.message
-        };
+        state = {...state, message: viewOpts.message };
         this.update(state);
       },
       update(viewOpts) {
-        state = {
-          ...state,
-          message: viewOpts.message
-        };
+        state = {...state, message: viewOpts.message };
         // mount(ui, (ui = this.render(state)), viewUi);
         mount(state, actions, this.render.bind(this), viewUi);
       },
       deactivate(viewOpts) {},
-      destroy() {}
-    };
-  }
-});
+      destroy() {} };
 
-
-
+  } });
 
 Stage.defineView({
   id: "about",
   // Templates are optional
   // template: `<div class="stage-view about"></div>`,
-  factory: function(stageContext, viewUi) {
+  factory: function (stageContext, viewUi) {
     const actions = {
       showMain() {
-        stageContext.popView({
-          message: "Message from about view " + Date()
-        });
-      }
+        stageContext.popView({message: "Message from about view " + Date() })
+      } 
     };
-
     return {
       render(state, actions) {
         return (
-          <div class="content">
-            <h2>About View</h2>
-            <p>
-              Made with <a
-                href="https://naikus.github.io/stage/dist/index.html"
-                target="_blank">
-                https://naikus.github.io/stage
-              </a> 
-            </p>
-            <p>
-              Also checkout my stage.js based <a target="_blank"
-                href="https://codepen.io/naikus/project/full/AzkkER">codepen project</a>
-            </p>
-            <button class="primary inline" onclick={actions.showMain}>&#171; Back</button>
-          </div>
+          h("div", { class: "content" },
+          h("h2", null, "About View"),
+          h("p", null, "Made with ",
+          h("a", {href: "https://naikus.github.io/stage/dist/index.html",target: "_blank" }, "https://naikus.github.io/stage")),
+          h("p", null, "Also checkout my stage.js based ",
+          h("a", { target: "_blank", href: "https://codepen.io/naikus/project/full/AzkkER" }, "codepen project")),
+          h("button", { class: "primary inline", onclick: actions.showMain }, "\xAB Back"))
         );
       },
       initialize() {
@@ -126,10 +78,10 @@ Stage.defineView({
       activate(viewOpts) {
         // mount(ui, (ui = this.render(viewOpts.message)), viewUi);
         mount(viewOpts.message, actions, this.render.bind(this), viewUi);
-      }
-    };
-  }
-});
+      } };
+
+  } });
+
 
 
 // You can also specify remote views. i.e. the above views 
@@ -156,11 +108,12 @@ Stage.defineView({
 // Push a view onto the Stage
 setTimeout(() => {
   stageApp.pushView("main", {
-    transition: "slide", 
-    // transition: "lollipop" | "slide" | "fancy" | "slide-up" | "slide-down", 
-    message: Date()
+    transition: "slide",
+    message: Date() 
   });
 }, 500);
+
+/* ========================================== */
 
 
 
