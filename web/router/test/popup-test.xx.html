@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>GRID SORT</title>
+	<link rel="stylesheet" href="/css/winbox.css">
+	<link rel="stylesheet" href="/css/quasar.min.css">
+	<link rel="stylesheet" href="/css/fa.css">
+	<link rel="stylesheet" href="/css/material-icons.css">
+	<link rel="stylesheet" href="/css/xui.css">
+	<script src="/js/jquery.js"></script>
+	<script src="/js/vue3.js"></script>
+	<script src="/js/tailwind.min.js"></script>
+	<script src="/js/common.js"></script>
+</head>
+
+<body style="overflow:hidden;" onload="initPage()">
+<div id="app-main" style="width:100%;height:100vh;"></div>
+	
+<template>
+	<div class="p-2">
+		<q-btn @click="store.popupOpen" label="테스트" color="indigo-500"/>
+	</div>
+
+	<script>
+		const boxHtml='<div class="flex flex-col full"><div class="box-title" style="height:28px"></div><div class="box-editor stretch"></div><div class="box-status" style="height:24px"></div></div>'
+		store.popupOpen = e => {
+			if(store.box ) {
+				store.box.show();
+				return;
+			}
+			xui.loadModule({winbox:'/js/xui-winbox.js'}, res=>{
+				const wb=xui.require('winbox');
+				const box=new wb({title:'에디터열기', x:'center', y:'center', html:boxHtml})
+				const body=$(box.body).find('.box-editor');
+				global.aceEditor(body[0])
+				box.app=true;
+				store.box=box;
+			})
+		}
+		global.loadCss('/css/winbox.css')
+	</script>
+</template>
+	
+	
+	<script>		
+		function initPage() {
+			initRoutePage((global,store)=>{
+				const el=getEl('app-main')
+				const src=getTemplateSource()
+				global.loadRoutePage(el, src, store)
+			});
+		}
+	</script>
+</body>
+</html>

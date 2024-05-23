@@ -1,213 +1,117 @@
-<api>
-	gitTest(req,param,&uri) {
-		git=@git.postEventAdd()
-		return "git => $git"
-	}
-	moveFile(req,param,&uri) {
-		name=uri.trim()
-		pathGit=conf("git#path.kwangho-na/na");
-		pathApp=System.path()
-		src=fileRead("$pathApp/$name");
-		fileWrite("$pathGit/$name", src)
-		return "$pathApp/$name => $pathGit/$name";
-	}
-	
-	gitPush(req,param,&uri) {
-		git=Baro.process('git')
-		fc=@git.cbPush
-		pandding=object('git.pandding').removeAll(true)
-		pandding.addNode().with(command:'add .', type:'pandding')
-		pandding.addNode().with(command:'commit -m "commit test"', type:'pandding');
-		pandding.addNode().with(command:'push', finishCallback:fc)
-		Cf.postEvent("gitCommand", 'gitEvent', pandding.child(0)); 
-		ss=''
-		while(cur, pandding, n) {
-			if(n) ss.add("\r\n")
-			ss.add(cur.result)
-		}
-		return ss;
-	}
-	gitCommand(req,param,&uri) {
-		git=Baro.process('git')
-		git.with(req, param)
-		type=uri.findPos('/').trim()
-		print("xxxxxx git command xxxxxxx", type);
-		switch(type) {
-		case logs:
-			param.command='log --graph --oneline';
-			git.finishCallback=@git.cbLogs
-		case log:
-			param.command='log';
-			git.finishCallback=@git.cbLog
-		case files:
-			param.command='ls-files --stage'
-			git.finishCallback=@git.cbFiles
-		case status:
-			param.command='status -z -uall'
-			git.finishCallback=@git.cbStatus
-		case tree:
-			key=uri.findPos('/').trim()
-			mode=uri.findPos('/').trim()
-			not(key) key='main';
-			if(mode=='all') {
-				param.command="ls-tree -r $key"
-			} else {
-				param.command="ls-tree $key"
-			}
-			git.finishCallback=@git.cbTrees
-		case addAll:
-			param.command='add .';
-		case config:
-			param.command='git config --list';
-		default:
-		}
-		print("git $cmd start")
-		Cf.postEvent("gitCommand", 'git', param); 
-		n=0;
-		while(250) {
-			System.sleep(150)
-			if(param.finished) {
-				break;
-			}
-			n++;
-		}
-		return param; 
-	}
-	 
-	gitDownFile(req, param, &uri) {
-		name=uri.trim();
-		w=Baro.web('down')
-		w.result=''
-		w.call("https://raw.githubusercontent.com/kwangho-na/baro/na/$name", func(type,data) {
-			if(type=='read') this.appendText('result',data)
-		})
-		path=System.path();
-		fileWrite("$path/$name", w.result)
-		return "$path/$name"
-	}
-	
-</api>
-
 <func>
-	@git.runProc(type,data) {
+	gitUse(req, param, &uri) {
+		Cf.include('web/app.js')
+		owner='kwangho-na'
+		repo='baro'
+		path=f(uri)
+		return @git.call("https://api.github.com/$path") 
+	}
+	gitSha(req, param, &uri) {
+		sha=uri.findPos('/').trim()
+		owner='kwangho-na'
+		repo='baro'
+		path=f(uri)
+		return @git.call("https://api.github.com/$path") 
+	}
+	gitPost(req, param, &uri) {
+		Cf.include('web/app.js')
+		type=uri.findPos('/').trim()
+		owner='kwangho-na'
+		repo='baro'
+		path=f(uri)
+		print("xxx git post xxx", path, type)
 		switch(type) {
-		case start: this.result=''
-		case read: this.appendText('result', data)
-		case finish:
-			param=this.postParam;
-			fc=when(param, param.finishCallback) not(typeof(fc,'func')) fc=this.finishCallback
-			if(typeof(fc,'func') ) {
-				fc()
-			}
-			if(param && param.isset(type) ) {
-				if( param.type.eq('pandding') ) {
-					param.result=this.result;
-					next=param.index()+1
-					cur=param.parentNode().child(next)
-					if(cur.command) Cf.postEvent('gitCommand', cur);
-				} else {
-					print("git run finish type error [type==${param.type}] ");
-				}
-			}
-			if(this.finishCallback) this.finishCallback=null;
+		case createCommit:
+			return @git.callPost("https://api.github.com/$path", '{"state":"success"}') 
+		case createPull:
+			data='{"title":"pull title","body":"pull bodys","head":"kwangho-na:main","base":"main"}'
+			return @git.callPost("https://api.github.com/$path", data)
+		case createRepo:
+			name=uri.findPos('/').trim()
+			path="user/repos"
+			data=fmt('{"name":"${name}"}')
+			print("====== create repo ========", name, data);
+			return @git.callPost("https://api.github.com/$path", data);
+		case addBlobs:
+			path='repos/kwangho-na/baro/git/blobs';
+			data=#[{"content":"print(\"Hello, World! aaa test 123\")","encoding":"utf-8"}]
+			return @git.callPost("https://api.github.com/$path", data);
+		case addTree:
+			name=uri.trim();
+			base='44e9056f1af8e3568e8dc184f2bd9b4d17bd61ff'
+			sha='5b755ad51997bfa286819d2b3b559b4b14b96f08';
+			path='repos/kwangho-na/baro/git/trees';
+			/*
+			100644 for file (blob), 
+			100755 for executable (blob), 
+			040000 for subdirectory (tree), 
+			160000 for submodule (commit), or 
+			120000 for a blob that specifies the path of a symlink.
+			*/
+			data=
+#[{
+	"tree": [
+		{
+			"path": "${name}",
+			"mode": "100644",   
+			"type": "blob",
+			"sha": "${sha}"
+		}
+	],
+	"base_tree": "${base}"
+}]
+			return @git.callPost("https://api.github.com/$path", data);
+		case addCommit:
+			base='44e9056f1af8e3568e8dc184f2bd9b4d17bd61ff'
+			sha='ae4fab3b663521fbc9e136bf6a97a97f7a047743'
+			path='repos/kwangho-na/baro/git/commits'
+			data=
+#[{
+	"message": "새로운 커밋실행",
+	"tree": "${sha}",
+	"parents": ["${base}"]
+}]
+			return @git.callPost("https://api.github.com/$path", data);
+		case addIssue:
+			path='repos/kwangho-na/test001/issues'
+			val='버그가 있어요! 🐛'
+			data=fmt('{"title":"${val}"}')
+			return @git.callPost("https://api.github.com/$path", data);
+		case addComment:
+			num=uri.findPos('/').trim()
+			body=uri.trim() not(body) body="감사합니다"
+			path=f('repos/kwangho-na/test001/issues/{num}/comments')
+			data=fmt('{"body":"${body}"}')
+			return @git.callPost("https://api.github.com/$path", data);
+		case addPatch:
+			path='repos/kwangho-na/baro/git/refs/heads/main'
+			sha='d5a54d486c1bba5d544a58bb1fc5517ee05be4df'
+			data=#[{"sha":"${sha}"}]
+			return @git.callPatch("https://api.github.com/$path", data);
+		case fullReq:
+			path='repos/kwangho-na/baro/pulls'
+			sha='d5a54d486c1bba5d544a58bb1fc5517ee05be4df'
+			data=#[{"sha":"${sha}"}]
+			return @git.callPatch("https://api.github.com/$path", data);
+			
+		case addFile:
+			path='repos/kwangho-na/baro/contents/hello.txt'
+			data=#[{
+	"message":"hello text commit",
+	"content":"bXkgbmV3IGZpbGUgY29udGVudHM=",
+	"branch":"main"
+}]
+			print("== git add file ==", data, path);
+			return @git.callPut("https://api.github.com/$path", data);
+		case createRef:
+			path='repos/kwangho-na/baro/git/refs';
+			name=uri.findPos('/').trim();
+			not(name) name="na";
+			sha='44e9056f1af8e3568e8dc184f2bd9b4d17bd61ff'
+			data=#[{"ref":"refs/heads/${name}", "sha":"${sha}"}]
+			return @git.callPost("https://api.github.com/$path", data);
 		default:
 		}
-	}
-	@git.postEventFuncs(type,param) {
-		switch(type) {
-		case gitCommand: 
-			git=Baro.process('git')
-			git.postParam=param;
-			git.run("git ${param.command}", @git.runProc)
-		default:
-		}
-	}
-	@git.postEventAdd() {
-		git=Baro.process('git')
-		not(git.var(workPath)) git.path(conf('git#path.kwangho-na/na'))
-		Cf.getObject().set('@postEvent_git', @git.postEventFuncs);
-		return git;
-	}
-	@git.cbLogs() {
-		this.inject(req,param)
-		s=this.ref(result);
-		while(s.valid()) {
-			line=s.findPos("\n");
-			not(line.ch()) break;
-			not(line.ch('*')) continue;
-			line.incr().ch()
-			key=line.move()
-			msg=line.trim()
-			param.addNode().with(key,msg)
-		}
-		not(param.childCount()) param.message='nologs'; 
-		param.finished=true;
-	}
-	@git.cbLog() {
-		this.inject(req,param)
-		s=this.ref(result);
-		s.findPos('commit ')
-		while(s.valid()) {
-			sha=s.move() s.findPos('Author:')
-			author=s.findPos("\n").trim() s.findPos('Date:')
-			date=s.findPos("\n").trim() 
-			comment=s.findPos('commit ').trim()
-			param.addNode().with(sha, author, date, comment)
-		}
-		not(param.childCount()) param.message='nolog'; 
-		param.finished=true;
-	}
-	@git.cbFiles() {
-		this.inject(req,param)
-		s=this.ref(result);
-		while(s.valid()) {
-			line=s.findPos("\n");
-			not(line.ch()) break;
-			num=line.findPos(" \t",4).trim()
-			sha=line.findPos(" \t",4).trim()
-			stat=line.findPos(" \t",4).trim()
-			name=line.trim()
-			param.addNode().with(num,sha,stat,name)
-		}
-		not(param.childCount()) param.message='nofiles'; 
-		param.finished=true;
-		print("git files finished ok ", param)
-	}
-	@git.cbStatus() {
-		this.inject(req,param)
-		s=this.ref(result);
-		print("git command status >> ", req, param, s)
-		while(s.valid()) {
-			line=s.findPos("\n");
-			not(line.ch()) break;
-			type=line.findPos(" \t",4).trim()
-			name=line.trim()
-			param.addNode().with(type,name)
-		} 
-		not(param.childCount()) param.message='nochange';
-		param.finished=true;
-		print("git status finished ok ", param)
-	}
-	@git.cbTrees() {
-		this.inject(req,param)
-		s=this.ref(result);
-		print("git command status >> ", req, param, s)
-		while(s.valid()) {
-			line=s.findPos("\n");
-			not(line.ch()) break;
-			num=line.findPos(" \t",4).trim()
-			type=line.findPos(" \t",4).trim()
-			sha=line.findPos(" \t",4).trim()
-			name=line.findPos(" \t",4).trim()
-			param.addNode().with(num, type, sha, name)
-		}
-		param.finished=true;
-		print("git tree finished ok ", param)
-	}
-	@git.cbPush() {
-		this.inject(req,param)
-		s=this.ref(result);
-		print("git command push >> ", req, param) 
-		param.finished=true;
+		return @git.call("https://api.github.com/$path") 
 	}
 </func>

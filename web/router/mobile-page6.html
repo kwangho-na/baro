@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>모바일 개발페이지</title>
+	<link rel="stylesheet" href="../css/quasar.min.css">
+	<link rel="stylesheet" href="../css/fontawesome.css">
+	<link rel="stylesheet" href="../css/material-icons.css">
+	<link rel="stylesheet" href="../css/xui.css">
+	<script src="../js/jquery.js"></script>
+	<script src="../js/vue3.js"></script>
+	<script src="../js/tailwind.min.js"></script>
+	<script src="../js/common.js"></script>
+</head>
+<body style="overflow:hidden;" onload="initPage()">
+	<div id="app-main" style="width:100%;height:100vh;"></div>
+	
+<template>
+<div class="screen">
+	<div class="wrapper">
+    <div class="content">
+      
+      <i class="fa fa-bars menu-toggle"></i>
+      
+      <header>
+       
+        <h1>Section</h1>
+        
+      </header>
+      <main class="view view--1">
+        
+        <img src="http://placehold.it/640x400">
+        <img src="http://placehold.it/640x400">
+        <img src="http://placehold.it/640x400">
+        <img src="http://placehold.it/640x400">
+        
+      </main>
+    </div>
+    <ul class="menu">
+      <li><a class="item item-0 menu-toggle"><i class="fa fa-times"></i></a></li>
+      <li><a class="item item-1"><i class="fa fa-car"></i></a></li>
+      <li><a class="item item-2"><i class="fa fa-heart"></i></a></li>
+      <li><a class="item item-3"><i class="fa fa-cloud"></i></a></li>
+      <li><a class="item item-4"><i class="fa fa-coffee"></i></a></li>
+      <li><a class="item item-5"><i class="fa fa-dribbble"></i></a></li>
+      <li><a class="item item-6"><i class="fa fa-book"></i></a></li>
+      <li><a class="item item-7"><i class="fa fa-book"></i></a></li>
+    </ul>
+  </div>
+</div>
+
+<style>
+.screen {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100vh;
+    transition: 0.5s;
+    transition-delay: 0.1s;
+    overflow: hidden;
+}
+.wrapper {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  background-color: #fdfdfd;
+  overflow: hidden;
+  position: relative;
+}
+
+.header {
+  display: block;
+}
+
+h1 {
+  font-family: "Futura", sans-serif;
+  color: #333;
+  text-align: center;
+  line-height: 60px;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.menu-toggle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 3em;
+  width: 60px;
+  height: 60px;
+  text-align: center;
+  line-height: 60px;
+  display: block;
+}
+
+.menu {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  transition: all 0.3s ease;
+  perspective: 2000px;
+}
+
+.item {
+  background-color: #33334c;
+  border-top: 1px solid #182844;
+  border-bottom: 1px solid #253149;
+  color: white;
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  display: block;
+  text-align: center;
+  transition: transform 0.6s ease, background-color 0.1s 0.15s ease;
+  transform-origin: left center;
+  position: relative;
+  text-decoration: none;
+  font-size: 3em;
+}
+.item:active {
+  background-color: #d64a73;
+  color: white;
+  transition: all 0.2s 0 ease;
+}
+
+.menu--is-closed {
+  pointer-events: none;
+}
+.menu--is-closed .item {
+  transform: rotateY(180deg);
+  background-color: #272841;
+}
+
+.item-0 {
+  transition-delay: 0.7s;
+  z-index: 0;
+}
+
+.menu--is-closed .item-0 {
+  transition-delay: 0s;
+}
+
+.item-1 {
+  transition-delay: 0.6s;
+  z-index: 1;
+}
+
+.menu--is-closed .item-1 {
+  transition-delay: 0.1s;
+}
+
+.item-2 {
+  transition-delay: 0.5s;
+  z-index: 2;
+}
+
+.menu--is-closed .item-2 {
+  transition-delay: 0.2s;
+}
+
+.item-3 {
+  transition-delay: 0.4s;
+  z-index: 3;
+}
+
+.menu--is-closed .item-3 {
+  transition-delay: 0.3s;
+}
+
+.item-4 {
+  transition-delay: 0.3s;
+  z-index: 4;
+}
+
+.menu--is-closed .item-4 {
+  transition-delay: 0.4s;
+}
+
+.item-5 {
+  transition-delay: 0.2s;
+  z-index: 5;
+}
+
+.menu--is-closed .item-5 {
+  transition-delay: 0.5s;
+}
+
+.item-6 {
+  transition-delay: 0.1s;
+  z-index: 6;
+}
+
+.menu--is-closed .item-6 {
+  transition-delay: 0.6s;
+}
+
+.item-7 {
+  transition-delay: 0s;
+  z-index: 7;
+}
+
+.menu--is-closed .item-7 {
+  transition-delay: 0.7s;
+}
+</style>
+
+<script>
+$('.menu-toggle').on('click', function(){
+  
+ console.log('click'); $('.menu').toggleClass('menu--is-closed');
+  
+});
+</script>
+</template>
+	
+	<script>
+		function initPage() {
+			const jsPath='/js', storePath='/js/stores';
+			xui.loadModule({
+				pinia:				jsPath+'/pinia.js',
+				quasar:				jsPath+'/quasar.umd.js',
+				'xui/config':		jsPath+'/xui-config.js',
+				'xui/pageSource':	jsPath+'/xui-pageSource.js',
+			}, () => {
+				const cf=xui.require('config');
+				const paths = {
+					'store/global': 		storePath+'/store-global.js',
+					'store/test': 			storePath+'/store-test.js',
+				}
+				// paths[subPageCode] = jsPath+'/'+subPageCode+'.js';
+				cf.createMainApp(jsPath, storePath)
+				if( cf.tailwindUse && window.tailwind ) tailwind.config={ plugins: [initPlugIn()] }
+				clog("init page path ==> ", paths);
+				xui.loadModule(paths, () => xui.store('global').loadRoutePage(getEl('app-main'), getTemplateSource()) )
+			})
+		}
+	</script>
+</body>
+</html>

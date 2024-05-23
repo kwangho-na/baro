@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>GRID FLEX</title>
+	<link rel="stylesheet" href="/css/winbox.css">
+	<link rel="stylesheet" href="/css/quasar.min.css">
+	<link rel="stylesheet" href="/css/fa.css">
+	<link rel="stylesheet" href="/css/material-icons.css">
+	<link rel="stylesheet" href="/css/xui.css">
+	<script src="/js/jquery.js"></script>
+	<script src="/js/vue3.js"></script>
+	<script src="/js/tailwind.min.js"></script>
+	<script src="/js/common.js"></script>
+</head>
+
+<body style="overflow:hidden;" onload="initPage()">
+<div id="app-main" style="width:100%;height:100vh;"></div>
+	
+<template> 
+<div style="width:100%;height:100%;background:#fff;padding:8px;">
+	<div class="flex">
+		<div style="width:60px">순번</div>
+		<div v-for="column in store.columns" class="cellHeader" :style="store.cellStyle(column)">
+		 	{{column.name}}
+		</div>
+	</div>
+	<q-virtual-scroll
+	  type="list"
+	  :style="{height: store.tableHeight}"
+	  :virtual-scroll-item-size="48"
+	  :virtual-scroll-sticky-size-start="48"
+	  :virtual-scroll-sticky-size-end="32"
+	  :items="store.list"
+	> 
+	  <template v-slot="{ item: row, index }">
+	  	<div class="flex">
+		  	<div style="width:60px">#{{ index }}</div>
+		  	<div v-for="column in store.columns" class="cellBody" :style="store.cellStyle(column)">
+		  		<span style="postion:relative;width:100%;height:100%;">
+		        	{{ row[column.prop] }}
+		        </span>
+		  	</div>
+		</div>
+	  </template>
+	</q-virtual-scroll>
+	<div style="height:36px;">
+		<q-btn @click.stop="store.clickTest">test</q-btn>
+	</div>
+</div>
+
+<script vars>
+	store.onResize = e => {
+		store.setTableHeight()
+		clog("window resize " + store.tableHeight )
+	}
+	store.onMouseup = e => {
+		if(store.currentRow) {
+			store.currentRow.editRowCheck=false
+			store.currentRow=null
+		}
+	}
+</script>
+
+<script>
+store.cellStyle = c => c.flex? 'flex:'+c.flex: c.width? 'width:'+c.width: 'width:80px';
+store.list = [
+  {
+    name: 'Frozen Yogurt',
+    calories: 159,
+    fat: 6.0,
+    carbs: 24,
+    protein: 4.0,
+    sodium: 87,
+    calcium: '14%'
+  },
+  {
+    name: 'Ice cream sandwich',
+    calories: 237,
+    fat: 9.0,
+    carbs: 37,
+    protein: 4.3,
+    sodium: 129,
+    calcium: '8%'
+  },
+  {
+    name: 'Eclair',
+    calories: 262,
+    fat: 16.0,
+    carbs: 23,
+    protein: 6.0,
+    sodium: 337,
+    calcium: '6%'
+  }
+];
+store.columns = [
+  { name: 'Dessert (100g serving)', prop: 'name', useEdit:true, flex:1 },
+  { name: 'Calories', prop: 'calories', useEdit:true, width:'100px' },
+  { name: 'Fat (g)', prop: 'fat', width:'80px' },
+  { name: 'Carbs (g)', prop: 'carbs', width:'80px' },
+  { name: 'Protein (g)', prop: 'protein', width:'100px' },
+  { name: 'Sodium (mg)', prop: 'sodium', width:'100px' },
+  { name: 'Calcium (%)', prop: 'calcium', width:'80px' }
+]
+</script> 
+
+<style>
+	.empty-element {
+		position:relative;
+		width:300px;
+		height: 28px;
+		padding: 4px;
+	}
+	.empty-element.show:after {
+		position:absolute;
+		content:'';
+		 top:0;
+		 right:0;
+		 width:0px;
+		 height:0px;
+		 border:10px solid;
+		 border-color: red red transparent transparent;
+		 border-width: 0 10px 10px 10px;
+	}
+</style>
+
+	</template>
+	
+	
+	<script>		
+		function initPage() {
+			const jsPath='/js', storePath='/js/stores';
+			xui.loadModule({
+				pinia:				jsPath+'/pinia.js',
+				quasar:				jsPath+'/quasar.umd.js',
+				config:				jsPath+'/xui-config.js',
+				sortable:			jsPath+'/xui-sortable.js',
+			}, () => {
+				const cf=xui.require('config');
+				const paths = {
+					'store/global': 		storePath+'/store-global.js',
+					'store/test': 			storePath+'/store-test.js',
+				}
+				// paths[subPageCode] = jsPath+'/'+subPageCode+'.js';
+				cf.createMainApp(jsPath, storePath)
+				if( cf.tailwindUse && window.tailwind ) tailwind.config={ plugins: [initPlugIn()] }
+				
+				const content=getEl('app-main');
+				const components=xui.require('dnd');
+				xui.loadModule(paths, () => xui.store('global').loadRoutePage(content,getTemplateSource(),xui.store('test'),components) )
+			})
+		}
+	</script>
+</body>
+</html>

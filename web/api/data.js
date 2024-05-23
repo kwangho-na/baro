@@ -56,14 +56,14 @@
 	} 
 	fileChunkStart(req, param, &uri, data) {
 		param.parseJson(data)
-		param.inject(fid, totalCount, savePath)
+		param.inject(tag, fid, filePath, savePath, totalCount)
 		not(typeof(totalCount,'num')) return print("file chunk start error [totalCount not defined]");
 		path=System.path()
 		map=object("map.filechunk")
 		infoPath="${path}/data/filechunkInfo/${fid}.inf"
 		fileWrite(infoPath, data)
 		hash=Baro.file().fileHash(infoPath)
-		node=map.addNode(hash).with(infoPath, userId, totalCount, savePath)
+		node=map.addNode(hash).with(infoPath, tag, fid, filePath, savePath, totalCount)
 		while(idx=0, idx<totalCount, idx++) {
 			node.addNode().with(idx)
 		}
@@ -100,92 +100,97 @@
 
 <func note="공통함수">
 	_ts(o) { return toString(o, true) }
-	_name(&s) {
+	_name(&s, flag) {
 		a=s.findLast('/');
 		b=when(a, a.right(), s);
+		if(typeof(flag,'bool') && flag) return b;
 		return b.findPos('.').trim();
 	} 
-	_json() {
+	_json(id) {
 		node=_node().parseJson(this.result)
-		switch(args.size()) {
-		case 0:
-			return node
-		case 1:
-			args(id)
-			return node.get(id)
-		default:
-			arr=_arr()
-			while(key, node.keys()) arr.add(node.get(key))
-			return arr;
-		}
+		return when(id,node.get(id),node)
 	}
 </func>
 
+
 <func> 
-	@data.fileChunkUpload(param, filePath, savePath) {
-		if(filePath ) {
-			fid='';
-			if(typeof(param,'string')) {
-				fid=param;
-				node=object("map.chunkUpload_${fid}");
-			} else if(typeof(param,'node')) {
-				node=param;
-			} else {
-				return print("file chunk upload root node error [path:$filePath]");
-			}
-			not(fid) fid=_name(filePath)
-			tag='chunk-root'
-			chunkSize=1048576
-			if(@data.fileChunk(filePath, node, chunkSize) ) {
-				totalCount=node.childCount();
-				node.with(tag, fid, filePath, savePath, totalCount)
-				web=Baro.web("chunkUpload")
-				web.target=node;
-				web.result='';
-				web.data=@json.nodeStr(node)
-				header=web.addNode('@header')
-				header.set('Content-Type', 'application/data')
-				web.call("http://localhost/api/data/fileChunkStart", "POST", func(type, data) {
-					switch(type) {
-					case read: this.appendText('result', data)
-					case finish:
-						target=this.target
-						target.fileHash=_json("fileHash")
-						@data.fileChunkUpload(target);
-					case error: this.target.error=data
-					}
-				});
-			}
-			return;
+	@data.fileChunkUploadStart(fid, filePath, savePath) {
+		not(fid) return print("파일청크 업로드 생성 CHUNK 식별자 미정의");
+		not(isFile(filePath)) return print("파일청크 업로드 생성 파일명 오류 (경로:$filePath)");
+		node=object("map.chunkUpload_${fid}")
+		if(node.status=='upload') return print("파일청크 업로드 $fid 진행중");
+		node.removeAll();
+		node.status='start';
+		not(savePath) {
+			path=System.path()
+			name=_name(filePath,true)
+			savePath="$path/data/upload/$name"
 		}
-		node=param;
+		not( @data.fileChunk(filePath, node, chunkSize) ) return print("파일청크 업로드 생성오류 (경로:$filePath)");
+		tag='chunk-root'
+		chunkSize=1048576
+		totalCount=node.childCount();
+		node.with(tag, fid, filePath, savePath, totalCount)
+		web=Baro.web("${fid}_start")
+		web.target=node;
+		web.result='';
+		web.data=@json.nodeStr(node)
+		header=web.addNode('@header')
+		header.set('Content-Type', 'application/data')
+		web.call("http://localhost/api/data/fileChunkStart", "POST", func(type, data) {
+			switch(type) {
+			case read: this.appendText('result', data)
+			case finish:
+				target=this.target
+				target.fileHash=_json("fileHash")
+				print("[finish] fileChunkStart target==$target");
+			case error: this.target.error=data
+			}
+		});
+		print("파일청크 업로드 생성완료")
+		// @data.fileChunkUpload(node);
+		return true;
+	}
+	@data.fileChunkUpload(node) { 
+		not(typeof(param,'node')) return print("파일청크 업로드 root node error");
+		node.inject(tag, fid, totalCount, fileHash, status )
+		if(status=='finished') return;
+		not(fileHash) return print("파일청크 업로드 파일해시오류");
 		total=node.childCount();
-		if(node.tag != 'chunk-root' ) return print("file chunk upload root node tag error [node:${node}]");
-		if(total != node.totalCount ) return print("file chunk upload total count error [${total} == ${node.totalCount}]");
-		fileHash=node.fileHash;
-		callCnt=0;
-		while(cur, node, idx) {
-			n=idx%4
-			web=Baro.web("chunkUpload$n") 
-			if(node.error) return print("file chunk upload error [idx:$idx]");
-			if(node.checkFinished) continue;
-			if(web.isRun()) continue;
+		if(tag != 'chunk-root' ) return print("파일청크 업로드 root node tag 오류 [node:${node}]");
+		if(total != totalCount ) return print("파일청크 업로드 total count error [${total} == ${node.totalCount}]");
+		uploadNode=null; 
+		while(cur, node) {
+			if(cur.error) return print("파일청크 업로드 오청오류 [idx:$idx]");
+			if(cur.checkFinished) continue;
+			uploadNode=cur;
+			break;
+		}
+		if( uploadNode ) {
+			node.status='upload';
+			web=Baro.web("${fid}_upload") 
 			web.startTick=System.tick()
-			web.data=node.data
-			web.target=node
-			node.idx=idx;
+			web.data=uploadNode.data
+			web.target=uploadNode
+			web.result=''
+			header=web.addNode('@header')
+			header.set('Content-Type', 'application/data')
+			idx=uploadNode.index();
 			web.call("http://localhost/api/data/fileChunk/$idx/$fileHash", "POST", func(type, data) {
 				switch(type) {
 				case read: this.appendText('result', data)
 				case finish:
-					root=this.target.parentNode()
-					@data.fileChunkUpload(root);
+					target=this.target;
+					target.checkFinished=true;
+					print("[finish] file chunk", this.url, target.parentNode() ) 
+					@data.fileChunkUpload(target.parentNode());
 				case error: this.target.error=data
 				}
 			});
-			callCnt++;
+		} else {
+			node.status='finish';
 		}
-		return callCnt;
+		return node;
 	}
 	@data.fileChunk(path, node, chunkSize) {
 		// 파일을 chunk 단위로 나눠서 노드에 저장한다
@@ -223,4 +228,3 @@
 	}
 	
 </func>
-

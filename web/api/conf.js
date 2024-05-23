@@ -1,4 +1,4 @@
-<func>
+<api>
 	refresh(req, param, &uri) {
 		@router.makeUrlMap();
 		return param;
@@ -223,6 +223,7 @@
 			}
 		})
 	}
+	
 	driveList(req,param) {
 		param.driveList=System.driveList()
 		return param
@@ -518,4 +519,4 @@
 		return node;
 	}
 	
-</func>
+</api>

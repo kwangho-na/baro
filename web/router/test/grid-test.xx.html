@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>GRID SORT</title>
+	<link rel="stylesheet" href="/css/winbox.css">
+	<link rel="stylesheet" href="/css/quasar.min.css">
+	<link rel="stylesheet" href="/css/fa.css">
+	<link rel="stylesheet" href="/css/material-icons.css">
+	<link rel="stylesheet" href="/css/xui.css">
+	<script src="/js/jquery.js"></script>
+	<script src="/js/vue3.js"></script>
+	<script src="/js/tailwind.min.js"></script>
+	<script src="/js/common.js"></script>
+</head>
+
+<body style="overflow:hidden;" onload="initPage()">
+<div id="app-main" style="width:100%;height:100vh;"></div>
+	
+<template>  
+<div style="width:100%;height:100%;background:#fff;padding:8px;" class="flex flex-col gap-2">
+	<div class="flex" style="height:32px">
+		<div style="width:40px">순번</div>
+		<div v-for="column in store.columns" class="cellHeader" :style="store.cellStyle(column)" @click.stop="store.sortList(column)">
+		 	{{column.name}}
+		</div>
+	</div>
+	<q-virtual-scroll
+	  type="list"
+	  style="flex:100"
+	  :virtual-scroll-item-size="20" 
+	  :items="store.srcDispList"
+	> 
+	  <template v-slot="{ item: row, index }">
+	  	<div class="rowBody flex" :class="{over: row.over }">
+		  	<div style="width:40px">#{{ index }}</div>
+		  	<div v-for="column in store.columns" class="cellBody" :style="store.cellStyle(column)" @mouseover="row.over=true" @mouseleave="row.over=false">
+		  		<span style="postion:relative;width:100%;height:100%;">
+		        	{{ row[column.field] }}
+		        </span>
+		  	</div>
+		</div>
+	  </template>
+	</q-virtual-scroll>
+	<div style="height:36px;">
+		<input v-model="store.filter" style="width:120px">
+		<span class="space"></span>
+	</div>
+</div>
+
+<script>
+	store.filter=''
+	store.columns = [
+		{name:'그룹', field:'grp', flex:15},
+		{name:'코드', field:'cd', flex:20},
+		{name:'설명', field:'note', flex:20},
+		{name:'변경일시', field:'moddt', flex:15},
+		{name:'등록일시', field:'regdt', flex:15},
+		{name:'', field:'blank', flex:5},
+	];
+	store.cellStyle= c => c.width? 'width:'+c.width+'px;': c.flex? 'flex:'+c.flex+';': 'width:100px;'
+	
+	let cc=null
+	const sortFc=(a,b)=> cc.sort=='desc'? 
+		(a[cc.field]<b[cc.field] ? 1 : a[cc.field]>b[cc.field]? -1: 0):
+		(a[cc.field]>b[cc.field] ? 1 : a[cc.field]<b[cc.field]? -1: 0)
+	store.sortList= c => {
+		if(!c.sort) c.sort='asc'
+		c.sort= c.sort=='asc' ? 'desc':'asc'
+		cc=c
+		store.srcDispList.sort(sortFc)
+	}
+	store.srcList=[];
+	store.srcDispList=[];
+	global.apiCall('GET','/api/conf/srcList', res=>{
+		store.srcList=res.children
+		store.srcDispList=store.srcList
+	})
+	Vue.watch(()=>store.filter, str=>{
+		store.srcDispList = store.srcList.filter(r=>
+			r.grp.indexOf(str)!=-1 || r.cd.indexOf(str)!=-1 || r.note.indexOf(str)!=-1 ? true: false
+		)
+	}) 
+</script>
+
+
+<style>
+	.cellHeader {
+		cursor: pointer;
+	}
+	.rowBody.over {
+		color:#fff;
+		background:#caa;
+	}
+</style>
+
+</template>
+	
+	
+	<script>		
+		function initPage() {
+			initRoutPage((global,store)=>{
+				const el=getEl('app-main')
+				const src=getTemplateSource()
+				const component=xui.require('dnd')
+				global.loadRoutePage(el, src, store, component);
+			})
+		}
+	</script>
+</body>
+</html>

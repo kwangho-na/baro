@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>폴더선택 페이지</title>
+	<link rel="stylesheet" href="/css/winbox.css">
+	<link rel="stylesheet" href="/css/quasar.min.css">
+	<link rel="stylesheet" href="/css/fa.css">
+	<link rel="stylesheet" href="/css/material-icons.css">
+	<link rel="stylesheet" href="/css/xui.css">
+	<script src="/js/jquery.js"></script>
+	<script src="/js/vue3.js"></script>
+	<script src="/js/tailwind.min.js"></script>
+	<script src="/js/common.js"></script>
+</head>
+
+<body style="overflow:hidden;" onload="initPage()">
+<div id="app-main" style="width:100%;height:100vh;"></div>
+
+<template note="폴더선택 이벤트 처리">
+	@@inc(ul-sidebar)
+	
+	<div class="p-2">
+		<q-select dense outlined v-model="store.driveVal" :options="store.options" 
+		label="드라이브선택" style="max-width:110px"/>
+	</div>
+	<div class="p-2">
+		@@inc(side-nav)
+		<q-tree
+			:nodes="store.nodes"
+			node-key="relative"
+			@lazy-load="store.lazyLoad"
+			v-model:expanded="store.expanded"
+			:ref="o=>store.treeRef=o"
+		>
+			<template v-slot:default-header="{node}=prop">
+				<div class="flex flex-center w-full">
+				  <q-icon v-show="node.icon" :name="node.icon" size="18px" style="width:24px;"></q-icon>
+				  <div class="cursor-pointer stretch" 
+					:class="{'tree-select':store.currentNode==node}" @click.stop="evt=>store.clickNode(node, evt)">{{ node.name }}</div>
+				  <i class="fa fa-bookmark" style="width:38px;text-align:center;"
+					:style="{color:store.bookmarkColor(node)}" 
+					@click.stop="e=>store.clickBookmark(node, e)"></i>
+				</div>
+			</template>
+		</q-tree>
+	</div>
+
+	<q-menu v-model="store.menuOpen" :target="store.targetNode" anchor="top right" self="top left">
+	  @@inc(menu-test)
+	</q-menu>
+	
+	<script vars>
+		store.nodes=[]
+		store.expanded=[]
+	</script>
+
+	<script>
+		const reloadDrive = () => {
+			global.apiCall('GET','/api/conf/folderList/2/'+store.drive, res=>{
+				store.nodes=listLazyCheck(res.children)
+				for(var cur of store.nodes) {
+					if(cur.children && cur.children.length>0 ) {
+						store.expanded.push(cur.relative)
+						break;
+					}
+				}
+				clog("start=>",store.expanded)
+			})
+		};
+		store.drive='C';
+		store.driveVal=null
+		store.options=[]
+		Vue.watch(()=>store.driveVal, node=>{
+			if(node) {
+				clog("drive change ", node)
+				store.drive=node.value
+				reloadDrive();
+			}
+		})
+		global.apiCall('GET','/api/conf/driveList', res=> {
+			store.options=res.driveList.map(s=>({label:s, value:s.substring(0,1)}))
+			store.driveVal=store.options[0]
+		})
+		const listLazyCheck=list=> {
+			if(!Array.isArray(list)) return [];
+			for(var cur of list) {
+				if(Array.isArray(cur.children) ) {
+					listLazyCheck(cur.children)
+				} else if(cur.childFolderCount>0) {
+					cur.lazy=true
+				}
+			}
+			return list;
+		}; 
+		store.prevRow=null;
+		store.lazyLoad=({ node, key, done, fail }) => {
+			global.apiCall('GET','/api/conf/folderList/2/'+store.drive+'/'+node.relative, res=>{
+				done(listLazyCheck(res.children))
+			})
+		}
+		store.clickNode=(node,evt) => {
+			store.currentNode=node;
+			const pos=store.expanded.indexOf(node.relative)
+			clog("click ",node, evt)
+			if(pos==-1) {
+				store.expanded.push(node.relative)
+			}
+			if(store.prevRow ) {
+				store.prevRow.addClass('q-hoverable')
+			}
+			const row= $(evt.target).closest('.q-hoverable')
+			row.removeClass('q-hoverable')
+			store.prevRow=row
+			clog("row===",row)
+		}
+		store.clickBookmark=(node,e)=> {
+			store.targetNode=e.target;
+			store.menuOpen=true;
+			clog("bookmark ", e, store.targetNode)
+		}
+		store.bookmarkColor=node=> node.childFolderCount>0 ?'#f88': '#aaa'
+		
+		@@inc(side-nav.js)
+	</script>
+	
+	<style>
+		.tree-select {
+			background: #edd; 
+			color: #339;
+			font-weight:bold;
+			padding: 2px 4px;
+		}
+		@@inc(css/side-nav.css)
+		@@inc(css/ul-sidebar.css)
+	</style>
+</template>
+	
+	<script>		
+		function initPage() {
+			initRoutePage((global,store)=>{
+				const el=getEl('app-main')
+				const src=getTemplateSource()
+				global.loadRoutePage(el, src, store)
+			});
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TEST 개발페이지</title>
+	<link rel="stylesheet" href="../css/quasar.min.css">
+	<link rel="stylesheet" href="../css/fontawesome.css">
+	<link rel="stylesheet" href="../css/material-icons.css">
+	<link rel="stylesheet" href="../css/xui.css">
+	<script src="../js/jquery.js"></script>
+	<script src="../js/vue3.js"></script>
+	<script src="../js/tailwind.min.js"></script>
+	<script src="../js/common.js"></script>
+</head>
+<body style="overflow:hidden;" onload="initPage()">
+	<div id="app-main" style="width:100%;height:100vh;">
+	</div>
+	
+	<script>
+		const pageTemplate='<div> store:{{store.xxx}} <br> PAGE:{{store.template}}</div><component :is="store.testDevPage"/>'
+		function initPage() {  
+			const {jsPath, storePath } = parent.xui.require('config');
+			tailwind.config={ plugins: [initPlugIn()] } 
+			xui.loadModule({quasar: jsPath+'/quasar.umd.js'}, () => reloadPage() );
+		}
+		function loadPageSource(src, store, callback) { 
+			const global=parent.xui.store('global');
+			const pageSource = parent.xui.require('pageSource')
+			const pageFuncs = pageSource? pageSource.pageFuncs : '';
+			const template = global.getHtmlTemplate(src, global.testApp);
+			const {markRaw, defineAsyncComponent } = Vue;	
+			const name="testDev"
+			// const componentName = name+randomKey()
+			clog("11111111111111", template, name)
+			store.tempate=template;
+			const options={name, template, setup() {
+				if(global.currentVars) { 
+					let fn=new Function("store, global", global.currentVars)
+					fn(store, global)
+				}
+				if(global.currentScript.trim()) { 
+					Vue.onMounted(()=> {
+						let fn=new Function("store, global", pageFuncs+global.currentScript)
+						fn(store, global)
+					});
+				}			
+				return {global, store}
+			}};
+			try {
+				const page=markRaw(defineAsyncComponent(()=> new Promise(res=>res(options))));
+				clog("테스트 페이지 생성 ok =>", page);
+				store.testDevPage=null;
+				Vue.nextTick(()=> {
+					store.testDevPage=page 
+					store.xxx=123
+				});
+			} catch(e) {
+				clog("페이지 생성오류 =>", e)
+			}
+		}
+		function reloadPage(src, store, callback) { 
+			const global=parent.xui.store('global');
+			const main=getEl('app-main'); 
+			if( !isObj(store) ) store=parent.xui.store('test'); 
+			global.testApp = null;
+			store.testDevPage=null;
+			const app = Vue.createApp({setup() { return {store, global} }, template:pageTemplate });
+			const cf=parent.xui.require('config')
+			if( cf && cf.pinia ) {
+				app.use(cf.pinia);
+			}
+			app.use(Quasar);
+			app.mount(main);
+			global.testApp = app
+			if( src ) {
+				loadPageSource(src, store, callback);
+			}
+			clog("xx test frame start ", app );
+		}
+		parent.documentTest = document;
+		clog("document === ", document);
+		
+	</script>
+</body>
+</html>

@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>tab edit</title>
+	<link rel="stylesheet" href="/css/winbox.css">
+	<link rel="stylesheet" href="/css/quasar.min.css">
+	<link rel="stylesheet" href="/css/fa.css">
+	<link rel="stylesheet" href="/css/material-icons.css">
+	<link rel="stylesheet" href="/css/xui.css">
+	<script src="/js/jquery.js"></script>
+	<script src="/js/vue3.js"></script>
+	<script src="/js/tailwind.min.js"></script>
+	<script src="/js/common.js"></script>
+</head>
+<body style="overflow:hidden;" onload="initPage()">
+	<div id="app-main" style="width:100%;height:100vh;"></div>
+	
+	<template> 
+<div class="no-skin">
+	<div id="navbar" class="navbar navbar-default ace-save-state hidden">
+		<div class="navbar-container ace-save-state" id="navbar-container">
+			<div class="navbar-buttons navbar-header pull-right" role="navigation">
+			</div>
+		</div>
+	</div>
+
+	<div class="main-container ace-save-state">
+		<!-- /.sidebar-shortcuts -->
+		<div id="sidebar" class="sidebar responsive ace-save-state">
+			<div class="sidebar-shortcuts" id="sidebar-shortcuts">
+				<div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+					<button class="btn btn-success">
+						<i class="ace-icon fa fa-signal"></i>
+					</button>
+
+					<button class="btn btn-info">
+						<i class="ace-icon fa fa-pencil"></i>
+					</button>
+
+				</div>
+
+				<div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
+					<span class="btn btn-success"></span>
+
+					<span class="btn btn-info"></span>
+
+					<span class="btn btn-warning"></span>
+
+					<span class="btn btn-danger"></span>
+				</div>
+			</div>
+			<ul class="nav nav-list">
+				<li>
+					<a href="index.html">
+						<i class="menu-icon fa fa-tachometer"></i>
+						<span class="menu-text"> Dashboard </span>
+					</a>
+
+					<b class="arrow"></b>
+				</li>
+
+				<li>
+					<a href="#" class="dropdown-toggle">
+						<i class="menu-icon fa fa-desktop"></i>
+						<span class="menu-text">
+							UI &amp; Elements
+						</span>
+
+						<b class="arrow fa fa-angle-down"></b>
+					</a>
+
+					<b class="arrow"></b>
+
+					<ul class="submenu">
+						<li class="active">
+							<a href="#" class="dropdown-toggle">
+								<i class="menu-icon fa fa-caret-right"></i>
+
+								Layouts
+								<b class="arrow fa fa-angle-down"></b>
+							</a>
+
+							<b class="arrow"></b>
+
+							<ul class="submenu">
+								<li>
+									<a href="top-menu.html">
+										<i class="menu-icon fa fa-caret-right"></i>
+										Top Menu
+									</a>
+
+									<b class="arrow"></b>
+								</li>
+
+								<li>
+									<a href="two-menu-1.html">
+										<i class="menu-icon fa fa-caret-right"></i>
+										Two Menus 1
+									</a>
+
+									<b class="arrow"></b>
+								</li>
+
+								<li>
+									<a href="two-menu-2.html">
+										<i class="menu-icon fa fa-caret-right"></i>
+										Two Menus 2
+									</a>
+
+									<b class="arrow"></b>
+								</li>
+
+								<li>
+									<a href="mobile-menu-1.html">
+										<i class="menu-icon fa fa-caret-right"></i>
+										Default Mobile Menu
+									</a>
+
+									<b class="arrow"></b>
+								</li>
+
+								<li>
+									<a href="mobile-menu-2.html">
+										<i class="menu-icon fa fa-caret-right"></i>
+										Mobile Menu 2
+									</a>
+
+									<b class="arrow"></b>
+								</li>
+
+								<li>
+									<a href="mobile-menu-3.html">
+										<i class="menu-icon fa fa-caret-right"></i>
+										Mobile Menu 3
+									</a>
+
+									<b class="arrow"></b>
+								</li>
+							</ul>
+						</li>
+
+						<li>
+							<a href="typography.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Typography
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="elements.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Elements
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="buttons.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Buttons &amp; Icons
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="content-slider.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Content Sliders
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="treeview.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Treeview
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="jquery-ui.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								jQuery UI
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="nestable-list.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Nestable Lists
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="#" class="dropdown-toggle">
+								<i class="menu-icon fa fa-caret-right"></i>
+
+								Three Level Menu
+								<b class="arrow fa fa-angle-down"></b>
+							</a>
+
+							<b class="arrow"></b>
+
+							<ul class="submenu">
+								<li>
+									<a href="#">
+										<i class="menu-icon fa fa-leaf green"></i>
+										Item #1
+									</a>
+
+									<b class="arrow"></b>
+								</li>
+
+								<li>
+									<a href="#" class="dropdown-toggle">
+										<i class="menu-icon fa fa-pencil orange"></i>
+
+										4th level
+										<b class="arrow fa fa-angle-down"></b>
+									</a>
+
+									<b class="arrow"></b>
+
+									<ul class="submenu">
+										<li>
+											<a href="#">
+												<i class="menu-icon fa fa-plus purple"></i>
+												Add Product
+											</a>
+
+											<b class="arrow"></b>
+										</li>
+
+										<li>
+											<a href="#">
+												<i class="menu-icon fa fa-eye pink"></i>
+												View Products
+											</a>
+
+											<b class="arrow"></b>
+										</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+
+				<li>
+					<a href="#" class="dropdown-toggle">
+						<i class="menu-icon fa fa-list"></i>
+						<span class="menu-text"> Tables </span>
+
+						<b class="arrow fa fa-angle-down"></b>
+					</a>
+
+					<b class="arrow"></b>
+
+					<ul class="submenu">
+						<li>
+							<a href="tables.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Simple &amp; Dynamic
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="jqgrid.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								jqGrid plugin
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+					</ul>
+				</li>
+
+				<li>
+					<a href="#" class="dropdown-toggle">
+						<i class="menu-icon fa fa-pencil-square-o"></i>
+						<span class="menu-text"> Forms </span>
+
+						<b class="arrow fa fa-angle-down"></b>
+					</a>
+
+					<b class="arrow"></b>
+
+					<ul class="submenu">
+						<li>
+							<a href="form-elements.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Form Elements
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="form-elements-2.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Form Elements 2
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="form-wizard.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Wizard &amp; Validation
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="wysiwyg.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Wysiwyg &amp; Markdown
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="dropzone.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Dropzone File Upload
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+					</ul>
+				</li>
+
+				<li>
+					<a href="widgets.html">
+						<i class="menu-icon fa fa-list-alt"></i>
+						<span class="menu-text"> Widgets </span>
+					</a>
+
+					<b class="arrow"></b>
+				</li>
+
+				<li>
+					<a href="calendar.html">
+						<i class="menu-icon fa fa-calendar"></i>
+
+						<span class="menu-text">
+							Calendar
+
+							<span class="badge badge-transparent tooltip-error" title="2 Important Events">
+								<i class="ace-icon fa fa-exclamation-triangle red bigger-130"></i>
+							</span>
+						</span>
+					</a>
+
+					<b class="arrow"></b>
+				</li>
+
+				<li>
+					<a href="gallery.html">
+						<i class="menu-icon fa fa-picture-o"></i>
+						<span class="menu-text"> Gallery </span>
+					</a>
+
+					<b class="arrow"></b>
+				</li>
+
+				<li>
+					<a href="#" class="dropdown-toggle">
+						<i class="menu-icon fa fa-tag"></i>
+						<span class="menu-text"> More Pages </span>
+
+						<b class="arrow fa fa-angle-down"></b>
+					</a>
+
+					<b class="arrow"></b>
+
+					<ul class="submenu">
+						<li>
+							<a href="profile.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								User Profile
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="inbox.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Inbox
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="pricing.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Pricing Tables
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="invoice.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Invoice
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="timeline.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Timeline
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="search.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Search Results
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="email.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Email Templates
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="login.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Login &amp; Register
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+					</ul>
+				</li>
+
+				<li>
+					<a href="#" class="dropdown-toggle">
+						<i class="menu-icon fa fa-file-o"></i>
+
+						<span class="menu-text">
+							Other Pages
+
+							<span class="badge badge-primary">5</span>
+						</span>
+
+						<b class="arrow fa fa-angle-down"></b>
+					</a>
+
+					<b class="arrow"></b>
+
+					<ul class="submenu">
+						<li>
+							<a href="faq.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								FAQ
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="error-404.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Error 404
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="error-500.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Error 500
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="grid.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Grid
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+
+						<li>
+							<a href="blank.html">
+								<i class="menu-icon fa fa-caret-right"></i>
+								Blank Page
+							</a>
+
+							<b class="arrow"></b>
+						</li>
+					</ul>
+				</li>
+			</ul><!-- /.nav-list -->
+		
+			<div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse">
+				<i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i>
+			</div>
+		</div>
+
+		<div class="main-content" style="height:100vh;">
+			<div class="relative full flex flex-col">
+				<div class="page-top"></div>
+				<div class="page-body stretch p-2 w-full"> 
+					<div class="full flex flex-col gap-2">
+						<div style="height:25px;"></div>
+						<div class="widget-main scrollable stretch" data-size="550">
+							<p v-for="n in 100" :key="n">
+								{{n+1}} scroll test ~~~~~~
+							</p>
+						</div>
+						<div style="height:25px;"></div>
+					</div>
+				
+				</div>
+				<div class="page-bottom"></div>
+			</div>
+		</div>
+		
+		 
+	</div>
+
+
+</div>
+
+<script>
+	xui.loadScript('/js/jquery-ui.js')
+	xui.loadScript('/js/ace-elm.js')
+	xui.loadScript('/js/ace-etc.js')
+	xui.loadScript('/js/ace-ui.js')
+	global.loadCss('/css/ace-ui.css')
+	global.loadCss(`
+	.sidebar.menu-min .sidebar-shortcuts-large { width:auto; text-wrap: nowrap }
+	.sidebar .sidebar-shortcuts-large>.btn {margin-right:4px }
+	`);
+	
+	const aa = function() {
+			
+		// scrollables
+		$('.scrollable').each(function () {
+			var $this = $(this);
+			$(this).ace_scroll({
+				size: $this.attr('data-size') || 100,
+				//styleClass: 'scroll-left scroll-margin scroll-thin scroll-dark scroll-light no-track scroll-visible'
+			});
+		});
+		$('.scrollable-horizontal').each(function () {
+			var $this = $(this);
+			$(this).ace_scroll(
+			  {
+				horizontal: true,
+				styleClass: 'scroll-top',//show the scrollbars on top(default is bottom)
+				size: $this.attr('data-size') || 500,
+				mouseWheelLock: true
+			  }
+			).css({'padding-top': 12});
+		});
+		
+		$(window).on('resize.scroll_reset', function() {
+			$('.scrollable-horizontal').ace_scroll('reset');
+		});
+	
+		
+		$('#id-checkbox-vertical').prop('checked', false).on('click', function() {
+			$('#widget-toolbox-1').toggleClass('toolbox-vertical')
+			.find('.btn-group').toggleClass('btn-group-vertical')
+			.filter(':first').toggleClass('hidden')
+			.parent().toggleClass('btn-toolbar')
+		});
+	
+		/**
+		//or use slimScroll plugin
+		$('.slim-scrollable').each(function () {
+			var $this = $(this);
+			$this.slimScroll({
+				height: $this.data('height') || 100,
+				railVisible:true
+			});
+		});
+		*/
+		
+	
+		/**$('.widget-box').on('setting.ace.widget' , function(e) {
+			e.preventDefault();
+		});*/
+	
+		/**
+		$('.widget-box').on('show.ace.widget', function(e) {
+			//e.preventDefault();
+			//this = the widget-box
+		});
+		$('.widget-box').on('reload.ace.widget', function(e) {
+			//this = the widget-box
+		});
+		*/
+	
+		//$('#my-widget-box').widget_box('hide');
+	
+		
+	
+		// widget boxes
+		// widget box drag & drop example
+		$('.widget-container-col').sortable({
+			connectWith: '.widget-container-col',
+			items:'> .widget-box',
+			handle: ace.vars['touch'] ? '.widget-title' : false,
+			cancel: '.fullscreen',
+			opacity:0.8,
+			revert:true,
+			forceHelperSize:true,
+			placeholder: 'widget-placeholder',
+			forcePlaceholderSize:true,
+			tolerance:'pointer',
+			start: function(event, ui) {
+				//when an element is moved, it's parent becomes empty with almost zero height.
+				//we set a min-height for it to be large enough so that later we can easily drop elements back onto it
+				ui.item.parent().css({'min-height':ui.item.height()})
+				//ui.sender.css({'min-height':ui.item.height() , 'background-color' : '#F5F5F5'})
+			},
+			update: function(event, ui) {
+				ui.item.parent({'min-height':''})
+				//p.style.removeProperty('background-color');
+	
+				
+				//save widget positions
+				var widget_order = {}
+				$('.widget-container-col').each(function() {
+					var container_id = $(this).attr('id');
+					widget_order[container_id] = []
+					
+					
+					$(this).find('> .widget-box').each(function() {
+						var widget_id = $(this).attr('id');
+						widget_order[container_id].push(widget_id);
+						//now we know each container contains which widgets
+					});
+				});
+				
+				ace.data.set('demo', 'widget-order', widget_order, null, true);
+			}
+		});
+		
+		
+		///////////////////////
+	
+		//when a widget is shown/hidden/closed, we save its state for later retrieval
+		$(document).on('shown.ace.widget hidden.ace.widget closed.ace.widget', '.widget-box', function(event) {
+			var widgets = ace.data.get('demo', 'widget-state', true);
+			if(widgets == null) widgets = {}
+clog("widgets == >", widgets) 					
+			var id = $(this).attr('id');
+			widgets[id] = event.type;
+			ace.data.set('demo', 'widget-state', widgets, null, true);
+		});
+	
+	
+		(function() {
+			//restore widget order
+			var container_list = ace.data.get('demo', 'widget-order', true);
+clog("container_list==>", container_list)
+			if(container_list) {
+				for(var container_id in container_list) if(container_list.hasOwnProperty(container_id)) {
+	
+					var widgets_inside_container = container_list[container_id];
+					if(widgets_inside_container.length == 0) continue;
+					
+					for(var i = 0; i < widgets_inside_container.length; i++) {
+						var widget = widgets_inside_container[i];
+						$('#'+widget).appendTo('#'+container_id);
+					}
+	
+				}
+			}
+			
+			
+			//restore widget state
+			var widgets = ace.data.get('demo', 'widget-state', true);
+			if(widgets != null) {
+				for(var id in widgets) if(widgets.hasOwnProperty(id)) {
+					var state = widgets[id];
+					var widget = $('#'+id);
+					if
+					(
+						(state == 'shown' && widget.hasClass('collapsed'))
+						||
+						(state == 'hidden' && !widget.hasClass('collapsed'))
+					) 
+					{
+						widget.widget_box('toggleFast');
+					}
+					else if(state == 'closed') {
+						widget.widget_box('closeFast');
+					}
+				}
+			}
+			
+			
+			$('#main-widget-container').removeClass('invisible');
+			
+			
+			//reset saved positions and states
+			$('#reset-widgets').on('click', function() {
+				ace.data.remove('demo', 'widget-state');
+				ace.data.remove('demo', 'widget-order');
+				document.location.reload();
+			});
+		
+		})();
+	
+	};
+	
+	setTimeout(aa, 1000)
+</script>
+		
+<style>
+	.main-content {
+		height: calc(100vh - 45px);
+		overflow: auto;
+	}
+	.page-top {
+		width:100%;
+		height:40px;
+		border-bottom: 1px solid #ccc;
+		background: #eee;
+	}
+	.page-bottom {
+		width:100%;
+		height:34px;
+	}
+</style>		
+	</template>
+	
+	
+	<script>
+		@@js(initPage) { name=test }
+	</script>
+</body>
+</html>

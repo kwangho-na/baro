@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TEST 개발페이지</title>
+	<link rel="stylesheet" href="../css/quasar.min.css">
+	<link rel="stylesheet" href="../css/fontawesome.css">
+	<link rel="stylesheet" href="../css/material-icons.css">
+	<link rel="stylesheet" href="../css/xui.css">
+	<script src="../js/jquery.js"></script>
+	<script src="../js/vue3.js"></script>
+	<script src="../js/tailwind.min.js"></script>
+	<script src="../js/common.js"></script>
+</head>
+<body style="overflow:hidden;" onload="initPage()">
+	<div id="app-main" style="width:100%;height:100vh;"></div>
+	<template>
+		<div class="main-contents full" style="overflow:auto;">
+			<q-splitter v-model="store.leftPanelSize" :ref="obj=>store.splitter=obj">		
+				<template v-slot:before>
+					<pre id="editor" style="width:100%; height:100%;margin:0;"></pre>
+					<div class="form-bar">
+						<button @click="store.runPage">실행</button>
+						<input v-model="store.saveName" style="max-width:110px;" placeholder="저장명" @keyup.enter="store.readTestSrc">
+						<input v-model="store.saveDesc" style="max-width:150px;" placeholder="저장설명" @keyup.enter="store.savePage">
+						<button @click="store.savePage">저장</button>
+						<span v-show="store.hasUndo" style="color:red"> * </span>
+						<span class="space"></span>
+						<select v-model="store.runType">
+							<option v-for="type in store.runTypes" :value="type">{{type}}</option>
+						</select>
+						<label for="wrapUse">
+							<input id="wrapUse" type="checkbox" @input="store.wrapToggle" :value="store.wrapUse"> wrap
+						</label>
+						<label for="jshintUse">
+							<input id="jshintUse" type="checkbox" :value="store.jshintUse"> jshint
+						</label>
+					</div>
+				</template>
+				<template v-slot:after>
+					<component :is="store.testDevPage"/>
+				</template>
+			</q-splitter> 
+		</div>
+		<script vars>
+			store.splitter=null
+			store.leftPanelSize=50
+			store.saveName=''
+			store.saveDesc=''
+			store.pageIndex=1
+			store.wrapUse=false 
+			store.runTypes=['page','xtemplate','sql','note', 'api']
+			store.runType='page'
+			store.jshintUse=false
+		</script>
+		<script>
+			const cf=xui.require('config')
+			const splitter=store.splitter.$el
+			const left=splitter.querySelector('.q-splitter__before')
+			
+			let templateList=null;
+			
+			// ; 키입력시 팝업처리
+			const lineCheck = editor => {
+				const {row,column} = editor.getCursorPosition(), 
+					es=editor.session,
+					line=es.getLine(row).slice(0, column), last=line.length-1;				 
+				const arr=line.split(/\s+/), str=arr[arr.length-1]
+				if( str.startsWith('@@')) {
+					const name=str.substr(2,str.length-2)
+					clog("line check name=="+name);
+					if(name=='template') {
+						const start = list=> {				
+							if(list) {
+								templateList=list.map(c=>c.cd)
+							} else {
+								list=templateList
+							}
+							store.currentRange=editor.selection.getRange()
+							store.currentRange.start.column-=str.length
+							store.completeShowPopup(editor, {matches:templateList})
+						}
+						if( templateList ) 
+							start()
+						else 
+							global.apiCall('GET','/api/data/templateList', res=>start(res.children));
+						return true;
+					} else if(name.startsWith('conf(')) {
+						const param=name.substring(5,name.length-1).trim()
+						global.apiCall('TEXT','/api/data/confData/'+param, text=>{
+							const range=editor.selection.getRange();
+							range.start.column-=str.length
+							editor.selection.setRange(range);
+							editor.insert(text);
+						});
+					}
+				}
+				return false;
+			}
+			// 에디터 팝업처리
+			store.completeShowPopup = (editor, options) => {
+				const Autocomplete=xui.require("ace/autocomplete").Autocomplete;
+				var completer = Autocomplete.for(editor);
+				completer.autoInsert = false;
+				completer.autoSelect = true;
+				completer.autoShown = false;
+				completer.insertCallback = (ac, data, completions) => {
+					editor.selection.setRange(store.currentRange)
+					editor.insert("@@"+data+"() {}");
+					return true;
+				}
+				completer.showPopup(editor, options);
+				completer.cancelContextMenu();
+			}
+			
+			store.hasUndo=false;
+			cf.addEditor('testDevEditor', getEl('editor'), store, e=> {
+				store.editor=e
+				e.commands.addCommand({
+					name:'templateAdd', 
+					bindKey:{win:';',mac:';'}, 
+					exec(e) {
+						return lineCheck(e);
+					}
+				});
+				e.on('change', () => {
+					store.hasUndo = e.session.getUndoManager().hasUndo();
+				});
+				global.loadSnippet('javascript');
+			});
+			
+			let prevType=''
+			Vue.watch(()=>store.runType, type=> {
+				if(prevType ) $('.form-bar').removeClass(prevType)
+				$('.form-bar').addClass(type)
+				prevType=type;
+			})
+			
+
+			// 체크버튼 처리
+			store.wrapToggle = () => {
+				clog("wrap toggle ", store.wrapUse)
+				store.wrapUse=!store.wrapUse
+				store.editor.setOption("wrap", store.wrapUse)
+			}
+			// 적용
+			store.reloadPage = () => {
+				const src=store.editor.getValue()
+				const name=store.saveName;
+				if(!src) return global.setError("새로고침할 소스가 없습니다")
+				if(store.runType=='api') {
+					applyApiSource(src) 
+				} else if(store.runType=='xtemplate') {
+					if( !name ) return global.alert("위젯템플릿 저장 이름이 없습니다");	
+					global.confirm(name+" 위젯템플릿을 저장하시겠습니까?" ,()=>{
+						global.apiCall('POST', '/api/conf/applyXTemplate', {src, tag:name}, 
+							res=>global.alert("위젯템플릿을 저장했습니다")
+						)
+					});
+				} else {
+					global.apiCall('APPLY', '/api/conf/parseXTemplate', {src}, 
+						res=>store.editor.setValue(res)
+					);
+				}
+			}
+			// 테스트소스 불러오기
+			store.readTestSrc = () => {
+				const saveName=store.saveName;
+				if( !saveName ) return global.alert("불러올 이름이 없습니다");
+				global.confirm(saveName+ " 이름으로 등록된 소스를 불러오겠습니까?", () => {
+					global.apiCall('TEXT', '/api/conf/readTestSrc/'+saveName, text => {
+						if(text.charAt(0)=='[') {
+							const p=text.indexOf(']')
+							if(p>0 ) {
+								store.saveDesc=text.substring(1,p);
+								text=text.substring(p+1)
+							}
+						}
+						store.editor.setValue(text)
+						store.editor.focus()
+					})
+				});
+			}
+			
+			// 저장버튼 
+			store.savePage = () => {
+				const data=store.editor.getValue();
+				const saveName=store.saveName;
+				if( !saveName ) return global.alert("저장 이름이 없습니다");
+				const save = type => {
+					global.confirm(saveName+ " 이름으로 소스를 "+type+" 하시겠습니까?", () => {
+						global.apiCall('POST','/api/conf/saveTestSrc',{saveName,data,saveDesc:store.saveDesc}, res=> {
+							if(res.error) {
+								return global.setError(res.error)
+							}
+							global.alert(res.message);
+							store.editor.session.getUndoManager().reset();
+							store.editor.focus()
+						});
+					})
+				};
+				global.apiCall('POST','/api/conf/saveNameCount/'+saveName, res=> save(parseInt(res.count)>0?'수정':'등록') );		
+			}
+			
+			// 실행버튼 
+			store.runPage=()=>{
+				let templateUse=false;
+				let src=store.editor.getValue()
+				if(!src) return global.setError("실행할 소스가 없습니다")
+				if(store.runType=='note') {
+					global.prompt('노트명을 입력하세요','',name=>{
+						if(!name) return global.alert("노트명을 입력하세요")
+						global.apiCall('POST', '/api/data/saveNote', {src, name} ,res=>global.alert(name+" 노트를 저장했습니다"))
+					});
+					return
+				}
+				if(store.runType=='sql') {
+					global.apiCall('APPLY', '/api/data/query', {sql:src}, 
+						res=>store.editorAppendText(res)
+					)
+					return
+				}
+				
+				if(store.jshintUse) {
+					global.apiCall('APPLY', '/api/conf/jshintUse', {src}, err=>{
+						if(err='ok') {
+							global.loadPageSource('testDev', src, store, page => store.testDevPage = page )
+						} else {
+							global.alert(err);
+						}
+					});
+					return;
+				} 
+				
+				if( templateUse) { 
+					const name=store.saveName;
+					global.apiCall('APPLY', '/api/conf/parseXTemplate', {src,name}, 
+						res=>global.loadPageSource('testDev', res, store, page => store.testDevPage = page )
+					);
+				}
+				
+				global.loadPageSource('testDev', src, store, page => store.testDevPage = page )
+			} 
+			
+			const applyApiSource = s => {		
+				const st='<api', et='</api>';
+				var sp=0, ep=0;
+				var ss='', prop='';
+				while(true) {
+					var p=s.indexOf(st, sp);
+					if(p<sp) {
+						ss+=s.substring(sp);
+						break;
+					}
+					if(p>sp) ss+=s.substring(sp, p);
+					sp=p+st.length;
+					p=s.indexOf('>',sp);
+					if(p==-1) break;
+					prop=s.substring(sp,p).trim();
+					if( prop && prop.length>0) {
+						ss+=' '+prop
+					}
+					ss+='>'
+					sp=p+1;
+					p=s.indexOf(et, sp);
+					if(p==-1) break;
+					global.apiCall('POST', '/api/conf/applyApiSource', {src:s.substring(sp,p), prop}, res=>clog("API " +prop+" apply ok"))
+					sp=p+et.length;
+				}
+				return ss;
+			 }
+			
+			// == 이벤트 처리 ==
+			const pageResize = () =>{
+				cf.setHeight(splitter, true)
+				cf.setHeight('editor', 38)
+			}
+			const pageKeydown = e => {
+				const k=e.key;
+				if( e.ctrlKey ) {
+					if( k=='s' || k=='r' ) {
+						e.preventDefault()
+						e.stopPropagation()
+						if(k=='r') store.reloadPage()
+						else store.runPage()
+					}
+				} else {
+					if( k=='Tab' && !e.shiftKey ) {
+						const editor=store.editor;
+						var pos = editor.selection.getCursor();
+						var session = editor.session;
+						if(session.getTextRange() ) return;
+						var curLine = (session.getDocument().getLine(pos.row)).trim();				
+						var curTokens = curLine.slice(0, pos.column).split(/\s+/);
+						var curCmd = curTokens[0];
+						clog('>> ',curLine, curTokens)
+						if (!curCmd) return;
+						
+					}
+				}
+			}
+			
+			store.editorAppendText = str => {
+				const e=store.editor;
+				e.navigateFileEnd()
+				e.splitLine()
+				e.splitLine()
+				e.insert(str)
+			}
+			
+			store.onStart = () => {
+				window.addEventListener('resize', pageResize)
+				window.addEventListener('keydown', pageKeydown)
+			}
+			store.onEnd = () => {
+				window.removeEventListener('resize', pageResize)
+				window.removeEventListener('keydown', pageKeydown)
+			}	
+			pageResize()
+			clog("page init ", cf);
+			
+			
+		</script>
+
+		<style>
+			.q-splitter__panel .buttons {
+				display:flex;
+				gap:8px;
+				height:38px;
+				padding:4px;
+				align-items: center;
+			} 
+			.q-splitter--vertical>.q-splitter__separator>div {
+				left: -2px;
+				right: -4px;
+				background: rgba(10,10,10,.25);
+			}
+			.form-bar button {
+				padding: 2px 4px;
+				height: 28px;
+			}
+			.form-bar input {
+				max-width: 110px;
+				padding: 2px 4px;
+			}
+			.form-bar.note {
+				background:#eaa;
+			}
+		</style>
+	</template>
+	
+	<script>
+		function initPage() {
+			const jsPath='/js', storePath='/js/stores';
+			xui.loadModule({
+				pinia:				jsPath+'/pinia.js',
+				quasar:				jsPath+'/quasar.umd.js',
+				'xui/config':		jsPath+'/xui-config.js',
+				'xui/pageSource':	jsPath+'/xui-pageSource.js',
+			}, () => {
+				const cf=xui.require('config');
+				const paths = {
+					'store/global': 		storePath+'/store-global.js',
+					'store/test': 			storePath+'/store-test.js',
+				}
+				// paths[subPageCode] = jsPath+'/'+subPageCode+'.js';
+				cf.createMainApp(jsPath, storePath)
+				if( cf.tailwindUse && window.tailwind ) tailwind.config={ plugins: [initPlugIn()] }
+				clog("init page path ==> ", paths);
+				xui.loadModule(paths, () => xui.store('global').loadRoutePage(getEl('app-main'), getTemplateSource()) )
+			})
+		}
+	</script>
+</body>
+</html>

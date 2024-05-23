@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>모바일 개발페이지</title>
+	<link rel="stylesheet" href="../css/quasar.min.css">
+	<link rel="stylesheet" href="../css/fontawesome.css">
+	<link rel="stylesheet" href="../css/material-icons.css">
+	<link rel="stylesheet" href="../css/xui.css">
+	<script src="../js/jquery.js"></script>
+	<script src="../js/vue3.js"></script>
+	<script src="../js/tailwind.min.js"></script>
+	<script src="../js/common.js"></script>
+</head>
+<body style="overflow:hidden;" onload="initPage()">
+	<div id="app-main" style="width:100%;height:100vh;"></div>
+	
+<template>
+<div class="screen">
+	<header>
+	  <nav>
+		<a href="#" class="title">
+		  Site Title
+		</a>
+		<ul class="menu">
+		  <li class="menu-item">
+			<a href="#"><i class="fa fa-home"></i> Home</a>
+		  </li>
+		  <li class="menu-item">
+			<a href="#">About</a>
+		  </li>
+		  <li class="menu-item">
+			<a href="#">Contact</a>
+		  </li>
+		  <li class="menu-item">
+			<a href="#">Privacy</a>
+		  </li>
+		</ul>
+		<a href="#" class="mobile-menu" data-action="toggleMenu">
+		  <i class="fa fa-bars" data-action="toggleMenu"></i> MENU
+		</a>
+	  </nav>
+	</header>
+
+	<div class="container">
+	  <h1>Mobile fly-out menu, with CSS</h1>
+	  <p>Converts a standard menu layout, to a fly-out mobile menu.</p>
+	  <p><em>Tip: Click or tap anywhere to hide the menu once it is open.</em></p>
+	  <ol>
+		<li>View this at < 600px width.</li>
+		<li>Click the 'MENU' button in the nav.</li>
+		<li>Watch the menu fly out from the right.</li>
+	  </ol>
+	</div>	 
+</div>
+
+<style>
+.screen {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100vh;
+    transition: 0.5s;
+    transition-delay: 0.1s;
+    overflow: hidden;
+}
+nav {
+  width: 100%;
+  background: #eaeaea;
+  display: table;
+}
+nav a {
+  color: #000;
+  text-decoration: none;
+}
+nav a.title {
+  float: left;
+  padding: 10px;
+  font-weight: bold;
+}
+nav a:hover {
+  background-color: #d1d1d1;
+}
+nav ul.menu {
+  float: right;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  letter-spacing: -4px;
+}
+nav ul.menu li.menu-item {
+  letter-spacing: normal;
+  display: inline-block;
+}
+nav ul.menu li.menu-item a {
+  padding: 10px;
+  display: block;
+}
+nav a.mobile-menu {
+  display: none;
+  float: right;
+  padding: 10px;
+}
+
+div.container {
+  padding: 20px;
+}
+
+@media screen and (max-width: 600px) {
+  nav ul.menu {
+    background: #3a3a3a;
+    width: 230px;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    right: -230px;
+    -webkit-transition: all 400ms ease;
+    -moz-transition: all 400ms ease;
+    -ms-transition: all 400ms ease;
+    -o-transition: all 400ms ease;
+    transition: all 400ms ease;
+  }
+  nav ul.menu li.menu-item {
+    display: block;
+    border-bottom: 1px solid #353535;
+  }
+  nav ul.menu li.menu-item a {
+    color: #FFF;
+  }
+  nav ul.menu li.menu-item a:hover {
+    background: #212121;
+  }
+  nav a.mobile-menu {
+    display: block;
+  }
+
+  body.nav-open {
+    margin-left: -230px;
+    margin-right: 230px;
+  }
+  body.nav-open nav ul.menu {
+    right: 0;
+  }
+}
+</style>
+
+<script> 
+
+  var actions = {
+    toggleMenu: function() {
+      $('body').toggleClass('nav-open');
+    },
+    closeMenu: function() {
+      $('body').removeClass('nav-open');
+    }
+  };
+
+  // When any element with a data-action attribute is clicked, we run the action if it exists
+  $('body').on('click', '[data-action]', function() {
+    var action = $(this).data('action');
+    if (action in actions) {
+      actions[action].apply(this, arguments);
+    }
+  });
+  
+  // Handle body taps to close the menu
+  $('html').on('touchstart', 'body.nav-open', function(e){
+    if(!$(e.target).is('a')){
+      actions.closeMenu();
+    }
+  });
+
+  // Handle body clicks to close the menu
+  $('html').on('click', 'body.nav-open', function(e){
+    if(!$(e.target).is('a')){
+      actions.closeMenu();
+    }
+  }); 
+
+</script>
+
+</template>
+	
+	<script>
+		function initPage() {
+			const jsPath='/js', storePath='/js/stores';
+			xui.loadModule({
+				pinia:				jsPath+'/pinia.js',
+				quasar:				jsPath+'/quasar.umd.js',
+				'xui/config':		jsPath+'/xui-config.js',
+				'xui/pageSource':	jsPath+'/xui-pageSource.js',
+			}, () => {
+				const cf=xui.require('config');
+				const paths = {
+					'store/global': 		storePath+'/store-global.js',
+					'store/test': 			storePath+'/store-test.js',
+				}
+				// paths[subPageCode] = jsPath+'/'+subPageCode+'.js';
+				cf.createMainApp(jsPath, storePath)
+				if( cf.tailwindUse && window.tailwind ) tailwind.config={ plugins: [initPlugIn()] }
+				clog("init page path ==> ", paths);
+				xui.loadModule(paths, () => xui.store('global').loadRoutePage(getEl('app-main'), getTemplateSource()) )
+			})
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TEST 개발페이지</title>
+	<link rel="stylesheet" href="../css/quasar.min.css">
+	<link rel="stylesheet" href="../css/fontawesome.css">
+	<link rel="stylesheet" href="../css/material-icons.css">
+	<link rel="stylesheet" href="../css/xui.css">
+	<script src="../js/jquery.js"></script>
+	<script src="../js/vue3.js"></script>
+	<script src="../js/tailwind.min.js"></script>
+	<script src="../js/common.js"></script>
+</head>
+<body style="overflow:hidden;" onload="initPage()">
+	<div id="app-main" style="width:100%;height:100vh;"></div>
+	<template>
+		<div class="main-contents full" style="overflow:auto;">
+			<q-splitter v-model="store.leftPanelSize" :ref="obj=>store.splitter=obj">		
+				<template v-slot:before>
+					<div class="form-bar">
+						<input v-model="store.openTestName" style="max-width:110px;" placeholder="팝업경로" @keyup.enter="store.openTestPopup">
+						<button @click="store.openTestPopup">팝업</button>					
+					</div>
+					<pre id="editor" style="width:100%; height:100%;margin:0;"></pre>
+					<div class="form-bar">
+						<button @click="store.runPage">실행</button>
+						<input v-model="store.saveName" style="max-width:110px;" placeholder="저장명" @keyup.enter="store.readTestSrc">
+						<input v-model="store.saveDesc" style="max-width:150px;" placeholder="저장설명" @keyup.enter="store.savePage">
+						<button @click="store.savePage">저장</button>
+						<span class="space"></span>
+						<select v-model="store.runType">
+							<option v-for="type in store.runTypes" :value="type">{{type}}</option>
+						</select>
+						<label for="wrapUse">
+							<input id="wrapUse" type="checkbox" @input="store.wrapToggle" :value="store.wrapUse"> wrap
+						</label>
+						<label for="jshintUse">
+							<input id="jshintUse" type="checkbox" :value="store.jshintUse"> jshint
+						</label>
+					</div>
+				</template>
+				<template v-slot:after>
+					<component :is="store.testDevPage"/>
+				</template>
+			</q-splitter> 
+		</div>
+		<script vars>
+			store.splitter=null
+			store.leftPanelSize=40
+			store.saveName=''
+			store.saveDesc=''
+			store.pageIndex=1
+			store.wrapUse=false 
+			store.runTypes=['all','css','script']
+			store.runType='all'
+			store.jshintUse=false
+		</script>
+		
+		<script>
+		clog("========== start  ===========", store.splitter )
+			const cf=xui.require('config')
+			const splitter=store.splitter.$el
+			const left=splitter.querySelector('.q-splitter__before')
+			// <iframe src="/html/testDevFrame.html" class="full" frameborder='0' scrolling="no"></iframe>
+			// const iframe = $('iframe')[0].contentWindow
+			cf.addEditor('testDevEditor', getEl('editor'), store, e=>store.editor=e )
+			
+			store.openTestName=''
+			store.openTestPopup=()=> {
+				if(!store.openTestName ) return global.alert("화면아이디가 입력되지 않았습니다");
+				global.popupRender('test',
+					{title:'테스트 화면정보', x:'center', y:'center'},
+					'/api/conf/testSource/'+store.openTestName, 
+					store, 
+					popup=> clog("popup")
+				)
+			}
+			
+			// 체크버튼 처리
+			store.wrapToggle = () => {
+				clog("wrap toggle ", store.wrapUse)
+				store.wrapUse=!store.wrapUse
+				store.editor.setOption("wrap", store.wrapUse)
+			}
+			store.reloadPage = () => {
+				const src=store.editor.getValue()
+				if(!src) return global.setError("새로고침할 소스가 없습니다")
+				// iframe.reloadPage(src, store, () => clog("reload ok") )
+			}
+			// 테스트소스 불러오기
+			store.readTestSrc = () => {
+				const saveName=store.saveName;
+				if( !saveName ) return global.alert("불러올 이름이 없습니다");
+				global.confirm(saveName+ " 이름으로 등록된 소스를 불러오겠습니까?", () => {
+					global.apiCall('TEXT', '/api/conf/readTestSrc/'+saveName, text => {
+						if(text.charAt(0)=='[') {
+							const p=text.indexOf(']')
+							if(p>0 ) {
+								store.saveDesc=text.substring(1,p);
+								text=text.substring(p+1)
+							}
+						}
+						store.editor.setValue(text)
+						store.editor.focus()
+					})
+				});
+			}
+			
+			// 저장버튼 
+			store.savePage = () => {
+				const data=store.editor.getValue();
+				const saveName=store.saveName;
+				if( !saveName ) return global.alert("저장 이름이 없습니다");
+				const save = type => {
+					global.confirm(saveName+ " 이름으로 소스를 "+type+" 하시겠습니까?", () => {
+						global.apiCall('POST','/api/conf/saveTestSrc',{saveName,data,saveDesc:store.saveDesc}, res=> {
+							if(res.error) {
+								return global.setError(res.error)
+							}
+							global.alert(res.message);
+							store.editor.focus()
+						});
+					})
+				};
+				global.apiCall('POST','/api/conf/saveNameCount/'+saveName, res=> save(parseInt(res.count)>0?'수정':'등록') );		
+			}
+			
+			// 실행버튼 
+			const applyApiSource = s => {		
+				const st='<api', et='</api>';
+				var sp=0, ep=0;
+				var ss='', prop='';
+				while(true) {
+					var p=s.indexOf(st, sp);
+					if(p<sp) {
+						ss+=s.substring(sp);
+						break;
+					}
+					if(p>sp) ss+=s.substring(sp, p);
+					sp=p+st.length;
+					p=s.indexOf('>',sp);
+					if(p==-1) break;
+					prop=s.substring(sp,p).trim();
+					if( prop && prop.length>0) {
+						ss+=' '+prop
+					}
+					ss+='>'
+					sp=p+1;
+					p=s.indexOf(et, sp);
+					if(p==-1) break;
+					global.apiCall('POST', '/api/conf/applyApiSource', {src:s.substring(sp,p), prop}, res=>clog("API " +prop+" apply ok"))
+					sp=p+et.length;
+				}
+				return ss;
+			}
+			store.runPage=()=>{
+				let src=store.editor.getValue()
+				if(!src) return global.setError("실행할 소스가 없습니다")
+				if(src.indexOf('<api ')!=-1) {
+					src=applyApiSource(src)
+				} 
+				if(store.jshintUse) {
+					global.apiCall('APPLY', '/api/conf/jshintUse', {src}, err=>{
+						if(err='ok') {
+							global.loadPageSource('testDev', src, store, page => store.testDevPage = page )
+						} else {
+							global.alert(err);
+						}
+					});
+				} else { 
+					global.loadPageSource('testDev', src, store, page => store.testDevPage = page )
+				}
+			} 
+			// == 이벤트 처리 ==
+			const pageResize = () =>{
+				cf.setHeight(splitter, true)
+				cf.setHeight('editor', 38*2)
+			}
+			const pageKeydown = e => {
+				const k=e.key;
+				if( e.ctrlKey ) {
+					if( k=='s' || k=='r' ) {
+						if(k=='r') store.reloadPage()
+						else store.runPage()
+					} else if( k=='o') {
+						 clog("key o down", e);
+					} else {
+						return;
+					}
+					e.preventDefault()
+					e.stopPropagation()
+				} else {
+					if( k=='Tab' && !e.shiftKey ) {
+						const editor=store.editor;
+						var pos = editor.selection.getCursor();
+						var session = editor.session;
+						if(session.getTextRange() ) return;
+						var curLine = (session.getDocument().getLine(pos.row)).trim();				
+						var curTokens = curLine.slice(0, pos.column).split(/\s+/);
+						var curCmd = curTokens[0];
+						clog('>> ',curLine, curTokens)
+						if (!curCmd) return;
+						
+					}
+				}
+			}
+			
+			store.onStart = () => {
+				window.addEventListener('resize', pageResize)
+				window.addEventListener('keydown', pageKeydown)
+			}
+			store.onEnd = () => {
+				window.removeEventListener('resize', pageResize)
+				window.removeEventListener('keydown', pageKeydown)
+			}	
+			pageResize()
+			clog("page init ", cf);
+			
+
+		</script>
+
+		<style>
+			.q-splitter__panel .buttons {
+				display:flex;
+				gap:8px;
+				height:38px;
+				padding:4px;
+				align-items: center;
+			} 
+			.q-splitter--vertical>.q-splitter__separator>div {
+				left: -2px;
+				right: -4px;
+				background: rgba(10,10,10,.25);
+			}
+			.form-bar button {
+				padding: 2px 4px;
+				height: 28px;
+			}
+			.form-bar input {
+				max-width: 110px;
+				padding: 2px 4px;
+			}
+		</style>
+	</template>
+	
+	<script>
+		function initPage() {
+			const jsPath='/js', storePath='/js/stores';
+			xui.loadModule({
+				pinia:				jsPath+'/pinia.js',
+				quasar:				jsPath+'/quasar.umd.js',
+				'xui/config':		jsPath+'/xui-config.js',
+				'xui/pageSource':	jsPath+'/xui-pageSource.js',
+			}, () => {
+				const cf=xui.require('config');
+				const paths = {
+					'store/global': 		storePath+'/store-global.js',
+					'store/test': 			storePath+'/store-test.js',
+				}
+				// paths[subPageCode] = jsPath+'/'+subPageCode+'.js';
+				cf.createMainApp(jsPath, storePath)
+				if( cf.tailwindUse && window.tailwind ) tailwind.config={ plugins: [initPlugIn()] }
+				clog("init page path ==> ", paths);
+				xui.loadModule(paths, () => xui.store('global').loadRoutePage(getEl('app-main'), getTemplateSource()) )
+			})
+		}
+	</script>
+</body>
+</html>

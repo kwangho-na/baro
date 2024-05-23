@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>모바일 개발페이지</title>
+	<link rel="stylesheet" href="../css/quasar.min.css">
+	<link rel="stylesheet" href="../css/fontawesome.css">
+	<link rel="stylesheet" href="../css/material-icons.css">
+	<link rel="stylesheet" href="../css/xui.css">
+	<script src="../js/jquery.js"></script>
+	<script src="../js/vue3.js"></script>
+	<script src="../js/tailwind.min.js"></script>
+	<script src="../js/common.js"></script>
+</head>
+<body style="overflow:hidden;" onload="initPage()">
+	<div id="app-main" style="width:100%;height:100vh;"></div>
+	<template>
+<div class="logo-container">
+    <a href="#top"><img id="logo" src="https://c2.staticflickr.com/4/3229/2745331617_0f15748719.jpg" height="100" ></a>
+ </div>
+  
+<nav class="custom-nav">
+	  <ul>
+   <li><a href="#tickets"><img id="mobile-nav-icons" src="http://image000.flaticon.com/icons/svg/149/149042.svg" height="30px" ></a>
+     <a href="#tickets" id="main-nav">Tickets</a></li>
+		 	  <li><a href="#music"><img id="mobile-nav-icons" src="http://image000.flaticon.com/icons/svg/148/148722.svg" height="30px" ></a>
+          <a href="#music" id="main-nav">Music</a></li>
+		 	  <li><a href="#shows"><img id="mobile-nav-icons" src="http://image000.flaticon.com/icons/svg/148/148751.svg" height="30px" ></a>
+          <a href="#shows" id="main-nav">Shows</a></li>
+		 	  <li><a href="#food"><img id="mobile-nav-icons" src="http://image000.flaticon.com/icons/svg/149/149074.svg" height="30px" ></a>
+          <a href="#food" id="main-nav">Food</a></li>
+		 	  <li><a href="#showroute"><img id="mobile-nav-icons" src="http://image000.flaticon.com/icons/svg/148/148933.svg" height="30px" ></a>
+          <a href="#showroute" id="main-nav">Show route</a></li>
+		 </ul>
+	</nav>
+<section class="parallax parallax-1">
+    <h1 class="parallax-h1 up"  id="tickets">Parallax</h1>
+</section> <!-- enf of parallax parallax-1 -->
+      <div class="text-container">
+        <h2>Tickets</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+          <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      </div> <!-- enf of text-container -->
+ 
+<section class="parallax parallax-2">
+    <h1 class="parallax-h1 down" id="music">One pager</h1>
+</section> <!-- enf of parallax parallax-2 -->
+      <div class="text-container">
+        <h2>Music</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+          <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      </div> <!-- enf of text-container -->
+
+<section class="parallax parallax-3">
+    <h1 class="parallax-h1 up" id="shows">With</h1>
+</section> <!-- enf of parallax parallax-3 -->
+      <div class="text-container">
+        <h2>Shows</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+          <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      </div> <!-- enf of text-container -->
+
+<section class="parallax parallax-4">
+    <h1 class="parallax-h1 down" id="food">Skew(y)</h1>
+</section> <!-- enf of parallax parallax-4 -->
+      <div class="text-container">
+        <h2>Food</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+          <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      </div> <!-- enf of text-container -->
+
+<section class="parallax parallax-5">
+    <h1 class="parallax-h1 up" id="showroute">Effect</h1>
+</section> <!-- enf of parallax parallax-5 -->
+      <div class="text-container">
+        <h2>Show Route</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+          <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      </div> <!-- enf of text-container -->
+<footer>
+  <div class="footer-content">Copyright @your name</div>
+    <div class="footer-contact">
+      <li>
+        <a href="tel:+358503425493"><i class="fa fa fa-mobile" id="contact-fa"></i></a>
+        <a href="mailto:henrik.k.sunden@gmail.com"><i class="fa fa fa-envelope" id="contact-fa"></i></a>
+        <a href="https://fi.linkedin.com/in/henrik-sund%C3%A9n-2b87916a" alt="LinkedIn" target="_blank"><i class="fa fa-linkedin-square" id="contact-fa"></i></a>
+      </li>
+  </div>
+</footer>
+
+<style>
+.custom-nav {
+	position: fixed;
+	top: 0;
+  left: 0px;
+	width: 100%;
+	height: 100px;
+	background: rgba(255,255,255,0.9);
+  text-align: center;
+  z-index: 3;
+  border-bottom: 1px solid rgba(0,0,0,0.4);
+}
+.custom-nav li {
+	display: inline-block;
+	padding: 24px 30px;
+}
+#mobile-nav-icons {
+  display: none;
+}
+.custom-nav li a {
+	color: #757575;
+	text-transform: uppercase;
+  text-decoration: none;
+}
+.custom-nav li a:hover {
+	color: #e87722;
+}
+.logo-container {
+  text-align: left;
+  width: 1260px;
+  margin: 0 auto;
+}
+#logo {
+  top: 0px;
+  position: fixed;
+  z-index: 99;
+}
+.parallax {
+  height: 450px;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+}
+.parallax-h1 {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 140px;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  top: 30%;
+  -webkit-transform: translateY(-30%);
+  -ms-transform: translateY(-30%);
+  transform: translateY(-30%);
+}
+.parallax-h1.up {
+  transform: skewY(2deg);
+}
+.parallax-h1.down {
+  transform: skewY(-2deg);
+}
+.text-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 80px 5% 120px 5%;
+}
+.text-container h2 {
+  font-size: 40px;
+}
+p {
+  margin-bottom: 20px;
+  font-size: 1.2em;
+  line-height: 1.5em;
+  font-weight: 300;
+}
+.parallax-1 {
+  background-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/121761/pattern_(4).svg");
+  transform: skewY(-2deg);
+  z-index: -1;
+}
+.parallax-2 {
+  background-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/121761/pattern_(3).svg");
+    transform: skewY(2deg);
+}
+.parallax-3 {
+  background-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/121761/pattern_(2).svg");
+  transform: skewY(-2deg);
+}
+.parallax-4 {
+  background-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/121761/pattern.svg");
+    transform: skewY(2deg);
+}
+.parallax-5 {
+  background-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/121761/pattern_(1).svg");
+  transform: skewY(-2deg);
+}
+footer {
+  background: #000;
+  text-align: center;
+  padding: 50px 0px;
+}
+.footer-content {
+  font-size: 0.7em;
+  color: rgba(255,255,255,0.5);
+  height: 60px;
+}
+#contact-fa {
+    color: rgba(255,255,255,0.7);
+    font-size: 2.4em;
+    width: 44px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.7);;
+    border-radius: 15px;
+    -webkit-transition: border-radius 0.3s ease-in-out;
+    -moz-transition: border-radius 0.3s ease-in-out;
+    -o-transition: border-radius 0.3s ease-in-out;
+    transition: border-radius 0.3s ease-in-out;
+}
+#contact-fa:hover {
+    border-radius: 45%;
+}
+@media only screen and (min-width: 320px) and (max-width: 768px) {      
+  body {
+    padding-top: 0px;
+  }
+  .custom-nav {
+    height: 60px;
+    text-align: right;
+  }
+  .custom-nav li {
+    padding: 0px 10px 0px 10px;
+  }
+  .custom-nav li:last-child {
+    padding: 0px 24px 2px 12px;
+   }
+  #main-nav {
+    display: none;
+  }
+  #mobile-nav-icons {
+    display: inline-block;
+  }
+  #logo {
+    height: 60px;
+  }
+  .parallax {
+    height: 300px;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+  }
+  .parallax-h1 {
+    font-size: 60px;
+    top: 40%;
+    -webkit-transform: translateY(-40%);
+    -ms-transform: translateY(-40%);
+    transform: translateY(-40%);
+  }
+  .text-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 40px 5% 30px 5%;
+  }
+  .text-container h2 {
+    font-size: 30px;
+  }
+}
+<script>
+	$('a[href*="#"]:not([href="#"])').click(function() {
+     if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') && location.hostname == this.hostname) {
+       var target = $(this.hash);
+       target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+       if (target.length) {
+         $('html, body').animate({
+           scrollTop: target.offset().top - 90
+         }, 1000);
+         return false;
+       }
+     }
+   });
+</script>
+</style>		 
+		
+
+	</template>
+	
+	<script>
+		function initPage() {
+			const jsPath='/js', storePath='/js/stores';
+			xui.loadModule({
+				pinia:				jsPath+'/pinia.js',
+				quasar:				jsPath+'/quasar.umd.js',
+				'xui/config':		jsPath+'/xui-config.js',
+				'xui/pageSource':	jsPath+'/xui-pageSource.js',
+			}, () => {
+				const cf=xui.require('config');
+				const paths = {
+					'store/global': 		storePath+'/store-global.js',
+					'store/test': 			storePath+'/store-test.js',
+				}
+				// paths[subPageCode] = jsPath+'/'+subPageCode+'.js';
+				cf.createMainApp(jsPath, storePath)
+				if( cf.tailwindUse && window.tailwind ) tailwind.config={ plugins: [initPlugIn()] }
+				clog("init page path ==> ", paths);
+				xui.loadModule(paths, () => xui.store('global').loadRoutePage(getEl('app-main'), getTemplateSource()) )
+			})
+		}
+	</script>
+</body>
+</html>
