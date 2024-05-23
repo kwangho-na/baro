@@ -1,5 +1,5 @@
 class layout {
-	<page id="p1" margin="0" onInit() {
+	<page id="p1" margin="0" type="main" onInit() {
 		this.put(sep, titleBar) 
 		class(this, 'test_p1') 
 		class(titleBar, 'test_titleBar')
@@ -23,6 +23,8 @@ class layout {
 		<div id="content">
 	</page>
 }
+
+
 class test_p1 {
 	initPage() {
 		sep.addPage(leftPanel)

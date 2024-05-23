@@ -78,7 +78,9 @@ class sourceEditorMain {
 	this.timer(200, this.setSplitterSize)
 	
 	onEvent(type, node) {
-		if(type.eq("logPrint")) logWriter('sourceRun').appendLog(node.eventData); 
+		if(type.eq("logPrint")) {
+			logWriter('sourceRun').appendLog(node.eventData); 
+		}
 	}
 	onActivationChange() {
 		if( this.is('active') ) {
@@ -115,13 +117,12 @@ class sourceEditorPanel {
 	this.setEditorSyntax() 
 	this.setKeyMap()
 	editorTitle.value("소스테스트 실행창")
-	
+	editorFocus() {
+		this.timer(250, func() { editor.focus() })
+	}
 	runScript(key) {
 		sel=editor.is("select");
 		not(key) key=when(sel,KEY.R, KEY.B);
-		if( sel && key.eq(KEY.S) ) {
-			return this.keyMapInput();
-		}
 		if( key.eq(KEY.Return, KEY.Enter) ) {
 			if(sel) {
 				line=editor.text("select");
@@ -212,7 +213,8 @@ class sourceEditorPanel {
 		insertIndent(editor, str);
 	}
 	keyMapInput() {
-		
+		dialog=widget('dialog','keyMapInput',this);
+		not(dialog) return this.alert("키맵설정 대화상자 오류");
 	}
 	searchFocus() {
 		
@@ -255,7 +257,8 @@ class sourceEditorLogPanel {
 	}
 	clearLog() {
 		editor.clear();
-		page("target").editorFocus();
+		Cf.debug('clear')
+		page('editPanel').editorFocus()
 	}
 }
 
@@ -327,6 +330,8 @@ class editorSource {
 		if( mode&KEY.ctrl ) {
 			if( key.eq(KEY.S, KEY.R, KEY.B) ) {
 				return page().runScript(key);
+			} else if(key.eq(KEY.E) ) {
+				return page().keyMapInput();
 			} else if(key.eq(KEY.Q) ) {
 				return page().keyTemplateInput();
 			} else if(key.eq(KEY.F) ) {
