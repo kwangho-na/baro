@@ -333,7 +333,7 @@
 			fnInit=Cf.funcNode(obj)
 			if(fnInit) {
 				if(funcs) obj[$funcs]
-				eval(init, obj, fnInit, true)
+				if(init) eval(init, obj, fnInit, true)
 				print("onInit 이미 설정됨 eval 실행 $className", fnInit.get(), obj)
 			} else {
 				src="onInit() {$init} $funcs"
