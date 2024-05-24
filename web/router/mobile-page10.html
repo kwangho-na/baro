@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>모바일 개발페이지</title>
+	<link rel="stylesheet" href="../css/quasar.min.css">
+	<link rel="stylesheet" href="../css/fontawesome.css">
+	<link rel="stylesheet" href="../css/material-icons.css">
+	<link rel="stylesheet" href="../css/xui.css">
+	<script src="../js/jquery.js"></script>
+	<script src="../js/vue3.js"></script>
+	<script src="../js/tailwind.min.js"></script>
+	<script src="../js/common.js"></script>
+</head>
+<body style="overflow:hidden;" onload="initPage()">
+	<div id="app-main" style="width:100%;height:100vh;"></div>
+	
+<template>
+<div class="screen">
+   
+</div>
+
+<div class="wrapper">
+  <main class="main-view">
+    <header>
+      <h1>Users</h1>
+    </header>
+    <section class="list-view">
+		<article class="list-item" v-for="user in store.userList" :key="user.id">
+			<a href="#" class="ripple" @click.stop="store.editUser(user)">
+			  <header>
+				<svg viewBox="0 0 24 24" class="icon" fill="none" xmlns="http://www.w3.org/2000/svg">
+				  <g stroke-width="0"></g>
+				  <g stroke-linecap="round" stroke-linejoin="round"></g>
+				  <g>
+					<path d="M5 20V19C5 16.2386 7.23858 14 10 14H14C16.7614 14 19 16.2386 19 19V20M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+				  </g>
+				</svg>
+				<div>
+				  <h2>{{user.name}}</h2>
+				  <p>{{user.role}}</p>
+				</div>
+			  </header>
+			</a>
+			<section data-listview-item-buttons>
+			  <button data-action="edit" class="ripple"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				  <g stroke-width="0"></g>
+				  <g stroke-linecap="round" stroke-linejoin="round"></g>
+				  <g>
+					<path d="M18.3785 8.44975L8.9636 17.8648C8.6844 18.144 8.3288 18.3343 7.94161 18.4117L4.99988 19.0001L5.58823 16.0583C5.66566 15.6711 5.85597 15.3155 6.13517 15.0363L15.5501 5.62132M18.3785 8.44975L19.7927 7.03553C20.1832 6.64501 20.1832 6.01184 19.7927 5.62132L18.3785 4.20711C17.988 3.81658 17.3548 3.81658 16.9643 4.20711L15.5501 5.62132M18.3785 8.44975L15.5501 5.62132" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+				  </g>
+				</svg>
+
+			  </button>
+
+			  <button v-show="user.role=='admin'" @click.stop="store.deleteConfirm(user)">
+				<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				  <g stroke-width="0"></g>
+				  <g stroke-linecap="round" stroke-linejoin="round"></g>
+				  <g>
+					<path d="M10 12V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+					<path d="M14 12V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+					<path d="M4 7H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+					<path d="M6 10V18C6 19.6569 7.34315 21 9 21H15C16.6569 21 18 19.6569 18 18V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+					<path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+				  </g>
+				</svg></button>
+			</section>
+		  </article>
+    </section>
+  </main>
+
+  <main class="view" id="show-view">
+    <header>
+      <a data-navigate-back href="#">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g stroke-width="0"></g>
+          <g stroke-linecap="round" stroke-linejoin="round"></g>
+          <g>
+            <path d="M15.5 19L9.20711 12.7071C8.81658 12.3166 8.81658 11.6834 9.20711 11.2929L15.5 5" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </g>
+        </svg>
+        <h1>User</h1>
+      </a>
+    </header>
+    <section>
+      <div>
+        <h2>Name</h2>
+        <p data-view-data></p>
+      </div>
+      <div>
+        <h2>Role</h2>
+        <p data-view-data></p>
+      </div>
+
+    </section>
+  </main>
+
+  <main class="view" id="edit-view">
+    <header>
+      <a data-navigate-back href="#">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g stroke-width="0"></g>
+          <g stroke-linecap="round" stroke-linejoin="round"></g>
+          <g>
+            <path d="M15.5 19L9.20711 12.7071C8.81658 12.3166 8.81658 11.6834 9.20711 11.2929L15.5 5" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </g>
+        </svg>
+        <h1>Edit User</h1>
+      </a>
+    </header>
+    <section>
+      <div>
+        <h2>Name</h2>
+        <input data-view-data></input>
+      </div>
+      <div>
+        <h2>Role</h2>
+        <input data-view-data></input>
+      </div>
+    </section>
+    <section data-view-buttons>
+      <button value="cancel" class="ripple" data-view-button="no">Cancel</button>
+      <button value="ok" class="ok" data-view-button="yes">OK</button>
+    </section>
+  </main>
+</div>
+
+<dialog :ref="el=>store.dialog=el" data-messagebox>
+  <section>
+	<header data-messagebox-title>
+		<h2>Are you sure?</h2>
+	</header>
+	<div data-messagebox-message>
+		<p>Deleteing will permanently remove the User.
+	</div>
+ 	<div data-messagebox-buttons>
+		<button value="cancel" class="ripple" data-messagebox-button="no">No</button>
+		<button value="ok" class="ok" data-messagebox-button="yes" @click="store.deleteOk()">Yes</button>
+	</div>
+  </section>
+</dialog>
+
+<style>
+.screen {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100vh;
+    transition: 0.5s;
+    transition-delay: 0.1s;
+    overflow: hidden;
+}
+:root {
+  --color-text-primary: #444;
+  --color-brand-primary: #dceaf6;
+  --color-ui-primary: #777;
+  --color-ui-secondary: #ddd;
+  --color-ui-tertiary: #eee;
+  --color-ui-ok: #2196f3;
+  --color-ui-ok-hover: #0c80df;
+  --child-padding: 1em;
+
+  --max-width: 576px;
+}
+
+.wrapper {
+  position: relative;
+  display: flex;
+  max-width: var(--max-width);
+  height: 100vh;
+  margin: auto;
+  box-shadow: 0 0 10px 5px #eee;
+  overflow: hidden;
+}
+
+.main-view,
+.view {
+  width: 100%;
+  min-width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  color: var(--color-text-primary);
+  background-color: #fff;
+}
+
+.view {
+  position: absolute;
+  visibility: hidden;
+  transform: translatex(100%);
+  transition: transform 0.3s;
+}
+.main-view > header,
+.view > header {
+  padding: var(--child-padding, 1em);
+  background-color: var(--color-brand-primary);
+}
+
+.list-view {
+  overflow-y: auto;
+}
+
+.list-view::-webkit-scrollbar,
+.view section:first-of-type::-webkit-scrollbar {
+  width: 5px;
+  height: 8px;
+  background-color: transparent;
+}
+
+/* Add a thumb */
+.list-view::-webkit-scrollbar-thumb,
+.view section:first-of-type::-webkit-scrollbar-thumb {
+  background-color: var(--color-ui-secondary);
+  border-radius: 100px;
+}
+.list-view:hover::-webkit-scrollbar-thumb,
+.view section:first-of-type:hover::-webkit-scrollbar-thumb {
+  background-color: var(--color-ui-primary);
+}
+
+.view section:first-of-type {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.list-item {
+  display: flex;
+  gap: 0.25em;
+  justify-content: space-between;
+  /*border: 1px solid #eee;*/
+}
+
+.list-item h2 {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.list-item > a {
+  width: 70%;
+  display: flex;
+  flex: 1;
+  padding-left: var(--child-padding, 1em);
+  padding-top: var(--child-padding, 1em);
+  padding-bottom: var(--child-padding, 1em);
+  color: inherit;
+  border-radius: 15px;
+  text-decoration: none;
+  outline: none;
+}
+
+.list-item > a:hover,
+.list-item > a:focus-visible {
+  background-color: var(--color-ui-tertiary);
+}
+
+.list-item > a header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.list-item > a header div {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.list-item .icon {
+  max-width: 64px;
+  margin-right: 0.55em;
+  border-radius: 50%;
+  background-color: var(--color-brand-primary);
+}
+.list-item section {
+  display: flex;
+  gap: 0.25em;
+  margin: auto 0;
+  padding-right: var(--child-padding, 1em);
+}
+
+.list-item > section a {
+  text-decoration: none;
+  outline: none;
+}
+.list-item button,
+.list-item > section a {
+  padding: 0.5em;
+  border: none;
+  border-radius: 50%;
+  background-color: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+.list-item button > svg,
+.list-item a > svg {
+  width: 38px;
+}
+
+button[data-action="delete"] {
+  color: #ea6b66;
+  color: var(--color-ui-primary);
+}
+
+button[data-action="delete"]:focus-visible,
+button[data-action="delete"]:hover {
+  /*color: #fff;
+  background-color: #ea6b66;*/
+  background-color: #eee;
+}
+
+a[data-action="edit"],
+button[data-action="edit"] {
+  color: #7ea6e0;
+  color: var(--color-ui-primary);
+}
+
+a[data-action="edit"]:focus-visible,
+a[data-action="edit"]:hover,
+button[data-action="edit"]:focus-visible,
+button[data-action="edit"]:hover {
+  /*color: #fff;
+  background-color: #7ea6e0;*/
+  background-color: var(--color-ui-tertiary);
+}
+
+.view > header > a,
+.view > header {
+  display: flex;
+  color: inherit;
+  text-decoration: none;
+}
+
+.view > header > a > svg {
+  width: 32px;
+}
+.view section {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  padding: var(--child-padding);
+}
+
+.view input {
+  width: 100%;
+  color: var(--color-ui-primary);
+  outline: none;
+  border-color: var(--color-ui-secondary);
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  transition: border-color 0.3s;
+}
+.view input:focus {
+  border-color: var(--color-ui-primary);
+}
+
+/* Ripple effect */
+.ripple {
+  background-position: center;
+  transition: background 0.6s, color 0.2s;
+}
+.ripple:hover {
+  background: #f6f6f669 radial-gradient(circle, transparent 1%, #f6f6f669 1%)
+    center/15000%;
+}
+.ripple:active {
+  background-size: 100%;
+  transition: background 0s;
+}
+
+@media (max-width: 576px) {
+  body,
+  main {
+    font-size: 0.75rem;
+  }
+
+  .list-item .icon {
+    max-width: 48px;
+    min-width: 32px;
+  }
+
+  .list-item button > svg,
+  .list-item a > svg {
+    width: 32px;
+    min-width: 24px;
+  }
+
+  .view > header > a > svg {
+    width: 24px;
+  }
+  .view > header > a > svg g path {
+    stroke-width: 2;
+  }
+}
+
+@media (max-width: 260px) {
+  body,
+  main {
+    font-size: 0.55rem;
+  }
+
+  .list-item .icon {
+    max-width: 32px;
+    min-width: 24px;
+  }
+
+  .list-item button > svg,
+  .list-item a > svg {
+    width: 24px;
+    min-width: 16px;
+  }
+}
+
+[data-messagebox] {
+  position: absolute;
+  width: 100%;
+  max-width: var(--max-width);
+  height: 100%;
+  max-height: 100%;
+  inset: 0;
+  margin: 0 auto;
+  border: none;
+  color: var(--color-text-primary);
+  background-color: #76767659;
+  overflow: hidden;
+}
+
+[data-messagebox] section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  width: 100%;
+  padding: 2em;
+  margin: 0 auto;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  background-color: white;
+  box-shadow: 0px -10px 20px 5px #9a9a9a;
+}
+
+[data-messagebox] [data-messagebox-title] {
+  text-align: center;
+}
+
+[data-messagebox-message] {
+  flex-shrink: 1;
+}
+
+[data-messagebox-buttons],
+[data-view-buttons] {
+  display: flex;
+  gap: 1em;
+  justify-content: center;
+  max-width: 80%;
+  margin: auto;
+  font-size: 1.1em;
+  font-weight: 700;
+}
+[data-messagebox-button],
+[data-view-button] {
+  flex: 1;
+  font-size: inherit;
+  padding: 0.5em 1.5em;
+  border: none;
+  border-radius: 1000px;
+  color: var(--color-text-primary);
+  background-color: var(--color-ui-tertiary);
+  cursor: pointer;
+  outline: none;
+}
+[data-messagebox-button="yes"],
+[data-view-button="yes"] {
+  color: #fff;
+  background-color: var(--color-ui-ok);
+}
+
+[data-messagebox-button="yes"]:hover,
+[data-messagebox-button="yes"]:focus-visible,
+[data-view-button="yes"]:hover,
+[data-view-button="yes"]:focus-visible {
+  background-color: var(--color-ui-ok-hover);
+}
+[data-messagebox-button="no"]:hover,
+[data-messagebox-button="no"]:focus-visible,
+[data-view-button="no"]:hover,
+[data-view-button="no"]:focus-visible {
+  background-color: var(--color-ui-secondary);
+}
+
+.view [data-view-buttons] {
+  width: 100%;
+  flex-direction: row;
+  gap: 1em;
+}
+
+</style>
+
+<script vars>
+	store.dialog = null
+</script>
+
+<script>
+setTimeout(() => {
+  showDetails(view, 1);
+  setTimeout(() => goBack(view), 1000);
+}, 1500);
+///
+store.currentUser = null
+store.deleteState = false
+store.userList = [
+  { id: 1, name: "John Doe", role: "admin" },
+  { id: 2, name: "Jane Doe", role: "guess" },
+  { id: 3, name: "Steve Very Long Name to Test Ellipsis", role: "user" },
+  { id: 4, name: "Dianne", role: "admin" },
+  { id: 5, name: "Martin", role: "user" },
+  { id: 6, name: "Anna", role: "user" },
+  { id: 7, name: "Arnold", role: "guess" }
+];
+store.deleteConfirm = user => {
+	store.currentUser = user
+	store.deleteState = true
+	store.dialog.showModal()
+}
+store.deleteOk = () => {
+	alert('delete ok')	
+}
+store.clickDialog = e => { 
+    const target = e.target;
+    const rect = target.getBoundingClientRect();
+	clog("click dialog ", target, rect)
+    if (rect.left > e.clientX || rect.right < e.clientX || rect.top > e.clientY || rect.bottom < e.clientY) {
+		store.dialog.close();
+    }
+}
+store.editUser = user => {
+	alert('edit user')
+}
+  
+const mainview = document.querySelector(".main-view");
+const listview = document.querySelector(".list-view");
+const view = document.querySelector("#show-view");
+const editview = document.querySelector("#edit-view");
+
+
+function refreshListview() {
+  let listitem = listview.querySelectorAll("article");
+  const rmElems = [];
+  listitem.forEach((li) => {
+    const user = store.userList.find((u) => u.id === parseInt(li.dataset.listItemKey));
+    if (user) {
+      let h = li.querySelector("[data-listview-item-header]");
+      h.textContent = user.name;
+      let d = li.querySelector("[data-listview-item-desc]");
+      d.textContent = user.role;
+    } else {
+      rmElems.push(li);
+    }
+  });
+
+  rmElems.forEach((e) => e.remove());
+}
+
+function showDetails(view, userId) {
+  const user = store.userList.filter((u) => u.id === userId);
+  if (user) {
+    view.querySelectorAll("section [data-view-data]").forEach((ele, i) => {
+      ele.textContent = user[0][Object.keys(user[0])[i + 1]];
+      ele.value = user[0][Object.keys(user[0])[i + 1]];
+    });
+    const btn = view.querySelector("[data-view-button='yes']");
+    if (btn) btn.value = userId;
+
+    view.style.visibility = "visible";
+    view.style.transform = "translateX(0%)";
+    view.ontransitionend = () => hideElement(mainview);
+  }
+}
+
+function hideElement(ele) {
+  ele.style.visibility = "hidden";
+}
+
+function showElement(ele) {
+  ele.style.visibility = "visible";
+}
+
+function goBack(view) {
+  view.style.transform = "translateX(100%)";
+  showElement(mainview);
+  view.ontransitionend = () => hideElement(view);
+}
+
+document.querySelectorAll("[data-navigate-back]").forEach((ele) =>
+  ele.addEventListener("click", (e) => {
+    goBack(ele.closest("main"));
+  })
+);
+
+document.querySelectorAll("[data-view-button]").forEach((ele) => {
+  ele.addEventListener("click", (e) => {
+    const btn = e.currentTarget;
+    if (btn.dataset.viewButton !== "no") {
+      const i = store.userList.findIndex((u) => u.id === parseInt(btn.value));
+      const vals = editview.querySelectorAll("section [data-view-data]");
+      store.userList[i].name = vals[0].value;
+      store.userList[i].role = vals[1].value;
+    }
+    refreshListview();
+    goBack(editview);
+  });
+});
+
+</script>
+</template>
+	
+	<script>
+		function initPage() {
+			const jsPath='/js', storePath='/js/stores';
+			xui.loadModule({
+				pinia:				jsPath+'/pinia.js',
+				quasar:				jsPath+'/quasar.umd.js',
+				'xui/config':		jsPath+'/xui-config.js',
+				'xui/pageSource':	jsPath+'/xui-pageSource.js',
+			}, () => {
+				const cf=xui.require('config');
+				const paths = {
+					'store/global': 		storePath+'/store-global.js',
+					'store/test': 			storePath+'/store-test.js',
+				}
+				// paths[subPageCode] = jsPath+'/'+subPageCode+'.js';
+				cf.createMainApp(jsPath, storePath)
+				if( cf.tailwindUse && window.tailwind ) tailwind.config={ plugins: [initPlugIn()] }
+				clog("init page path ==> ", paths);
+				xui.loadModule(paths, () => xui.store('global').loadRoutePage(getEl('app-main'), getTemplateSource()) )
+			})
+		}
+	</script>
+</body>
+</html>

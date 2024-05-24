@@ -1,4 +1,4 @@
-class contextTest { 
+class context { 
 	buttons=mdc('buttons', 'btn-bg02.png')
 	drawButton(dc) {
 		not(buttons) return;

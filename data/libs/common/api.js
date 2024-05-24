@@ -8,7 +8,9 @@ apiController(req, param, service, uri) {
 		buffer=req.readBuffer();
 		if(buffer) {
 			type=req.getValue('Content-Type');
-			if(type.eq('application/xml')) {
+			if(type.eq('application/data')) {
+				print("type == application/data")
+			} else if(type.eq('application/xml')) {
 				parseXml(buffer);
 			} else {
 				param.parseJson(buffer);
@@ -25,16 +27,14 @@ apiController(req, param, service, uri) {
 		Access-Control-Allow-Headers: Accept, Content-Type, X-PINGOTHER
 		Access-Control-Allow-Method: GET, POST, PUT, OPTIONS
 	]);
-	*/
-	Cf.error(true);
-	/*
 	subPageCode=uri.findPos('/@').trim()
 	print("API start => ", service, subPageCode)
 	src=conf("src#${service}.${subPageCode}")
 	if(src) {
 		return req.send(@pages.subPageSource(src,param))
 	} 
-	*/	
+	*/
+	Cf.error(true);
 	result=@api.service(service, uri, param, buffer);
 	not(result) result=param;
 	err=Cf.error();
@@ -48,6 +48,7 @@ apiController(req, param, service, uri) {
 		req.send(result);
 	} 
 }
+
 @api.addServiceFunc(serviceNode, &s) {
 	ss='', src='', idx=0
 	while(s.valid() ) {
@@ -62,7 +63,19 @@ apiController(req, param, service, uri) {
 	if(src) serviceNode[$src]
 	Cf.sourceApply(ss)
 }
-
+@api.reloadApi(name) {
+	fo=Baro.file("api")
+	path=webRoot()
+	filePath="$path/api/${name}.js"
+	serviceNode=Cf.getObject("api", name, true);
+	modifyTm=fo.modifyDate(filePath);
+	if(modifyTm.eq(serviceNode.lastModifyTm)) { 
+		print("reload api skip $filePath not change")
+	} else {
+		@api.addServiceFunc(serviceNode, fileRead(filePath));
+		serviceNode.lastModifyTm=modifyTm;
+	}
+}
 @api.service(service, &uri, param, buffer) {
 	if( service=='page' ) {
 		path=webRoot()
@@ -106,6 +119,7 @@ apiController(req, param, service, uri) {
 	}
 	return param;
 }
+
 @api.addFunc(&uri, src, param, skipSave) {
 	fo=Baro.file('api');
 	vars=null;

@@ -169,6 +169,7 @@ class ProxyClient {
 			}
 			worker.funcNode=Cf.funcNode()
 		});
+		return Baro.socket(clientId)
 	}
 	funcNode(id) {
 		while(w, workers) {

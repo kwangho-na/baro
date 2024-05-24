@@ -260,6 +260,9 @@ class sourceEditorLogPanel {
 		Cf.debug('clear')
 		page('editPanel').editorFocus()
 	}
+	apiResult(socket, uri, &data, param) {
+		this.appendLog("$uri => $data")
+	}
 }
 
 class editorSource {

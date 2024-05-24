@@ -77,13 +77,22 @@
 			while(info.next()) {
 				info.inject(type, name, fullPath, ext)
 				if( type=='folder') {
+					if(name.eq('temp')) continue;
 					classLoadPath(fullPath, pathLen)
 					continue;
 				}
 				if(ext.eq('js','src')) {
-					src=fileRead(fullPath)
 					relative=fullPath.trim(pathLen+1)
 					groupId=relative.findPos('.').trim()
+					modify=Baro.file().modifyDate(fullPath)
+					prev=conf("classModify.$groupId")
+					if( prev && modify.le(prev) ) {
+						src=conf("funcSource.$groupId")
+						Cf.sourceApply("<func>${src}</func>", groupId, true)
+						continue;
+					}
+					conf("classModify.$groupId", modify, true);
+					src=fileRead(fullPath)
 					classSource(src, fullPath, groupId)
 				}
 			}
@@ -155,26 +164,18 @@
 				s.next().ch()
 				className=s.findPos('{',0,1).trim()
 				not(className) return;
-				if(groupId) {
-					mapId="${groupId}/${className}"
-				} else {
+				not(groupId ) groupId=className
+				if( groupId.eq(className) ) {
 					mapId=className
-				}
-				modify=Baro.file().modifyDate(pathFile)
-				prev=conf("classModify.$mapId")
-				if( prev && modify.le(prev) ) {
-					node=map.get(mapId)
-					not(node) {
-						node=map.addNode(mapId)
-						node.groupId=groupId
-						node.name=className
-						node.path=pathFile
-						node.modifyDate=modify
+				} else {
+					if( lastEq(groupId, className)) {
+						mapId=groupId
+					} else {
+						mapId="${groupId}:${className}"
 					}
-					return node;
 				}
+				
 				print("클래스소스 변경 ID:$mapId (변경:$modify)")
-				conf("classModify.$mapId", modify, true)
 				node=map.get(mapId)
 				if( typeof(node,'node') ) {
 					node.updateTm=System.localtime()
@@ -203,15 +204,18 @@
 				} else if(className.eq("conf")) {
 					setConfSrc(groupId,src)
 				} else {
+					not( mapId.eq(className) ) {
+						conf("class.$mapId", src, true)
+					}
 					conf("class.$className", src, true)
 					print("class $className loaded")
 				}
 			}
-			node=map.get("${groupId}/layout")
+			node=map.get("${groupId}:layout")
 			if(node) {
 				conf("layoutSource.$groupId", node.source, true)
 			}
-			node=map.get("${groupId}/func")
+			node=map.get("${groupId}:func")
 			if(node) {
 				conf("funcSource.$groupId", node.source, true)
 				Cf.sourceApply("<func>${node.source}</func>", groupId, true)
@@ -267,9 +271,21 @@
 		}
 		return param;
 	}
-	class() {
-		if(args().size()==1) {
-			args(param)
+	
+	class(param) {
+		baseName=func(name,base) { 
+			not(base) return name;
+			if(base.find(':')) {
+				base=left(base,':')
+			}
+			if(lastEq(base,name)) {
+				return base
+			} else {
+				return "$base:$name"
+			}
+		}
+		switch(args().size()) {
+		case 1: 
 			if(typeof(param,'node') ) {
 				className=param.id
 				obj=param
@@ -277,30 +293,51 @@
 				className=param
 				obj=object("class.$className")
 			}
-		} else {
-			args(obj,className)
+		case 2:
+			if(typeof(param,'string') ) {
+				args(className, base)
+				if(typeof(base,'bool')) {
+					base=this.var(baseCode)
+				}
+				className=baseName(className, base)
+			} else {
+				args(obj,className)
+			}
+		case 3:
+			args(obj,className,base)
+			if(typeof(base,'bool')) {
+				base=obj.var(baseCode)
+			}
+			className=baseName(className, base)
+		default:
 		}
 		not(typeof(obj,'node')) return print("$className class 객체 미설정(obj:$obj)")
 		not(className) return print("class 매개변수 미설정")
-		arr=obj.addArray("@classNames")
-		if(typeof(className,'array') ) {
-			while(name, className) {
-				src=conf("class.$name")
-				not(src) return print("class $name 클래스 소스 미등록")
-				if( arr.find(name)) {
-					print("$name 클래스 이미 등록됨")
-					continue;
-				}
-				arr.add(name)
-				parse(obj, src)
-			}
+		print("class $className 로딩 시작")
+		src=conf("class.$className")
+		not(src) return print("class $className 클래스 소스 미등록")
+		arr=obj.addArray("@classNames") 
+		find=arr.find(className)
+		if(find.ge(0)) {
+			print("$className 클래스 이미 등록됨")	 
 		} else {
-			not(conf("class.$className")) classLoadAll()
+			if( typeof(obj,'widget')) {
+				print("class $className 위젯객체")
+				tag=obj.tag;
+				if(tag.eq('page','dialog','main')) {
+					not(className.eq('page')) class(obj,'page')
+				} else {
+					not(className.eq('widget')) class(obj,'widget')
+				}
+			}
 			arr.add(className)
-			src=conf("class.$className")
 			parse(obj, src)
+			obj.var(useClass, true)
+			if(typeof(obj.initClass,'func')) {
+				print("class initClass 함수 실행시작")
+				obj.initClass()
+			}
 		}
-		obj.var(useClass, true)
 		return obj;
 		
 		parse=func(obj, &s) {			
@@ -333,8 +370,10 @@
 			fnInit=Cf.funcNode(obj)
 			if(fnInit) {
 				if(funcs) obj[$funcs]
-				if(init) eval(init, obj, fnInit, true)
-				print("onInit 이미 설정됨 eval 실행 $className", fnInit.get(), obj)
+				if(init) {
+					eval(init, obj, fnInit, true)
+					print("onInit 이미 설정됨 eval 실행 $className", fnInit.get(), obj)
+				}
 			} else {
 				src="onInit() {$init} $funcs"
 				obj[$src]
@@ -619,7 +658,15 @@
 		}
 		return arr;
 	}
-
+	lastEq(a,b) {
+		as=a.size(), bs=b.size()
+		if(as.gt(bs)) {
+			p=as-bs
+			aa=a.value(p)
+			if(aa.eq(b)) return true;
+		}
+		return false;
+	}
 </func>
 
 <func note="공통 배열함수">

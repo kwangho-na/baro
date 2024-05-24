@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>모바일 개발페이지</title>
+	<link rel="stylesheet" href="../css/quasar.min.css">
+	<link rel="stylesheet" href="../css/fontawesome.css">
+	<link rel="stylesheet" href="../css/material-icons.css">
+	<link rel="stylesheet" href="../css/xui.css">
+	<script src="../js/jquery.js"></script>
+	<script src="../js/vue3.js"></script>
+	<script src="../js/tailwind.min.js"></script>
+	<script src="../js/common.js"></script>
+</head>
+<body style="overflow:hidden;" onload="initPage()">
+	<div id="app-main" style="width:100%;height:100vh;"></div>
+	
+<template>
+<div class="screen"> 
+  <div class="phone-btn" id="phone-btn-1"></div>
+  <div class="phone-btn" id="phone-btn-2"></div>
+  <div class="phone-btn" id="phone-btn-3"></div>
+  <div class="phone-screen">
+    <img src="https://images.unsplash.com/photo-1579187707643-35646d22b596?q=80&w=988&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="home" class="content show">
+    <img src="https://images.unsplash.com/photo-1544833058-e70f9ca25c17?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="work" class="content">
+    <img src="https://images.unsplash.com/photo-1530177150700-84cd9a3b059b?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="blog" class="content">
+    <img src="https://images.unsplash.com/photo-1600172454284-934feca24ccd?q=80&w=1035&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="about" class="content">
+    <nav class="bottom-bar">
+      <ul>
+        <li>
+          <i class="fas fa-home"></i>
+          <p>Home</p>
+        </li>
+        <li>
+          <i class="fas fa-box"></i>
+          <p>Work</p>
+        </li>
+        <li>
+          <i class="fas fa-book-open"></i>
+          <p>Blog</p>
+        </li>
+        <li>
+          <i class="fas fa-users"></i>
+          <p>About us</p>
+        </li>
+      </ul>
+    </nav>
+  </div>		 
+</div>
+
+<style>
+:root {
+  --phone-color: #444252;
+  --accent-color: #c7b0c3;
+}
+.screen {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100vh;
+    transition: 0.5s;
+    transition-delay: 0.1s;
+    overflow: hidden;
+}
+.phone-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.phone-btn {
+  position: absolute;
+  background-color: var(--phone-color);
+  width: 10px;
+  height: 50px;
+  z-index: 100;
+}
+
+#phone-btn-1 {
+  top: 100px;
+  left: -10px;
+  border-radius: 5px 0 0 5px;
+}
+
+#phone-btn-2 {
+  top: 160px;
+  left: -10px;
+  border-radius: 5px 0 0 5px;
+}
+
+#phone-btn-3 {
+  top: 100px;
+  right: -10px;
+  height: 100px;
+  border-radius: 0 5px 5px 0;
+}
+
+.screen .content {
+  opacity: 0;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: calc(100% - 60px);
+  width: 100%;
+  transition: opacity 0.4s ease;
+}
+
+.screen .content.show {
+  opacity: 1;
+}
+
+.bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin-top: -5px;
+  width: 100%;
+}
+
+.bottom-bar ul {
+  background-color: #fff;
+  display: flex;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  height: 60px;
+}
+
+.bottom-bar li {
+  color: #777;
+  cursor: pointer;
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+}
+
+.bottom-bar ul li p {
+  font-size: 12px;
+  margin: 2px 0;
+}
+
+.bottom-bar ul li:hover,
+.bottom-bar ul li.active {
+  color: var(--accent-color);
+  font-weight: 900;
+}
+
+</style>
+
+<script>
+const contents = document.querySelectorAll(".screen .content");
+const listItems = document.querySelectorAll("nav ul li");
+
+listItems.forEach((item, idx) => {
+  item.addEventListener("click", () => {
+    hideAllContents();
+    hideAllItems();
+
+    item.classList.add("active");
+    contents[idx].classList.add("show");
+  });
+});
+
+function hideAllContents() {
+  contents.forEach((content) => {
+    content.classList.remove("show");
+  });
+}
+
+function hideAllItems() {
+  listItems.forEach((item) => {
+    item.classList.remove("active");
+  });
+}
+
+</script>
+</template>
+	
+	<script>
+		function initPage() {
+			const jsPath='/js', storePath='/js/stores';
+			xui.loadModule({
+				pinia:				jsPath+'/pinia.js',
+				quasar:				jsPath+'/quasar.umd.js',
+				'xui/config':		jsPath+'/xui-config.js',
+				'xui/pageSource':	jsPath+'/xui-pageSource.js',
+			}, () => {
+				const cf=xui.require('config');
+				const paths = {
+					'store/global': 		storePath+'/store-global.js',
+					'store/test': 			storePath+'/store-test.js',
+				}
+				// paths[subPageCode] = jsPath+'/'+subPageCode+'.js';
+				cf.createMainApp(jsPath, storePath)
+				if( cf.tailwindUse && window.tailwind ) tailwind.config={ plugins: [initPlugIn()] }
+				clog("init page path ==> ", paths);
+				xui.loadModule(paths, () => xui.store('global').loadRoutePage(getEl('app-main'), getTemplateSource()) )
+			})
+		}
+	</script>
+</body>
+</html>

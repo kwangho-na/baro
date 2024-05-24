@@ -24,7 +24,23 @@ class func {
 		}
 		return;
 	}
-	
+	@page.margin() {
+		page=this
+		box=page.child(0)
+		tag=box.tag
+		not(tag.eq('vbox','hbox','form')) return print("page margin 오류 레이아웃 미정의");
+		switch(args().size()) {
+		case 1:
+			args(a)
+			box.margin(a)
+		case 2:
+			args(a,b)
+			box.margin(a,b,a,b)
+		case 4:
+			args(a,b,c,d)
+			box.margin(a,b,c,d)
+		}
+	}
 }
 class widget {
 	addChild() {
@@ -90,11 +106,18 @@ class widget {
 			}
 		}
 	}
+	applyWidget(src, id) {
+		base=this.base()
+		ss=format(src, id)
+		Cf.sourceApply(#[
+			<widgets base="${base}">${ss}</widgets>
+		])
+	}
 }
 
 class page {
+	class(this, 'widget')
 	page=this
-	class(page, widget)
 	positionSave() {
 		code=this.var(baseCode)
 		page=this;

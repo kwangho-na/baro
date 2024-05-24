@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>모바일 개발페이지</title>
+	<link rel="stylesheet" href="../css/quasar.min.css">
+	<link rel="stylesheet" href="../css/fontawesome.css">
+	<link rel="stylesheet" href="../css/material-icons.css">
+	<link rel="stylesheet" href="../css/xui.css">
+	<script src="../js/jquery.js"></script>
+	<script src="../js/vue3.js"></script>
+	<script src="../js/tailwind.min.js"></script>
+	<script src="../js/common.js"></script>
+</head>
+<body style="overflow:hidden;" onload="initPage()">
+	<div id="app-main" style="width:100%;height:100vh;"></div>
+	
+<template>
+<div class="screen">
+<main class="flex justify-center items-center min-h-screen bg-gradient-to-tr from-[#04364A] to-[#176B87]">
+
+  <phone class="bg-white w-[480px] relative h-[750px] rounded-3xl overflow-hidden">
+    <!-- Search Section -->
+    <section class="p-4">
+      <h1 class="text-lg ">Candidates</h1>
+      <div class="flex relative justify-between mt-2 gap-2">
+        <input type="text" class="p-2 bg-slate-100 rounded-lg placeholder:text-sm pl-12 w-full outline-none text-sm" placeholder="Search candidates ...">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-slate-400 absolute top-2 left-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+        <div class="p-2 border rounded-lg cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-slate-500">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
+          </svg>
+        </div>
+      </div>
+    </section>
+    <!-- List Candidates with scroll -->
+    <section class="w-full bg-slate-100 p-4 h-full space-y-2 overflow-y-auto pb-56">
+      <div class="p-4 pb-2 px-2 bg-white rounded-md">
+        <div class="flex justify-between">
+          <div class="flex items-center space-x-1">
+            <img src="https://t4.ftcdn.net/jpg/03/64/21/11/360_F_364211147_1qgLVxv1Tcq0Ohz3FawUfrtONzz8nq3e.jpg" class="w-10 h-10 object-cover rounded-full" alt="">
+            <div class="">
+              <h1 class="text-sm">Keneth Conroy</h1>
+              <h2 class="text-xs text-slate-500">UI UX Designer</h2>
+            </div>
+          </div>
+          <div class="flex space-x-1">
+            <button class="border border-slate-100 rounded-full p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-500">
+              <path fill-rule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <button class="border border-slate-100 rounded-full p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-500">
+                <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <hr class="mt-4 border-slate-100">
+        <div class="flex justify-between mt-1 items-center">
+          <h1 class="text-xs text-slate-400">Applied: February 22,2023</h1>
+          <span class="bg-[#FFC436] text-xs font-bold px-2.5 p-0.5 rounded-md">Screening</span>
+        </div>
+      </div>
+      <div class="p-4 pb-2 px-2 bg-white rounded-md">
+        <div class="flex justify-between">
+          <div class="flex items-center space-x-1">
+            <img src="https://www.shutterstock.com/image-photo/head-shot-portrait-close-smiling-250nw-1714666150.jpg" class="w-10 h-10 object-cover rounded-full" alt="">
+            <div class="">
+              <h1 class="text-sm">Odis Rhinehart</h1>
+              <h2 class="text-xs text-slate-500">Full Stack Engineer</h2>
+            </div>
+          </div>
+          <div class="flex space-x-1">
+            <button class="border border-slate-100 rounded-full p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-500">
+              <path fill-rule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <button class="border border-slate-100 rounded-full p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-500">
+                <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <hr class="mt-4 border-slate-100">
+        <div class="flex justify-between mt-1 items-center">
+          <h1 class="text-xs text-slate-400">Applied: January 22,2023</h1>
+          <span class="bg-sky-500 text-white text-xs font-bold px-2.5 p-0.5 rounded-md">Interview</span>
+        </div>
+      </div>
+      <div class="p-4 pb-2 px-2 bg-white rounded-md">
+        <div class="flex justify-between">
+          <div class="flex items-center space-x-1">
+            <img src="https://media.istockphoto.com/id/1307791658/photo/headshot-portrait-of-arabic-businessman-posing-in-office.jpg?s=612x612&w=0&k=20&c=V8Wqmr-x6KYXdPDV-iAi5pjJqgKGasOCRYUSNUNsltM=" class="w-10 h-10 object-cover rounded-full" alt="">
+            <div class="">
+              <h1 class="text-sm">Bill Gatson</h1>
+              <h2 class="text-xs text-slate-500">Digital Marketing</h2>
+            </div>
+          </div>
+          <div class="flex space-x-1">
+            <button class="border border-slate-100 rounded-full p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-500">
+              <path fill-rule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <button class="border border-slate-100 rounded-full p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-500">
+                <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <hr class="mt-4 border-slate-100">
+        <div class="flex justify-between mt-1 items-center">
+          <h1 class="text-xs text-slate-400">Applied: January 13,2023</h1>
+          <span class="bg-sky-300 text-xs px-2.5 p-0.5 rounded-md">Test</span>
+        </div>
+      </div>
+      <div class="p-4 pb-2 px-2 bg-white rounded-md">
+        <div class="flex justify-between">
+          <div class="flex items-center space-x-1">
+            <img src="https://t4.ftcdn.net/jpg/03/64/21/11/360_F_364211147_1qgLVxv1Tcq0Ohz3FawUfrtONzz8nq3e.jpg" class="w-10 h-10 object-cover rounded-full" alt="">
+            <div class="">
+              <h1 class="text-sm">Keneth Conroy</h1>
+              <h2 class="text-xs text-slate-500">UI UX Designer</h2>
+            </div>
+          </div>
+          <div class="flex space-x-1">
+            <button class="border border-slate-100 rounded-full p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-500">
+              <path fill-rule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <button class="border border-slate-100 rounded-full p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-500">
+                <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <hr class="mt-4 border-slate-100">
+        <div class="flex justify-between mt-1 items-center">
+          <h1 class="text-xs text-slate-400">Applied: February 22,2023</h1>
+          <span class="bg-[#FFC436] text-xs font-bold px-2.5 p-0.5 rounded-md">Screening</span>
+        </div>
+      </div>
+      <div class="p-4 pb-2 px-2 bg-white rounded-md">
+        <div class="flex justify-between">
+          <div class="flex items-center space-x-1">
+            <img src="https://www.shutterstock.com/image-photo/head-shot-portrait-close-smiling-250nw-1714666150.jpg" class="w-10 h-10 object-cover rounded-full" alt="">
+            <div class="">
+              <h1 class="text-sm">Odis Rhinehart</h1>
+              <h2 class="text-xs text-slate-500">Full Stack Engineer</h2>
+            </div>
+          </div>
+          <div class="flex space-x-1">
+            <button class="border border-slate-100 rounded-full p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-500">
+              <path fill-rule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <button class="border border-slate-100 rounded-full p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-500">
+                <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <hr class="mt-4 border-slate-100">
+        <div class="flex justify-between mt-1 items-center">
+          <h1 class="text-xs text-slate-400">Applied: January 22,2023</h1>
+          <span class="bg-sky-500 text-white text-xs font-bold px-2.5 p-0.5 rounded-md">Interview</span>
+        </div>
+      </div>
+      <div class="p-4 pb-2 px-2 bg-white rounded-md">
+        <div class="flex justify-between">
+          <div class="flex items-center space-x-1">
+            <img src="https://media.istockphoto.com/id/1307791658/photo/headshot-portrait-of-arabic-businessman-posing-in-office.jpg?s=612x612&w=0&k=20&c=V8Wqmr-x6KYXdPDV-iAi5pjJqgKGasOCRYUSNUNsltM=" class="w-10 h-10 object-cover rounded-full" alt="">
+            <div class="">
+              <h1 class="text-sm">Bill Gatson</h1>
+              <h2 class="text-xs text-slate-500">Digital Marketing</h2>
+            </div>
+          </div>
+          <div class="flex space-x-1">
+            <button class="border border-slate-100 rounded-full p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-500">
+              <path fill-rule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <button class="border border-slate-100 rounded-full p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-500">
+                <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <hr class="mt-4 border-slate-100">
+        <div class="flex justify-between mt-1 items-center">
+          <h1 class="text-xs text-slate-400">Applied: January 13,2023</h1>
+          <span class="bg-sky-300 text-xs px-2.5 p-0.5 rounded-md">Test</span>
+        </div>
+      </div>
+    </section>
+    <!-- Bottom Fixed Bar -->
+    <section class="p-5 px-2 sticky bottom-0 right-0 ring-1 ring-slate-200 shadow-inner bg-white">
+      <div class="grid grid-cols-4 text-slate-600 text-sm">
+        <button class="flex flex-col items-center group transition-colors duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 group-hover:text-blue-600">
+          <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" />
+          <path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z" />
+          </svg>
+          <span class="uppercase text-xs font-semibold mt-1 group-hover:text-blue-600">Home</span>
+        </button>
+        <button class="flex flex-col items-center group transition-colors duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 group-hover:text-blue-600">
+            <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z" clip-rule="evenodd" />
+          </svg>
+          <span class="uppercase text-xs font-semibold mt-1 group-hover:text-blue-600">Search</span>
+        </button>
+        <button class="flex flex-col items-center group transition-colors duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 group-hover:text-blue-600">
+            <path fill-rule="evenodd" d="M7.5 5.25a3 3 0 013-3h3a3 3 0 013 3v.205c.933.085 1.857.197 2.774.334 1.454.218 2.476 1.483 2.476 2.917v3.033c0 1.211-.734 2.352-1.936 2.752A24.726 24.726 0 0112 15.75c-2.73 0-5.357-.442-7.814-1.259-1.202-.4-1.936-1.541-1.936-2.752V8.706c0-1.434 1.022-2.7 2.476-2.917A48.814 48.814 0 017.5 5.455V5.25zm7.5 0v.09a49.488 49.488 0 00-6 0v-.09a1.5 1.5 0 011.5-1.5h3a1.5 1.5 0 011.5 1.5zm-3 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+            <path d="M3 18.4v-2.796a4.3 4.3 0 00.713.31A26.226 26.226 0 0012 17.25c2.892 0 5.68-.468 8.287-1.335.252-.084.49-.189.713-.311V18.4c0 1.452-1.047 2.728-2.523 2.923-2.12.282-4.282.427-6.477.427a49.19 49.19 0 01-6.477-.427C4.047 21.128 3 19.852 3 18.4z" />
+          </svg>
+          <span class="uppercase text-xs font-semibold mt-1 group-hover:text-blue-600">Offers</span>
+        </button>
+        <button class="flex flex-col items-center group transition-colors duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 group-hover:text-blue-600">
+            <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clip-rule="evenodd" />
+          </svg>
+          <span class="uppercase text-xs font-semibold mt-1 group-hover:text-blue-600">Profile</span>
+        </button>        
+      </div>
+    </section>
+  </phone>
+</main>		 
+</div>
+
+<style>
+.screen {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100vh;
+    transition: 0.5s;
+    transition-delay: 0.1s;
+    overflow: hidden;
+}
+</style>
+
+<script>
+</script>
+</template>
+	
+	<script>
+		function initPage() {
+			const jsPath='/js', storePath='/js/stores';
+			xui.loadModule({
+				pinia:				jsPath+'/pinia.js',
+				quasar:				jsPath+'/quasar.umd.js',
+				'xui/config':		jsPath+'/xui-config.js',
+				'xui/pageSource':	jsPath+'/xui-pageSource.js',
+			}, () => {
+				const cf=xui.require('config');
+				const paths = {
+					'store/global': 		storePath+'/store-global.js',
+					'store/test': 			storePath+'/store-test.js',
+				}
+				// paths[subPageCode] = jsPath+'/'+subPageCode+'.js';
+				cf.createMainApp(jsPath, storePath)
+				if( cf.tailwindUse && window.tailwind ) tailwind.config={ plugins: [initPlugIn()] }
+				clog("init page path ==> ", paths);
+				xui.loadModule(paths, () => xui.store('global').loadRoutePage(getEl('app-main'), getTemplateSource()) )
+			})
+		}
+	</script>
+</body>
+</html>
