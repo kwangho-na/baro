@@ -73,7 +73,9 @@ class widget {
 		not(widget) return print("$name 위젯 미정의 (addChild 오류)")
 		arr=this.member(widgetList)
 		not(arr) {
-			arr=this.addArray('@widgetList')
+			page=page('main')
+			not(page) page=this.pageNode()
+			arr=page.addArray('@widgetList')
 			this.member(widgetList, arr)
 		}
 		while(cur, arr) {
@@ -90,6 +92,15 @@ class widget {
 			if(cur.cmp('id',id)) return cur;
 		}
 		return;
+	}
+	widgetMove(widget, rect) {
+		if(typeof(rect,"rect") ) {
+			widget.rectClient=rect; 
+		} else {
+			rect=widget.rectClient;
+		}
+		rcGeo=this.mapGlobal(rect);
+		widget.move(rcGeo);
 	}
 	injectVar(&s) {
 		fn=Cf.funcNode('parent')
