@@ -171,13 +171,23 @@ class ProxyClient {
 		});
 		return Baro.socket(clientId)
 	}
+	setTarget(clientId, target) {
+		worker=Baro.worker(clientId)
+		worker.target = target
+		return worker;
+	}
 	funcNode(id) {
 		while(w, workers) {
 			not(w.funcNode) continue
 			w.funcNode.inject(clientId, socket)
 			if(id.eq(clientId)) return w.funcNode;
 		}
+		print("ProxyClient $id 클라이언트 funcNode 미정의"); 
 		return;
+	}
+	socket(id) {
+		fn=this.funcNode(id) not(fn) return;
+		return fn.get('socket');
 	}
 	isConnect(id) {
 		fn=this.funcNode(id) not(fn) return;
@@ -256,6 +266,11 @@ class ProxyClient {
 					if(socket.isRead(500)) {
 						result=socket.recvData();
 						print("connect result == $result");
+						url=fn.get('apiUrl')
+						if(url) {
+							fn.set('apiUrl', null)
+							self.send(socket,'api',url)
+						}
 					} else {
 						print("connect recv timeout", socket);
 					}
@@ -321,7 +336,12 @@ class ProxyClient {
 		print("로그인 처리응답 ", uri, data, param);
 	}
 	apiResult_ok(socket, &uri, &data, param) {
-		print("api 호출 응답 ", uri, data, param);
+		while(w,workers) {
+			target=w.target
+			if( target && typeof(target.apiResult,'func') ) {
+				target.apiResult(uri, data, param)
+			}
+		}
 	}
 }
 

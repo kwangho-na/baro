@@ -1,6 +1,26 @@
 class conf {
 editorSrc: 
 	<page id="#{0}"><editor id="editor"></page>
+tabStyle: 
+	<text>
+		QTabWidget::pane {
+		  border: 1px solid lightgray;
+		  top:-1px; 
+		  background: rgb(245, 245, 245);; 
+		} 
+
+		QTabBar::tab {
+			background: rgb(245, 245, 245); 
+		  border: 1px solid lightgray; 
+		  padding: 5px;
+		} 
+
+		QTabBar::tab:selected { 
+		  background: rgb(90, 90, 120);
+		  color: #fff;
+		  margin-bottom: -1px; 
+		}
+	</text>	
 }
 
 class layout {
@@ -11,11 +31,11 @@ class layout {
 		sep.addPage(leftPanel)
 		sep.addPage(contentPanel)
 		apiClient=class('ProxyClient')
-		apiSocket=socket=apiClient.start('funcEditor')
 		class(this,'main', true)
 		class(leftPanel,'leftPanel', true)
 		class(contentPanel,'contentPanel', true)
 		class(titleBar, 'titleBar', true)
+		this.positionLoad()
 		this.timer(200, this.setSepSize)		
 	}>
 		<context id="titleBar" height="40">
@@ -37,15 +57,16 @@ class layout {
 
 class main {
 	initClass() {
+		base=this.base()
+		if(base) {
+			apiClient.start(base)
+			apiClient.setTarget(base, this)
+		}
+		@page.spacing(this, 2)
 		print("=== func editor page init class ok ===", this)
 	}
-	addEditor(pageId) {
-		base=this.base()
-		src=fmt(this.conf("editorSrc"))
-		Cf.sourceApply(#[
-			<widgets base="${base}">${src}</widgets>
-		])
-		contentPanel.addPage(page(pageId))
+	onClose() {
+		this.positionSave()
 	}
 	setSepSize() {
 		total=arraySum(sep.sizes());
@@ -56,11 +77,18 @@ class main {
 		}
 		sep.sizes(arr);
 	}
-	apiCall(uri) {
-		
+	apiCall(url) {
+		base=this.base() not(base) return print("api call error 페이지 base 미정의")
+		socket=apiClient.socket(base)
+		not(socket) {
+			apiClient.var(apiUrl, url)
+			apiClient.start(base)
+			return;
+		}
+		apiClient.send(socket,'api',url)
 	}
-	apiResult(socket, uri, data, param) {
-		
+	apiResult(uri, data, param) {
+		print("api result $url, $data", param)
 	}
 }
 class titleBar {
@@ -73,12 +101,22 @@ class leftPanel {
 	this.put(leftTab, leftBar)
 	funcTree=page('funcTree')
 	workTree=page('workTree')
-	initClass() {
-		tab=leftTag.tab;
-		tab.addPage(funcTree,'함수정보')
-		tab.addPage(workTree,'작업정보')
-		tab.current(0)
-		funcLoad
+	class(leftBar, 'leftBar', true)
+	class(findId(funcTree,'tree'), 'funcTree', true)
+	class(findId(workTree,'tree'), 'workTree', true)
+	initClass() { 
+		@page.spacing(this,0)
+		@page.margin(this,4,0,2,0)
+		@page.margin(funcTree, 0,2,2,0)
+		@page.margin(workTree, 0,2,2,0)
+		leftTab.styleSheet(this.conf('tabStyle'));
+		leftTab.addPage(funcTree,'함수정보')
+		leftTab.addPage(workTree,'작업정보')
+		leftTab.current(0)
+	}
+	setTabChange(code) {
+		if(code=='funcTree') leftTab.current(funcTree)
+		else leftTab.current(workTree)
 	}
 }
 class contentPanel {
@@ -88,32 +126,21 @@ class contentPanel {
 	initClass() {
 		pageId="contentDefaultEditor"
 		page=this.makePage("editorSrc",pageId)
-		content.addPage(page, true)
+		this.addEditor(page)
 		print("contentPanel init class default page ==>", page)
 	}
-}
-
-
-class leftTab {
-	this.put(tree)
-	class(this, 'widget')
-	initClass() {
-		funcTree.setTreeData()
-		workTree.setTreeData()
+	addEditor(page) {
+		content.addPage(page, true)
 	}
 }
+
 class leftBar {
 	onDraw(dc, rc) {
 		dc.fill('#eee')
 		dc.rectLine(rc.incrH(-1), 4, '#ccc', 2)
 		dc.text('funcEditor leftBar','center')
 	}
-}
-class content {
-	addPage(page) {
-		content.addPage(page)
-	}
-}
+} 
 class contentBar {
 	onDraw(dc, rc) {
 		dc.fill('#eee')

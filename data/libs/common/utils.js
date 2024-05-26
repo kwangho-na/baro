@@ -88,7 +88,9 @@
 					prev=conf("classModify.$groupId")
 					if( prev && modify.le(prev) ) {
 						src=conf("funcSource.$groupId")
-						Cf.sourceApply("<func>${src}</func>", groupId, true)
+						if(src) {
+							Cf.sourceApply("<func>${src}</func>", groupId, true)
+						}
 						continue;
 					}
 					conf("classModify.$groupId", modify, true);
@@ -249,8 +251,13 @@
 					while(c.eq('-')) c=s.incr().next().ch()
 					tag=s.trim(sp+1,s.cur(),true)
 					s.pos(sp)
-					s.match("<$tag","</$tag>")
-					v=s.value(sp, s.cur(), true)
+					ss=s.match("<$tag","</$tag>")
+					if(tag.eq('text','sql')) {
+						ss.findPos('>')
+						v=ss
+					} else {
+						v=s.value(sp, s.cur(), true)
+					}
 				} else {
 					v=s.findPos("\n");
 				}

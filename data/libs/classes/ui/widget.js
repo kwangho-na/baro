@@ -24,36 +24,72 @@ class func {
 		}
 		return;
 	}
-	@page.margin() {
-		page=this
+	@widget.varValue(obj,param,nullCheck) {
+		code="@$param"
+		val=obj.get(code) 
+		if(nullCheck) obj.set(code,null)
+		return val;
+	}
+	@page.margin(page) {
 		box=page.child(0)
 		tag=box.tag
 		not(tag.eq('vbox','hbox','form')) return print("page margin 오류 레이아웃 미정의");
 		switch(args().size()) {
-		case 1:
-			args(a)
-			box.margin(a)
 		case 2:
-			args(a,b)
+			args(1,a)
+			box.margin(a)
+		case 3:
+			args(1,a,b)
 			box.margin(a,b,a,b)
-		case 4:
-			args(a,b,c,d)
+		case 5:
+			args(1,a,b,c,d)
 			box.margin(a,b,c,d)
 		}
 	}
+	@page.spacing(page, num) {
+		not(num) num=0
+		box=page.child(0)
+		tag=box.tag
+		not(tag.eq('vbox','hbox','form')) return print("page margin 오류 레이아웃 미정의");
+		box.spacing(num)
+	}
 }
 class widget {
-	addChild() {
-		print("widget add child")
-	}
 	base() {
 		base=this.var(baseCode)
-		not(base ) base
+		not(base) {
+			page=this.pageNode()
+			base=page.var(baseCode)
+		}
 		return when(base.find(':'), left(base,':'), base);
 	}
 	conf(name) {
 		base=this.base()
 		return conf("${base}.${name}")
+	}
+	addWidget(tag, name) {
+		base=this.base()
+		widget=Cf.getObject(tag, "$base:$name")
+		not(widget) return print("$name 위젯 미정의 (addChild 오류)")
+		arr=this.member(widgetList)
+		not(arr) {
+			arr=this.addArray('@widgetList')
+			this.member(widgetList, arr)
+		}
+		while(cur, arr) {
+			if(cur.cmp('id',name)) return cur;
+		}
+		arr.add(widget)
+		widget.parentWidget(this)
+		widget.flags("child")
+		return arr;
+	}
+	getWidget(id) {
+		arr=this.member(widgetList)
+		while(cur, arr) {
+			if(cur.cmp('id',id)) return cur;
+		}
+		return;
 	}
 	injectVar(&s) {
 		fn=Cf.funcNode('parent')
@@ -106,12 +142,14 @@ class widget {
 			}
 		}
 	}
-	applyWidget(src, id) {
+	makePage(code, pageId) {
 		base=this.base()
-		ss=format(src, id)
+		src=this.conf(code)
+		ss=format(, pageId)
 		Cf.sourceApply(#[
 			<widgets base="${base}">${ss}</widgets>
 		])
+		return page(pageId)
 	}
 }
 
@@ -129,6 +167,8 @@ class page {
 	positionLoad() {
 		page=this
 		code=this.var(baseCode)
+		not(page.parentWidget()) return;
+		not(code) return;
 		s=conf("pagePosition.${code}");
 		w=800, h=600;
 		not(s) {
