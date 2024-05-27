@@ -53,6 +53,11 @@ class layout {
 		<div id="content">
 		<div id="contentBar" height=30>
 	</page>
+	<input id="filter">
+		onKeyDown(k,a,b) {
+			print("keydown ", k,a,b)
+		}
+	</input>
 }
 
 class main {

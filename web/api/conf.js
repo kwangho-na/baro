@@ -1,4 +1,43 @@
 <api>
+	confVal(req, param, &uri) {
+		name=uri.findPos('/').trim()
+		db=Baro.db('config')
+		db.fetchAll("select data from conf_info where grp='$name'", param, true)
+		return param;
+	}
+	confList(req, param, &uri) {
+		name=uri.findPos('/').trim()
+		not(name) name='sql'
+		param.name=name
+		sql=V[
+			select grp, cd 
+			from conf_info 
+			where 1=1 #[name? and grp=#{name}]
+			order by grp
+		]
+		db=Baro.db('config')
+		db.fetchAll(sql, param, true)
+		return param;
+	}
+	confGroupList(req, param, &uri) {
+		db=Baro.db('config') 
+		sql=#[
+			select grp, cnt from (
+				select grp, count(1) as cnt
+				from conf_info 
+				where 1=1
+				group by grp
+			) order by cnt
+		]
+		db.fetchAll(sql, param, true)
+		return param;
+	}
+	confGroupRemove(req, param, &uri) {
+		grp=uri.findPos('/').trim()
+		db=Baro.db('config') 
+		db.fetchAll("delete from conf_info where 1=1 and grp='${grp}'", param, true)
+		return param;
+	}
 	refresh(req, param, &uri) {
 		@router.makeUrlMap();
 		return param;

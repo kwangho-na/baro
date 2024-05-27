@@ -62,6 +62,9 @@
 		}
 		this.member(name, fn)
 	}
+	classLoad(name ) { 
+		classLoadAll()
+	}
 	classLoadAll(classPath) {
 		not(classPath) {
 			path=System.path()
@@ -95,32 +98,12 @@
 					}
 					conf("classModify.$groupId", modify, true);
 					src=fileRead(fullPath)
-					classSource(src, fullPath, groupId)
+					classSource(src, fullPath, groupId, modify)
 				}
 			}
 		});
 	}
-	classLoad(name ) { 
-		path=System.path()
-		if(name.ch('/')) {
-			ss=name.ref()
-			a=ss.findLast('/')
-			relative=a.trim();
-			name=a.right();
-			pathBase=Cf.val(path, relative);
-		} else {
-			pathBase=Cf.val(path,"/data/libs/classes")
-		}
-		if(name.find('.')) {
-			pathFile="${pathBase}/${name}";
-		} else {
-			pathFile="${pathBase}/${name}.js";
-		}
-		print("pathFile == $pathFile")
-		not( isFile(pathFile) ) return print("$name class 로딩오류 [$pathFile 파일없음]");
-		src=fileRead(pathFile)
-		classSource(src,pathFile)
-	}
+	
 	classFuncLoad(name) {
 		db=Baro.db('config')
 		node=db.fetchAll("select data from conf_info where grp='funcSource'")
@@ -147,7 +130,7 @@
 		}
 		return node;
 	}
-	classSource(src, pathFile, groupId) {
+	classSource(src, pathFile, groupId, modify) {
 		map=object('map.classes')
 		parse = func(&s) {
 			while(s.valid() ) {
@@ -190,8 +173,10 @@
 					node.name=className
 					node.regTm=System.localtime()
 				}
-				node.path=pathFile
-				node.modifyDate=modify 
+				if(modify ) {
+					node.path=pathFile
+					node.modifyDate=modify 
+				}
 				src=s.match(1)
 				if(typeof(src,'bool')) {
 					node.error="클래스소스 매칭오류 (아이디:$mapId)"
@@ -334,6 +319,9 @@
 				if(tag.eq('page','dialog','main')) {
 					not(className.eq('page')) class(obj,'page')
 				} else {
+					if(tag.eq('context','canvas')) {
+						not(className.eq('ui/draw')) class(obj,'ui/draw')
+					}
 					not(className.eq('widget')) class(obj,'widget')
 				}
 			}

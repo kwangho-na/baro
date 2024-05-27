@@ -227,4 +227,4 @@
 		return true;
 	}
 	
-</func>
+</api>

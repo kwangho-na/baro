@@ -1,4 +1,21 @@
 class func {
+	@widget.find(base, id) {
+		_find=func(&s) {
+			s.findPos('.')
+			if(s.start(base,true)) {
+				if(s.ch(':')) {
+					name=s.incr().trim()
+					if(name.eq(id)) return true;
+				}
+			}
+			return false;
+		};
+		root=Cf.getObject()
+		while(name, root.keys()) {
+			if(_find(name)) return root.get(name);
+		}
+		return;
+	}
 	@widget.eventBase() {
 		fn=Cf.funcNode()
 		if( fn.eventFuncList()) {
@@ -88,10 +105,13 @@ class widget {
 	}
 	getWidget(id) {
 		arr=this.member(widgetList)
-		while(cur, arr) {
-			if(cur.cmp('id',id)) return cur;
+		if(arr) {
+			while(cur, arr) {
+				if(cur.cmp('id',id)) return cur;
+			}
 		}
-		return;
+		base=this.base()
+		return @widget.find(base,id);
 	}
 	widgetMove(widget, rect) {
 		if(typeof(rect,"rect") ) {
@@ -102,8 +122,15 @@ class widget {
 		rcGeo=this.mapGlobal(rect);
 		widget.move(rcGeo);
 	}
-	injectVar(&s) {
+	injectVar(param) {
 		fn=Cf.funcNode('parent')
+		page=this;
+		if(typeof(param,'widget')) {
+			args(1,&s)
+			page=param
+		} else {
+			args(&s)
+		} 
 		while(s.valid()) {
 			left=s.findPos(',')
 			not(left.ch()) break;
@@ -113,7 +140,30 @@ class widget {
 			} else {
 				id=name
 			}
-			fn.set(name, findId(this,id))
+			val=page.member(id) 
+			not(val) val=findId(this,id)
+			fn.set(name, val)
+		}
+	}
+	setMemberVar(param) {
+		fn=Cf.funcNode('parent')
+		page=this;
+		if(typeof(param,'widget')) {
+			args(1,&s)
+			page=param
+		} else {
+			args(&s)
+		} 
+		while(s.valid()) {
+			left=s.findPos(',')
+			not(left.ch()) break;
+			name=left.findPos(':').trim()
+			if(left.ch()) {
+				id=left.trim()
+			} else {
+				id=name
+			}
+			page.member(name, fn.get(id))
 		}
 	}
 	setEvent(param) {
