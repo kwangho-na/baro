@@ -62,15 +62,32 @@
 		}
 		this.member(name, fn)
 	}
-	classLoad(name ) { 
-		classLoadAll()
-	}
-	classLoadAll(classPath) {
+	classLoad(mapCheck, classPath ) { 
 		not(classPath) {
 			path=System.path()
 			classPath=Cf.val(path,"/data/libs/classes")
 		}
+		if( mapCheck ) {
+			db=Baro.db('config')
+			node=db.fetchAll("select grp, cd, data from conf_info where grp='mapClassName'")
+			print("map check node=>$node")
+			map=object('map.className')
+			while(cur, node) {
+				cur.inject(grp, cd, data)
+				map.set(cd, data)
+			}
+			print("map=========>$map")
+		}
 		classLoadPath(classPath)
+	}
+	classLoadAll() {
+		db=Baro.db('config')
+		node=db.exec("select grp, cd from conf_info where grp='classModify'")
+		while(cur, node) {
+			cur.inject(grp, cd)
+			conf("classModify.${cd}", 0)
+		}
+		classLoad()
 	}
 	classLoadPath(path, pathLen) {
 		not(path) return;
@@ -94,11 +111,15 @@
 						if(src) {
 							Cf.sourceApply("<func>${src}</func>", groupId, true)
 						}
+						if( conf('local.classMapCheck') ) {
+							classMapCheck(src, groupId)
+						}
 						continue;
 					}
-					conf("classModify.$groupId", modify, true);
+					print("클래스소스 변경 경로:$fullPath (변경:$modify)", groupId)
+					conf("classModify.$groupId", modify, true)
 					src=fileRead(fullPath)
-					classSource(src, fullPath, groupId, modify)
+					classSource(src, groupId, fullPath, modify )
 				}
 			}
 		});
@@ -130,7 +151,73 @@
 		}
 		return node;
 	}
-	classSource(src, pathFile, groupId, modify) {
+	classStartCheck(&s) {
+		type=s.move()
+		not(type.eq('class')) return false;
+		c=s.next().ch()
+		while(c.eq('-')) c=s.next().ch()
+		if(c.eq('{')) return true;
+		name=s.move()
+		if(name.eq('extends', 'extend')) {
+			sp=s.cur()
+			c=s.next().ch()
+			while(c.eq('/',':','-',',')) c=s.next().ch()
+			if(c.eq('{')) {
+				return s.trim(sp, s.cur());
+			}
+		}
+		return false;
+	}
+	classMapCheck(src, groupId) {
+		parse = func(&s) {
+			while(s.valid() ) {
+				c=s.ch()
+				if(c.eq(',',';')) {
+					s.incr()
+					continue;
+				}
+				chk=classStartCheck(s)
+				not(chk) {
+					return print("클래스 맵체크 오류 (경로: groupId)");
+				}
+				s.next().ch()
+				if(typeof(chk,'bool')) {
+					className=s.findPos('{',0,1).trim()
+				} else {
+					sp=s.cur()
+					c=s.next().ch()
+					while(c.eq('/',':','-')) c=s.next().ch()
+					className=s.trim(sp,s.cur())
+					s.findPos('{',0,1)
+				}
+				not(className) return;
+				not(groupId ) groupId=className
+				if( groupId.eq(className) ) {
+					mapId=className
+				} else {
+					if( lastEq(groupId, className)) {
+						mapId=groupId
+					} else {
+						mapId="${groupId}:${className}"
+					}
+				}  
+				src=s.match(1)
+				if(typeof(src,'bool')) {
+					return print("클래스소스 매핑오류 (아이디:$mapId)");
+				}
+				if( className.eq("layout","func","conf")) {
+					 continue;
+				}
+				not( mapId.eq(className)) {
+					object('map.className').set(className, mapId)
+					conf("mapClassName.${className}", mapId, true)
+				}
+			} 
+		};
+		
+		return parse(stripJsComment(src))
+	}
+	classSource(src, groupId, fullPath, modify) {
 		map=object('map.classes')
 		parse = func(&s) {
 			while(s.valid() ) {
@@ -139,7 +226,7 @@
 					s.incr()
 					continue;
 				}
-				chk=checkClass(s)
+				chk=classStartCheck(s)
 				not(chk) {
 					if(s.ch()) {
 						line=s.findPos("\n");
@@ -168,8 +255,6 @@
 						mapId="${groupId}:${className}"
 					}
 				}
-				
-				print("클래스소스 변경 ID:$mapId (변경:$modify)")
 				node=map.get(mapId)
 				if( typeof(node,'node') ) {
 					node.updateTm=System.localtime()
@@ -183,7 +268,7 @@
 					node.regTm=System.localtime()
 				}
 				if(modify ) {
-					node.path=pathFile
+					node.path=fullPath
 					node.modifyDate=modify 
 				}
 				src=s.match(1)
@@ -200,7 +285,10 @@
 				} else if(className.eq("conf")) {
 					setConfSrc(groupId,src)
 				} else { 
-					not( mapId.eq(className)) object('map.classeName').set(className, mapId)
+					not( mapId.eq(className)) {
+						conf("mapClassName.${className}", mapId, true)
+						object('map.className').set(className, mapId)
+					}
 					conf("class.$mapId", src, true)
 					print("class $mapId loaded")
 				}
@@ -215,23 +303,7 @@
 				Cf.sourceApply("<func>${node.source}</func>", groupId, true)
 			}
 		};
-		checkClass = func(&s) {
-			type=s.move()
-			not(type.eq('class')) return false;
-			c=s.next().ch()
-			while(c.eq('-')) c=s.next().ch()
-			if(c.eq('{')) return true;
-			name=s.move()
-			if(name.eq('extends', 'extend')) {
-				sp=s.cur()
-				c=s.next().ch()
-				while(c.eq('/',':','-',',')) c=s.next().ch()
-				if(c.eq('{')) {
-					return s.trim(sp, s.cur());
-				}
-			}
-			return false;
-		};
+		
 		setConfSrc = func( groupId, &s) {
 			while(s.valid()) {
 				c=s.ch()
@@ -330,14 +402,14 @@
 		}
 		not(typeof(obj,'node')) return print("$className class 객체 미설정(obj:$obj)")
 		not(className) return print("class 매개변수 미설정")
-		print("class $className 로딩 시작")
+		print("class $className 시작")
 		src=conf("class.$className")
 		not(src) {
 			not(className.find('/')) {
-				mapId=object('map.classeName').get(className)
-				src=conf("class.$mapid")
+				mapId=object('map.className').get(className)
+				src=conf("class.$mapId")
 			}
-			not(src) return print("class $className 클래스 소스 미등록")
+			not(src) return print("class $className 클래스 소스 미등록 (mapId:$mapId)")
 		}
 		arr=obj.addArray("@classNames") 
 		find=arr.find(className)
