@@ -139,7 +139,8 @@
 					s.incr()
 					continue;
 				}
-				not(checkClass(s)) {
+				chk=checkClass(s)
+				not(chk) {
 					if(s.ch()) {
 						line=s.findPos("\n");
 						print("class load match error line=$line");
@@ -147,7 +148,15 @@
 					return;
 				}
 				s.next().ch()
-				className=s.findPos('{',0,1).trim()
+				if(typeof(chk,'bool')) {
+					className=s.findPos('{',0,1).trim()
+				} else {
+					sp=s.cur()
+					c=s.next().ch()
+					while(c.eq('/',':','-')) c=s.next().ch()
+					className=s.trim(sp,s.cur())
+					conf("extends.$className", chk, true)
+				}
 				not(className) return;
 				not(groupId ) groupId=className
 				if( groupId.eq(className) ) {
@@ -190,12 +199,10 @@
 					}
 				} else if(className.eq("conf")) {
 					setConfSrc(groupId,src)
-				} else {
-					not( mapId.eq(className) ) {
-						conf("class.$mapId", src, true)
-					}
-					conf("class.$className", src, true)
-					print("class $className loaded")
+				} else { 
+					not( mapId.eq(className)) object('map.classeName').set(className, mapId)
+					conf("class.$mapId", src, true)
+					print("class $mapId loaded")
 				}
 			}
 			node=map.get("${groupId}:layout")
@@ -214,6 +221,15 @@
 			c=s.next().ch()
 			while(c.eq('-')) c=s.next().ch()
 			if(c.eq('{')) return true;
+			name=s.move()
+			if(name.eq('extends', 'extend')) {
+				sp=s.cur()
+				c=s.next().ch()
+				while(c.eq('/',':','-',',')) c=s.next().ch()
+				if(c.eq('{')) {
+					return s.trim(sp, s.cur());
+				}
+			}
 			return false;
 		};
 		setConfSrc = func( groupId, &s) {
@@ -263,7 +279,14 @@
 		}
 		return param;
 	}
-	
+	classExtends(obj, &s ) { 
+		while(s.valid()) {
+			name=s.findPos(',').trim() 
+			if(name) {
+				class(obj, name)
+			}
+		}
+	}
 	class(param) {
 		baseName=func(name,base) { 
 			not(base) return name;
@@ -300,30 +323,44 @@
 			if(typeof(base,'bool')) {
 				base=obj.var(baseCode)
 			}
-			className=baseName(className, base)
+			if( base ) {
+				className=baseName(className, base)
+			}
 		default:
 		}
 		not(typeof(obj,'node')) return print("$className class 객체 미설정(obj:$obj)")
 		not(className) return print("class 매개변수 미설정")
 		print("class $className 로딩 시작")
 		src=conf("class.$className")
-		not(src) return print("class $className 클래스 소스 미등록")
+		not(src) {
+			not(className.find('/')) {
+				mapId=object('map.classeName').get(className)
+				src=conf("class.$mapid")
+			}
+			not(src) return print("class $className 클래스 소스 미등록")
+		}
 		arr=obj.addArray("@classNames") 
 		find=arr.find(className)
-		if(find.ge(0)) {
+		if(find.ne(-1)) {
 			print("$className 클래스 이미 등록됨")	 
 		} else {
+			extend=conf("extends.$className")
 			if( typeof(obj,'widget')) {
 				print("class $className 위젯객체")
 				tag=obj.tag;
 				if(tag.eq('page','dialog','main')) {
 					not(className.eq('page')) class(obj,'page')
-				} else {
-					if(tag.eq('context','canvas')) {
-						not(className.eq('ui/draw')) class(obj,'ui/draw')
+				} else { 
+					not(className.eq('widget')) {
+						if(tag.eq('context','canvas')) {
+							not(className.eq('draw')) class(obj,'draw')
+						}
+						class(obj,'widget')
 					}
-					not(className.eq('widget')) class(obj,'widget')
 				}
+			}
+			if(extend) {
+				classExtends(obj, extend)
 			}
 			arr.add(className)
 			parse(obj, src)
@@ -370,9 +407,10 @@
 					print("onInit 이미 설정됨 eval 실행 $className", fnInit.get(), obj)
 				}
 			} else {
+				fnParent=Cf.funcNode('parent')
 				src="onInit() {$init} $funcs"
 				obj[$src]
-				obj.onInit()
+				obj.onInit(fnParent)
 			}
 		};
 		funcCheck = func(&s) {
@@ -406,17 +444,15 @@
 		}
 		return arr;
 	}
-	fn(name) {
+	fn(&s) {
+		not(s) return;
 		fn=Cf.funcNode('parent')
-		while(fn) {
-			if(fn.isset(name)) return fn;
-			fn=fn.parentFunc()
+		while(s.valid()) {
+			name=s.findPos(',').trim()
+			not(fn.isset(name)) return false;
 		}
-		return;
-	}
-	fnVal(name) {
-		return Cf.funcNode('parent').get(name)
-	}
+		return true;
+	} 
 	fnValue(name) {
 		fn=fn(name)
 		not(typeof(fn,'func')) return print("$name parent function not found")

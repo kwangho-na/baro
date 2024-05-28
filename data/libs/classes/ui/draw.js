@@ -27,7 +27,30 @@ class draw {
 	}
 }
 
+
 class func { 
+	containsRect(r1, r2) {
+		if(r1.eq(r2)) return true;
+		r1.inject(x,y,w,h)
+		r2.inject(x1,y1,w1,h1)
+		r=x+w, b=y+h;
+		r1=x1+w1, b1=y1+h1;
+		c0=x.lt(x1) && y.lt(y1)
+		c1=r.gt(r1) && b.gt(b1)
+		return c0 && c1;
+	}
+	imgSize(param) {
+		not(param) return pt(0,0);
+		if(typeof(param,'size')) return param;
+		if(typeof(param,'rect')) return param.size();
+		if(typeof(param,'widget')) return param.rect().size();
+		if(typeof(param,'image')) return param.imageSize();
+		if(typeof(param,'node')) {
+			rc=param.var(rect)
+			if(rc) return rc.size()
+		}
+		return pt(0,0);
+	}
 	@draw.loadImages(imagePath) {
 		_load=func(path, pathLen) {
 			not(path) {

@@ -1,4 +1,44 @@
 class func {
+	widget(tag, name, parent) {
+		not(name) {
+			p=this.parentWidget()
+			return when(p, p.pageNode(), this.pageNode());
+		}
+		not(name.find(':')) {
+			base=this.var(baseCode)
+			if(base) {
+				name=Cf.val(left(base,':'),':', name)
+			} else {
+				name=Cf.val('test:',name)
+			}
+		}
+		obj=Cf.getObject(tag, name) not(obj) return print("$name $tag 오류");
+		if(typeof(obj,'widget')) {
+			not(obj.var(classUse)) {
+				class(obj, 'widget')
+			}
+		}
+		if(typeof(parent,'widget')) {
+			obj.parentWindow(parent)
+		}
+		return obj;
+	}
+	page(name, parent) {
+		return widget('page', name, parent)
+	} 
+	widgetSub(parent, widget, rect) {
+		not(typeof(widget,"widget") ) return print("widgetSub widget error", args());
+		widget.parentWidget(parent);
+		widget.flags("child");
+		widgetAdd(parent, widget);
+		if(typeof(rect,"rect") ) {
+			rcGeo=parent.mapGlobal(rect);
+			widget.rectClient=rect;
+			widget.move(rcGeo);
+			widget.show();
+		}
+		return widget;
+	}
 	@widget.find(base, id) {
 		_find=func(&s) {
 			s.findPos('.')
@@ -12,7 +52,15 @@ class func {
 		};
 		root=Cf.getObject()
 		while(name, root.keys()) {
-			if(_find(name)) return root.get(name);
+			if(_find(name)) {
+				obj=root.get(name);
+				if(typeof(obj,'widget')) {
+					not(obj.var(classUse)) {
+						class(obj, 'widget')
+					}
+				}
+				return obj;
+			}
 		}
 		return;
 	}
@@ -168,9 +216,13 @@ class widget {
 	}
 	setEvent(param) {
 		if(typeof(param,'string')) {
-			args(fnm, fc)
+			args(fnm, fc, thisNode)
 			fn=this.get(fnm)
 			if(typeof(fn,'func')) {
+				if(typeof(thisNode,'node')) {
+					fn.set("@this",thisNode)
+					fn.set("target",this)
+				}
 				if(fn.isset('eventUse')) {
 					not(fc) return;
 				} else {
@@ -183,8 +235,12 @@ class widget {
 					fn.addFuncSrc(fc)
 				}
 			} else {
-				this.set(fnm, call(@widget.eventBase))
-				fn=this.get(fnm)
+				fn=call(@widget.eventBase)
+				this.set(fnm, fn)
+				if(typeof(thisNode,'node')) {
+					fn.set("@this",thisNode)
+					fn.set("target",this)
+				}
 				fn.set('eventUse', true)
 				if(typeof(fc,'func')) {
 					fn.addFuncSrc(fc)
@@ -195,10 +251,11 @@ class widget {
 		}
 		
 		if(typeof(param,'node')) {
+			args(1,thisNode)
 			for(fnm, param.keys()) { 
 				fc=param.get(fnm)
 				if(typeof(fc,'func')) {
-					this.setEvent(fnm, fc)
+					this.setEvent(fnm, fc, thisNode)
 				}
 			}
 		}
@@ -214,8 +271,9 @@ class widget {
 	}
 }
 
+
 class page {
-	class(this, 'widget')
+	class(this,'widget')
 	page=this
 	positionSave() {
 		code=this.var(baseCode)
@@ -228,7 +286,7 @@ class page {
 	positionLoad() {
 		page=this
 		code=this.var(baseCode)
-		not(page.parentWidget()) return;
+		if(page.parentWidget()) return;
 		not(code) return;
 		s=conf("pagePosition.${code}");
 		w=800, h=600;
@@ -247,14 +305,15 @@ class page {
 			case 2: w=v.toInt();
 			case 3: h=v.toInt();
 			}
-		}
-		cnt=System.info("screenCount");
-		while(n=0,n<cnt,n++) {
+		} 
+		rc=rc(x,y,w,h)
+		while(n=0,System.info("screenCount")) {
 			rcScreen=System.info("screenRect",n);
-			if( containsRect(rcScreen,rc)) {
+			if( rcScreen.contains(rc) ) {
 				return page.move(x,y).size(w,h);
 			}
 		}
+		 
 		page.move( System.info("screenRect").center(w,h) ); 
 		page.active();
 	}

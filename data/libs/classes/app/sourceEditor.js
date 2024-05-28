@@ -1,6 +1,13 @@
 class layout {
 	<page id="main" title="소스 테스트 페이지" onInit() {
-		class(this,'sourceEditorMain')
+		editPanel=page("editPanel")
+		logPanel=page("logPanel")
+		splitter=findTag(this,"splitter");
+		splitter.addPage(editPanel)
+		splitter.addPage(logPanel)
+		class(editPanel, 'editPanel', true)
+		class(logPanel, 'logPanel', true)
+		class(this,'main',true)
 	}>
 		<splitter type="vbox">
 	</page>
@@ -65,18 +72,11 @@ class layout {
 }
 
 
-class sourceEditorMain {
-	editPanel=page("editPanel")
-	logPanel=page("logPanel")
-	class(editPanel, 'sourceEditorPanel')
-	class(logPanel, 'sourceEditorLogPanel')
-	splitter=findTag(this, "splitter");
-	splitter.addPage(editPanel)
-	splitter.addPage(logPanel)
-	widgetPositionLoad("sourceEditor");
-	logClass('sourceRun').timeout()
-	this.timer(200, this.setSplitterSize)
-	
+class main {
+	initClass() { 
+		this.timer(200, this.setSplitterSize)
+		this.positionLoad()
+	}
 	onEvent(type, node) {
 		if(type.eq("logPrint")) {
 			logWriter('sourceRun').appendLog(node.eventData); 
@@ -88,10 +88,10 @@ class sourceEditorMain {
 		}
 	}
 	onClose() {
-		widgetPositionSave("sourceEditor");
+		this.positionSave();
 	}
 	onTimer() {
-		str=logClass('sourceRun').timeout();
+		str=logReader('soureEditor').timeout();
 		if(str) logPanel.appendLog(str)
 	}
 	editorFocus() {
@@ -110,10 +110,10 @@ class sourceEditorMain {
 	}
 }
 
-class sourceEditorPanel {
+class editPanel {
 	this.put(editor, editorTitle, editorInfo, searchInput)
 	
-	class(editor,'editorSource')
+	class(editor,'editorSource',true)
 	this.setEditorSyntax() 
 	this.setKeyMap()
 	editorTitle.value("소스테스트 실행창")
@@ -249,7 +249,7 @@ class sourceEditorPanel {
 	}
 }
 
-class sourceEditorLogPanel {
+class logPanel {
 	this.put(editor, logTitle, logInfo)
 	
 	appendLog(str) {

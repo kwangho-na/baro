@@ -11,8 +11,8 @@
 	randItem(list) { return list.get(randInt(0, list.size())) }
 
 	mdc(code, param) {
-		asize=args().size() not(asize) return map;
 		map=object("user.mdcMap")
+		asize=args().size() not(asize) return map;
 		d=map.get(code)
 		if( asize.eq(1) ) {
 			return d;
