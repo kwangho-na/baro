@@ -73,8 +73,9 @@ class layout {
 
 
 class main {
-	initClass() { 
+	initClass() {
 		this.timer(200, this.setSplitterSize)
+		this.timer('idle',500)
 		this.positionLoad()
 	}
 	onEvent(type, node) {
@@ -91,7 +92,7 @@ class main {
 		this.positionSave();
 	}
 	onTimer() {
-		str=logReader('soureEditor').timeout();
+		str=logReader('sourceRun').timeout();
 		if(str) logPanel.appendLog(str)
 	}
 	editorFocus() {
@@ -201,7 +202,7 @@ class editPanel {
 		}
 	}
 	keyTemplateInput() {
-		dialog=widget('dialog','keyTemplateInput',this);
+		dialog=this.getWidget('keyTemplateInput');
 		not(dialog) return this.alert("키템플릿설정 대화상자 오류");
 		dialog.open(this,"center");
 		dialog.var(formValue).inject(key, note);
@@ -213,7 +214,7 @@ class editPanel {
 		insertIndent(editor, str);
 	}
 	keyMapInput() {
-		dialog=widget('dialog','keyMapInput',this);
+		dialog=this.getWidget('keyMapInput');
 		not(dialog) return this.alert("키맵설정 대화상자 오류");
 	}
 	searchFocus() {
@@ -246,6 +247,9 @@ class editPanel {
 		if(str) global("prevSearchValue",str);
 		editor.focus();
 		editorSearch(editor, 0);	
+	}
+	keymapInfo() {
+		
 	}
 }
 

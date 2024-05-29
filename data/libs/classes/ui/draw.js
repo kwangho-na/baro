@@ -28,6 +28,8 @@ class draw {
 }
 
 
+
+
 class func { 
 	containsRect(r1, r2) {
 		if(r1.eq(r2)) return true;
@@ -51,7 +53,7 @@ class func {
 		}
 		return pt(0,0);
 	}
-	@draw.loadImages(imagePath) {
+	@draw.loadImages(path) {
 		_load=func(path, pathLen) {
 			not(path) {
 				path=Cf.val(webRoot(),'/images')
@@ -72,11 +74,12 @@ class func {
 					}
 					relative=fullPath.value(pathLen+1)
 					code=left(name,'.')
+					print("xxxxx", code, relative)
 					mdc(code, relative)
 				}
 			});
 		};
-		return _load();
+		return _load(path);
 	}
 	@draw.rectArray(rc,cx,cy,iw,ih,num) {
 		arr=[]

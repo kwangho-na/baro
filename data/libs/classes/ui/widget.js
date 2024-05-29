@@ -14,8 +14,8 @@ class func {
 		}
 		obj=Cf.getObject(tag, name) not(obj) return print("$name $tag 오류");
 		if(typeof(obj,'widget')) {
-			not(obj.var(classUse)) {
-				class(obj, 'widget')
+			not(obj.var(useClass)) {
+				class(obj,'widget')
 			}
 		}
 		if(typeof(parent,'widget')) {
@@ -52,15 +52,7 @@ class func {
 		};
 		root=Cf.getObject()
 		while(name, root.keys()) {
-			if(_find(name)) {
-				obj=root.get(name);
-				if(typeof(obj,'widget')) {
-					not(obj.var(classUse)) {
-						class(obj, 'widget')
-					}
-				}
-				return obj;
-			}
+			if(_find(name)) return root.get(name);
 		}
 		return;
 	}
@@ -152,14 +144,32 @@ class widget {
 		return arr;
 	}
 	getWidget(id) {
-		arr=this.member(widgetList)
-		if(arr) {
-			while(cur, arr) {
-				if(cur.cmp('id',id)) return cur;
+		obj=this.get(id)
+		not(typeof(obj,'widget')) {
+			arr=this.member(widgetList)
+			if(arr) {
+				while(cur, arr) {
+					if(cur.cmp('id',id)) {
+						obj=cur
+						break;
+					}
+				}
+			}
+			not(obj) {
+				base=this.base()
+				obj=@widget.find(base,id);
 			}
 		}
-		base=this.base()
-		return @widget.find(base,id);
+		if(typeof(obj,'widget')) {
+			not( obj.var(useClass)) {
+				class(obj, 'widget')
+				tag=obj.tag
+				if(tag.eq('canvas','context')) {
+					class(obj, 'draw')
+				}
+			}
+		}
+		return obj;
 	}
 	widgetMove(widget, rect) {
 		if(typeof(rect,"rect") ) {
@@ -218,11 +228,8 @@ class widget {
 		if(typeof(param,'string')) {
 			args(fnm, fc, thisNode)
 			fn=this.get(fnm)
+			print("@@@@@@@@@ set event $fnm @@@@@@@@@", fn)
 			if(typeof(fn,'func')) {
-				if(typeof(thisNode,'node')) {
-					fn.set("@this",thisNode)
-					fn.set("target",this)
-				}
 				if(fn.isset('eventUse')) {
 					not(fc) return;
 				} else {
@@ -230,6 +237,10 @@ class widget {
 					this.set(fnm, call(@widget.eventBase))
 					fn=this.get(fnm)
 					fn.set('eventUse', true)
+					if(typeof(thisNode,'node')) {
+						fn.set("@this",thisNode)
+						fn.set("target",this)
+					}
 				}
 				if(typeof(fc,'func')) {
 					fn.addFuncSrc(fc)
@@ -271,25 +282,25 @@ class widget {
 	}
 }
 
-
 class page {
 	class(this,'widget')
 	page=this
 	positionSave() {
-		code=this.var(baseCode)
-		page=this;
+		code=page.var(baseCode)
 		not(code) return;
 		page.geo().inject(x,y,w,h);
 		y-=31;
 		conf("pagePosition.${code}", "$x,$y,$w,$h", true)
 	}
-	positionLoad() {
-		page=this
-		code=this.var(baseCode)
-		if(page.parentWidget()) return;
+	positionLoad(w,h) {
+		code=page.var(baseCode)
+		if(page.parentWidget()) {
+			return;
+		}
 		not(code) return;
-		s=conf("pagePosition.${code}");
-		w=800, h=600;
+		s=conf("pagePosition.${code}")
+		not(w) w=800
+		not(h) h=600
 		not(s) {
 			return page.move( System.info("screenRect").center(w,h) );
 		}

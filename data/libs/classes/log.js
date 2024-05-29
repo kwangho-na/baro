@@ -2,7 +2,7 @@ class func {
 	logReader(name, fileName) {
 		not(name) name='baro'
 		obj=object("logReader.$name")
-		if(obj.var(classUse)) {
+		if(obj.var(useClass)) {
 			return obj;
 		}
 		path=System.path()
@@ -21,7 +21,7 @@ class func {
 	logWriter(name, fileName) {
 		not(name) name='baro'
 		obj=object("logWriter.$name")
-		if(obj.var(classUse)) return obj;
+		if(obj.var(useClass)) return obj;
 		path=System.path()
 		if( fileName ) {
 			logFileName=Cf.val(path,'/',fileName)
@@ -36,7 +36,7 @@ class func {
 	}
 }
 class logReader {	
-	startTime=null
+	startTime=System.localtime()
 	name=fnParent.get("name");
 	logFileName=fnParent.get("logFileName");			
 	fileLogReader=Baro.file("logRead_$name"); 
@@ -45,10 +45,14 @@ class logReader {
 	logTick=0
 	fileCurrentPos=0
 	lastRead=false
-	this.start()
+	this.timeout()
+	
 	start() {
 		this.member(startTime, System.localtime())
 		this.timeout()
+	}
+	stop() {
+		this.member(startTime, null)
 	}
 	timeout() {
 		not( startTime ) return;
@@ -100,7 +104,7 @@ class logReader {
 }
 
 class logWriter {
-	startTime=null 
+	startTime=System.localtime() 
 	name=fnParent.get("name")
 	logFileName=fnParent.get("logFileName")
 	fileLogAppend=Baro.file("logWriter_$name")

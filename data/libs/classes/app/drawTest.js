@@ -31,31 +31,29 @@ class main {
 }
 
 class canvasTest {
-	canvas=this.get('c')
-	inputFilter=null
+	canvas=this.get('c') 
+	inputFilter=this.getWidget('filter')
+	cbType=this.getWidget('cbType')
+	params=canvas.addNode('params')
 	initClass() {
-		input=this.getWidget('filter')
-		cbType=this.getWidget('cbType')
-		input.flags('child')
-		input.parentWidget(canvas)
+		inputFilter.flags('child')
+		inputFilter.parentWidget(canvas)
 		cbType.flags('child') 
 		cbType.parentWidget(canvas)
 		items=cbType.parseJson(#[[
 			{type:hline,name:수평선}
 			{type:vline,name:수직선}
 		]])
-		cbType.addItem(item,'type,name')
-		this.member('cbType',cbType)
-		this.member(inputFilter, input)
-		
-		params=canvas.addNode('params')
-		params.rate=1		
+		cbType.addItem(items,'type,name')
+		class(canvas,'widget')
 		canvas.setEvent('onDraw', this.draw, this)
 		canvas.setEvent('onDraw', this.drawLines, this)
 		canvas.setEvent('onMouseDown', this.mouseDown, this)
 		canvas.setEvent('onMouseWheel', this.mouseWheel, this)
-		input.setEvent('onKeyDown', this.keydown, this)
+		inputFilter.setEvent('onKeyDown', this.keydown, this)
+		params.rate=1
 		@page.margin(this, 4)
+		this.positionLoad()
 		this.onResize()
 	}
 	onResize() {
@@ -65,13 +63,15 @@ class canvasTest {
 		inputFilter.move(rcInput)
 		cbType.move(rcCombo)
 	}
+	onClose() {
+		this.positionSave()
+	}
 	draw() {
 		args(dc,rc)
 		rcCanvas=canvas.rect()
 		not(rcCanvas.eq(rc)) return;
 		dc.fill('#fff')
-		name=canvas.var(imageName)
-		params=canvas.params
+		name=canvas.var(imageName) 
 		if(name) {
 			params.inject(rate)
 			img=mdc(name)
@@ -87,7 +87,6 @@ class canvasTest {
 	}
 	drawLines() {
 		args(dc,rc)
-		not(fn('params')) return;
 		params.inject(rate)
 		while(cur, params) {
 			cur.inject(type, px, py, rect)
@@ -108,7 +107,6 @@ class canvasTest {
 	keyEnter(input) { 
 		val=input.value().trim()
 		not(val) return;
-		params=canvas.params
 		if(val.find(':')) {
 			params.parseJson(val)
 			if( params.name) {
@@ -149,7 +147,6 @@ class canvasTest {
 	mouseDown() {
 		args(p,a)
 		p.inject(px, py)
-		params=canvas.params
 		cur=cbType.current()
 		if(cur) {
 			type=cur.type;
@@ -157,9 +154,7 @@ class canvasTest {
 		}
 	}
 	mouseWheel() {
-		args(p,a,b) 
-		params=canvas.params
-		not(typeof(params,'node')) return;
+		args(p,a,b)
 		if(b&KEY.ctrl) {
 			if(a>0) {
 				params.rate+=0.25;
@@ -174,11 +169,5 @@ class canvasTest {
 }
 
 class func {
-	findPrevType(node) {
-		idx=node.index()
-		while(idx.ge(0)) {
-			cur=node.child(idx--)
-			cur
-		}
-	}
+	
 }

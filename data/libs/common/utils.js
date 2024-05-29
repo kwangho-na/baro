@@ -63,30 +63,35 @@
 		this.member(name, fn)
 	}
 	classLoad(mapCheck, classPath ) { 
-		not(classPath) {
-			path=System.path()
-			classPath=Cf.val(path,"/data/libs/classes")
-		}
 		if( mapCheck ) {
 			db=Baro.db('config')
 			node=db.fetchAll("select grp, cd, data from conf_info where grp='mapClassName'")
-			print("map check node=>$node")
 			map=object('map.className')
 			while(cur, node) {
 				cur.inject(grp, cd, data)
 				map.set(cd, data)
 			}
-			print("map=========>$map")
+		}
+		not(classPath) {
+			path=System.path()
+			classPath=Cf.val(path,"/data/libs/classes")
 		}
 		classLoadPath(classPath)
 	}
-	classLoadAll() {
+	classLoadAll(resetModify) {
 		db=Baro.db('config')
-		node=db.exec("select grp, cd from conf_info where grp='classModify'")
-		while(cur, node) {
-			cur.inject(grp, cd)
-			conf("classModify.${cd}", 0)
+		if( resetModify ) {
+			node=db.fetchAll("select grp, cd from conf_info where grp='classModify'")
+			while(cur, node) {
+				cur.inject(grp, cd)
+				conf("classModify.${cd}",0)
+			}
 		}
+		db.exec("delete from conf_info where grp='classModify'")
+		db.exec("delete from conf_info where grp='class'")
+		db.exec("delete from conf_info where grp='extends'")
+		db.exec("delete from conf_info where grp='mapClassName'")
+
 		classLoad()
 	}
 	classLoadPath(path, pathLen) {
@@ -155,10 +160,10 @@
 		type=s.move()
 		not(type.eq('class')) return false;
 		c=s.next().ch()
-		while(c.eq('-')) c=s.next().ch()
+		while(c.eq('/',':','-')) c=s.next().ch()
 		if(c.eq('{')) return true;
 		name=s.move()
-		if(name.eq('extends', 'extend')) {
+		if( name.eq('extends', 'extend') ) {
 			sp=s.cur()
 			c=s.next().ch()
 			while(c.eq('/',':','-',',')) c=s.next().ch()
@@ -181,7 +186,7 @@
 					return print("클래스 맵체크 오류 (경로: groupId)");
 				}
 				s.next().ch()
-				if(typeof(chk,'bool')) {
+				if( typeof(chk,'bool')) {
 					className=s.findPos('{',0,1).trim()
 				} else {
 					sp=s.cur()
@@ -230,9 +235,9 @@
 				not(chk) {
 					if(s.ch()) {
 						line=s.findPos("\n");
-						print("class load match error line=$line");
+						print("class source load match error line=$line");
 					}
-					return;
+					break;
 				}
 				s.next().ch()
 				if(typeof(chk,'bool')) {
@@ -242,9 +247,14 @@
 					c=s.next().ch()
 					while(c.eq('/',':','-')) c=s.next().ch()
 					className=s.trim(sp,s.cur())
+					print("$className class source extends ", chk) 
 					conf("extends.$className", chk, true)
+					s.findPos('{',0,1)
 				}
-				not(className) return;
+				not(className) {
+					print("class source name error", groupId)
+					break;
+				}
 				not(groupId ) groupId=className
 				if( groupId.eq(className) ) {
 					mapId=className
@@ -273,8 +283,8 @@
 				}
 				src=s.match(1)
 				if(typeof(src,'bool')) {
-					node.error="클래스소스 매칭오류 (아이디:$mapId)"
-					return print(node.error);
+					print("클래스소스 매칭오류 (아이디:$mapId)");
+					break;
 				}
 				if( className.eq("layout","func")) {
 					if( node.source) {
@@ -371,6 +381,8 @@
 				return "$base:$name"
 			}
 		}
+		fnParent=null
+		skipInit=false
 		switch(args().size()) {
 		case 1: 
 			if(typeof(param,'node') ) {
@@ -398,6 +410,13 @@
 			if( base ) {
 				className=baseName(className, base)
 			}
+		case 4:
+			args(obj,className,base,funcNode)
+			if( base ) {
+				className=baseName(className, base)
+			}
+			fnParent=funcNode
+			skipInit=skip
 		default:
 		}
 		not(typeof(obj,'node')) return print("$className class 객체 미설정(obj:$obj)")
@@ -412,33 +431,35 @@
 			not(src) return print("class $className 클래스 소스 미등록 (mapId:$mapId)")
 		}
 		arr=obj.addArray("@classNames") 
+		not(fnParent) {
+			fnParent=Cf.funcNode('parent')
+		}
 		find=arr.find(className)
 		if(find.ne(-1)) {
 			print("$className 클래스 이미 등록됨")	 
-		} else {
-			extend=conf("extends.$className")
-			if( typeof(obj,'widget')) {
-				print("class $className 위젯객체")
-				tag=obj.tag;
-				if(tag.eq('page','dialog','main')) {
-					not(className.eq('page')) class(obj,'page')
-				} else { 
-					not(className.eq('widget')) {
-						if(tag.eq('context','canvas')) {
-							not(className.eq('draw')) class(obj,'draw')
-						}
-						class(obj,'widget')
-					}
+			return obj;
+		}
+		arr.add(className)
+		if( typeof(obj,'widget')) {
+			print("class $className 위젯객체")
+			tag=obj.tag;
+			if(tag.eq('page','dialog','main')) {
+				not(className.eq('page')) class(obj,'page',null,fnParent)
+			} else { 
+				not(className.eq('widget')) {
+					class(obj,'widget',null,fnParent)
 				}
 			}
-			if(extend) {
-				classExtends(obj, extend)
-			}
-			arr.add(className)
-			parse(obj, src)
+		}
+		if(extend) {
+			classExtends(obj, extend)
+		}
+		extend=conf("extends.$className")
+		parse(obj, src)
+		not(skipInit) {
 			obj.var(useClass, true)
 			if(typeof(obj.initClass,'func')) {
-				print("class initClass 함수 실행시작")
+				print("$className class initClass 함수 실행시작")
 				obj.initClass()
 			}
 		}
@@ -446,7 +467,8 @@
 		
 		parse=func(obj, &s) {			
 			init='', funcs='';
-			n=0;		
+			n=0;
+			print("$className class parse (skip:$skipInit)")
 			while(s.valid()) {
 				if(funcCheck(s)) {
 					sp=s.cur()
@@ -460,29 +482,34 @@
 					s.match()
 					s.match(1)
 					src=s.value(sp, s.cur(), true)
-					funcs.add(src)
+					funcs.add(src,"\r\n\t")
 					c=s.ch()
 					if(c.eq(',',';')) s.incr();
 					continue;
 				} 
 				line=s.findPos("\n").trim()
-				if(n) init.add("\n")
+				if(n) init.add("\r\n")
 				init.add(line)
 				n++;
-			}
-			 
+			}  
 			fnInit=Cf.funcNode(obj)
 			if(fnInit) {
 				if(funcs) obj[$funcs]
+				if(skipInit) return;
 				if(init) {
+					fnInit.set('fnParent', fnParent)
 					eval(init, obj, fnInit, true)
 					print("onInit 이미 설정됨 eval 실행 $className", fnInit.get(), obj)
 				}
 			} else {
-				fnParent=Cf.funcNode('parent')
 				src="onInit() {$init} $funcs"
 				obj[$src]
-				obj.onInit(fnParent)
+				if(skipInit) return;
+				fnInit=Cf.funcNode(obj)
+				if(fnInit) {
+					fnInit.set('fnParent', fnParent)
+					obj.onInit()
+				}
 			}
 		};
 		funcCheck = func(&s) {
