@@ -370,7 +370,7 @@
 		}
 	}
 	class(param) {
-		baseName=func(name,base) { 
+		_baseName=func(name,base) { 
 			not(base) return name;
 			if(base.find(':')) {
 				base=left(base,':')
@@ -380,9 +380,12 @@
 			} else {
 				return "$base:$name"
 			}
-		}
+		};
+		_moduleName=func(&s) {
+			if(s.find(':')) s.findPos(':')
+			return s.trim();
+		};
 		fnParent=null
-		skipInit=false
 		switch(args().size()) {
 		case 1: 
 			if(typeof(param,'node') ) {
@@ -398,7 +401,7 @@
 				if(typeof(base,'bool')) {
 					base=this.var(baseCode)
 				}
-				className=baseName(className, base)
+				className=_baseName(className, base)
 			} else {
 				args(obj,className)
 			}
@@ -408,15 +411,14 @@
 				base=obj.var(baseCode)
 			}
 			if( base ) {
-				className=baseName(className, base)
+				className=_baseName(className, base)
 			}
 		case 4:
 			args(obj,className,base,funcNode)
 			if( base ) {
-				className=baseName(className, base)
+				className=_baseName(className, base)
 			}
 			fnParent=funcNode
-			skipInit=skip
 		default:
 		}
 		not(typeof(obj,'node')) return print("$className class 객체 미설정(obj:$obj)")
@@ -430,6 +432,7 @@
 			}
 			not(src) return print("class $className 클래스 소스 미등록 (mapId:$mapId)")
 		}
+		moduleName=_moduleName(className)
 		arr=obj.addArray("@classNames") 
 		not(fnParent) {
 			fnParent=Cf.funcNode('parent')
@@ -456,33 +459,41 @@
 		}
 		extend=conf("extends.$className")
 		parse(obj, src)
-		not(skipInit) {
-			obj.var(useClass, true)
-			if(typeof(obj.initClass,'func')) {
-				print("$className class initClass 함수 실행시작")
-				obj.initClass()
-			}
+		obj.var(useClass, true)
+		fcInit=obj.get("${moduleName}#initClass")
+		if(typeof(fcInit,'func')) {
+			print("$className class initClass 함수 실행시작")
+			call(fcInit,obj,fnParent)
 		}
 		return obj;
 		
 		parse=func(obj, &s) {			
 			init='', funcs='';
 			n=0;
-			print("$className class parse (skip:$skipInit)")
+			print("$className class parse start")
 			while(s.valid()) {
+				not(s.ch()) break;
 				if(funcCheck(s)) {
 					sp=s.cur()
 					fnm=s.move()
+					initCheck=false
 					if(fnm.eq('private','public')) {
 						sp=s.cur()
 						s.next().ch()
 					} else {
+						if(fnm.eq('initClass')) {
+							initCheck=true
+						}
 						s.ch()
 					}
 					s.match()
 					s.match(1)
 					src=s.value(sp, s.cur(), true)
-					funcs.add(src,"\r\n\t")
+					if(initCheck) {
+						funcs.add(moduleName,'#',src)
+					} else {
+						funcs.add(src)
+					}
 					c=s.ch()
 					if(c.eq(',',';')) s.incr();
 					continue;
@@ -495,7 +506,6 @@
 			fnInit=Cf.funcNode(obj)
 			if(fnInit) {
 				if(funcs) obj[$funcs]
-				if(skipInit) return;
 				if(init) {
 					fnInit.set('fnParent', fnParent)
 					eval(init, obj, fnInit, true)
@@ -504,7 +514,6 @@
 			} else {
 				src="onInit() {$init} $funcs"
 				obj[$src]
-				if(skipInit) return;
 				fnInit=Cf.funcNode(obj)
 				if(fnInit) {
 					fnInit.set('fnParent', fnParent)
