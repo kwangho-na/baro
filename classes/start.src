@@ -1,0 +1,544 @@
+<func comment="common util">
+
+_arr(code, reuse) {
+	not( code ) {
+		return Cf.array();
+	}
+	arr=Cf.get(code);
+	not(arr) arr=Cf.newArray(code);
+	if( typeof(reuse,"bool") && reuse ) arr.reuse();
+	return arr;
+}
+_node(code, reuse) {
+	not( code ) {
+		return Cf.node();
+	}
+	node=Cf.get(code);
+	not(typeof(node,"node")) {
+		node=Cf.newNode(2,code);
+		node.var(tag, code);
+	}	
+	if( typeof(reuse,"bool") && reuse ) node.reset(true);
+	return node;
+}
+
+global(code, value) {
+	root=Cf.rootNode();
+	not(code) return root;
+	sz=args().size();
+	gcode="@$code";
+	if(sz.eq(1)) {
+		return root.get(gcode);
+	}
+	if(code.eq('funcInfo')) return;
+	root.set(gcode, value);
+}
+object(code, newCheck) {
+	if( code.find('.') ) {
+		code.split('.').inject(a,b);
+		if(typeof(newCheck,"bool")) return Cf.getObject(a,b, newCheck);
+		return Cf.getObject(a,b,true);
+	}
+	return Cf.getObject("page", code);
+} 
+include(fileCode, skip) {
+	if(fileCode.find('.')) {
+		fileName="classes/${fileCode}";
+	} else {
+		fileName="classes/${fileCode}.js";
+	}
+	fo=Baro.file();
+	not( fo.isFile(fileName) ) {
+		if(skip) return;
+		return print("파일이 없습니다(파일명:$fileName)");
+	}
+	Cf.include(fileName);
+}
+
+classLoad(mapCheck, classPath ) { 
+	if( mapCheck ) {
+		db=Baro.db('config')
+		node=db.fetchAll("select grp, cd, data from conf_info where grp='mapClassName'")
+		map=object('map.className')
+		while(cur, node) {
+			cur.inject(grp, cd, data)
+			map.set(cd, data)
+		}
+	}
+	not(classPath) {
+		path=System.path()
+		classPath=Cf.val(path,"/data/libs/classes")
+	}
+	classLoadPath(classPath)
+}
+classLoadAll(resetModify) {
+	db=Baro.db('config')
+	if( resetModify ) {
+		node=db.fetchAll("select grp, cd from conf_info where grp='classModify'")
+		while(cur, node) {
+			cur.inject(grp, cd)
+			conf("classModify.${cd}",0)
+		}
+	}
+	db.exec("delete from conf_info where grp='classModify'")
+	db.exec("delete from conf_info where grp='class'")
+	db.exec("delete from conf_info where grp='extends'")
+	db.exec("delete from conf_info where grp='mapClassName'")
+
+	classLoad()
+}
+classLoadPath(path, pathLen) {
+	not(path) return;
+	not(pathLen) pathLen=path.size()
+	fo=Baro.file()
+	fo.list(path, func(info) {
+		while(info.next()) {
+			info.inject(type, name, fullPath, ext)
+			if( type=='folder') {
+				if(name.eq('temp')) continue;
+				classLoadPath(fullPath, pathLen)
+				continue;
+			}
+			if(ext.eq('js','src')) {
+				relative=fullPath.trim(pathLen+1)
+				groupId=relative.findPos('.').trim()
+				modify=Baro.file().modifyDate(fullPath)
+				prev=conf("classModify.$groupId")
+				if( prev && modify.le(prev) ) {
+					src=conf("funcSource.$groupId")
+					if(src) {
+						Cf.sourceApply("<func>${src}</func>", groupId, true)
+					}
+					if( conf('local.classMapCheck') ) {
+						classMapCheck(src, groupId)
+					}
+					continue;
+				}
+				print("클래스소스 변경 경로:$fullPath (변경:$modify)", groupId)
+				conf("classModify.$groupId", modify, true)
+				src=fileRead(fullPath)
+				classSource(src, groupId, fullPath, modify )
+			}
+		}
+	});
+}
+
+classFuncLoad(name) {
+	db=Baro.db('config')
+	node=db.fetchAll("select data from conf_info where grp='funcSource'")
+	src=''
+	while(cur, node) {
+		src.add(cur.data,"\n")
+	}
+	not(src) {
+		print("$name/func 함수정보가 없습니다")
+		return;
+	}
+	Cf.sourceApply("<func>${src}</func>", "${name}/func", true)
+}
+classLayout(name, skip) {
+	src=conf("layoutSource.${name}")
+	not(src) return print("$name layout source 오류");
+	Cf.sourceApply(#[
+		<widgets base="${name}">${src}</widgets>
+	]);
+	while(cur,objectArray("page.$name:", "object")) {
+		if(cur.cmp('id','main')) {
+			return cur;
+		}
+	}
+	return node;
+}
+classStartCheck(&s) {
+	type=s.move()
+	not(type.eq('class')) return false;
+	c=s.next().ch()
+	while(c.eq('/',':','-')) c=s.next().ch()
+	if(c.eq('{')) return true;
+	name=s.move()
+	if( name.eq('extends', 'extend') ) {
+		sp=s.cur()
+		c=s.next().ch()
+		while(c.eq('/',':','-',',')) c=s.next().ch()
+		if(c.eq('{')) {
+			return s.trim(sp, s.cur());
+		}
+	}
+	return false;
+}
+classMapCheck(src, groupId) {
+	parse = func(&s) {
+		while(s.valid() ) {
+			c=s.ch()
+			if(c.eq(',',';')) {
+				s.incr()
+				continue;
+			}
+			chk=classStartCheck(s)
+			not(chk) {
+				return print("클래스 맵체크 오류 (경로: groupId)");
+			}
+			s.next().ch()
+			if( typeof(chk,'bool')) {
+				className=s.findPos('{',0,1).trim()
+			} else {
+				sp=s.cur()
+				c=s.next().ch()
+				while(c.eq('/',':','-')) c=s.next().ch()
+				className=s.trim(sp,s.cur())
+				s.findPos('{',0,1)
+			}
+			not(className) return;
+			not(groupId ) groupId=className
+			if( groupId.eq(className) ) {
+				mapId=className
+			} else {
+				if( lastEq(groupId, className)) {
+					mapId=groupId
+				} else {
+					mapId="${groupId}:${className}"
+				}
+			}  
+			src=s.match(1)
+			if(typeof(src,'bool')) {
+				return print("클래스소스 매핑오류 (아이디:$mapId)");
+			}
+			if( className.eq("layout","func","conf")) {
+				 continue;
+			}
+			not( mapId.eq(className)) {
+				object('map.className').set(className, mapId)
+				conf("mapClassName.${className}", mapId, true)
+			}
+		} 
+	};
+	
+	return parse(stripJsComment(src))
+}
+classSource(src, groupId, fullPath, modify) {
+	map=object('map.classes')
+	parse = func(&s) {
+		while(s.valid() ) {
+			c=s.ch()
+			if(c.eq(',',';')) {
+				s.incr()
+				continue;
+			}
+			chk=classStartCheck(s)
+			not(chk) {
+				if(s.ch()) {
+					line=s.findPos("\n");
+					print("class source load match error line=$line");
+				}
+				break;
+			}
+			s.next().ch()
+			if(typeof(chk,'bool')) {
+				className=s.findPos('{',0,1).trim()
+			} else {
+				sp=s.cur()
+				c=s.next().ch()
+				while(c.eq('/',':','-')) c=s.next().ch()
+				className=s.trim(sp,s.cur())
+				print("$className class source extends ", chk) 
+				conf("extends.$className", chk, true)
+				s.findPos('{',0,1)
+			}
+			not(className) {
+				print("class source name error", groupId)
+				break;
+			}
+			subName="";
+			if(className.start("func:")) {
+				subName=right(className,":")
+				className="func"
+			} else if(className.start("layout:")) {
+				subName=right(className,":")
+				className="layout"
+			}
+			not(groupId ) groupId=className
+			if( groupId.eq(className) ) {
+				mapId=className
+			} else {
+				if( lastEq(groupId, className)) {
+					mapId=groupId
+				} else {
+					mapId="${groupId}:${className}"
+				}
+			}
+			node=map.get(mapId)
+			if( typeof(node,'node') ) {
+				node.updateTm=System.localtime()
+				if(node.source ) {
+					node.source=''
+				}
+			} else {
+				node=map.addNode(mapId)
+				node.groupId=groupId
+				node.name=className
+				node.regTm=System.localtime()
+			}
+			if(modify ) {
+				node.path=fullPath
+				node.modifyDate=modify 
+			}
+			src=s.match(1)
+			if(typeof(src,'bool')) {
+				print("클래스소스 매칭오류 (아이디:$mapId)");
+				break;
+			}
+			if( className.eq("layout","func") ) {
+				if(subName) {
+					conf("${className}Source.${groupId}:${subName}", src, true)
+				}
+				if( node.source) {
+					node.appendText("source",src)
+				} else {
+					node.source=src;
+				}
+			} else if(className.eq("conf")) {
+				setConfSrc(groupId,src)
+			} else { 
+				not( mapId.eq(className)) {
+					conf("mapClassName.${className}", mapId, true)
+					object('map.className').set(className, mapId)
+				}
+				conf("class.$mapId", src, true)
+				print("class $mapId loaded")
+			}
+		}
+		node=map.get("${groupId}:layout")
+		if(node) {
+			conf("layoutSource.$groupId", node.source, true)
+		}
+		node=map.get("${groupId}:func")
+		if(node) {
+			conf("funcSource.$groupId", node.source, true)
+			Cf.sourceApply("<func>${node.source}</func>", groupId, true)
+		}
+	};
+	
+	setConfSrc = func( groupId, &s) {
+		while(s.valid()) {
+			c=s.ch()
+			not(c) break;
+			if(c.eq(',',';')) {
+				s.incr()
+				continue;
+			}
+			code=s.move()
+			c=s.ch()
+			not(c.eq(':')) break;
+			c=s.incr().ch()
+			if(c.eq()) {
+				v=s.match()
+			} else if( c.eq('<')) {
+				sp=s.cur()
+				c=s.incr().next().ch()
+				while(c.eq('-')) c=s.incr().next().ch()
+				tag=s.trim(sp+1,s.cur(),true)
+				s.pos(sp)
+				ss=s.match("<$tag","</$tag>")
+				if(tag.eq('text','sql')) {
+					ss.findPos('>')
+					v=ss
+				} else {
+					v=s.value(sp, s.cur(), true)
+				}
+			} else {
+				v=s.findPos("\n");
+			}
+			conf("${groupId}.${code}", v, true)
+		}
+	};
+	return parse(stripJsComment(src))
+}
+classReload(param) {
+	if(typeof(param,'node') && param.var(useClass) ) {
+		param.var(useClass,false)
+		arr=param.var(classNames)
+		if(typeof(arr,'array')) {
+			name=arr.get(0)
+			arr.reuse()
+			if(name) class(param, name)
+		}
+	}
+	return param;
+}
+classExtends(obj, &s ) { 
+	while(s.valid()) {
+		name=s.findPos(',').trim() 
+		if(name) {
+			class(obj, name)
+		}
+	}
+}
+class(param) {
+	_baseName=func(name,base) { 
+		not(base) return name;
+		if(base.find(':')) {
+			base=left(base,':')
+		}
+		if(lastEq(base,name)) {
+			return base
+		} else {
+			return "$base:$name"
+		}
+	};
+	_moduleName=func(&s) {
+		if(s.find(':')) s.findPos(':')
+		return s.trim();
+	};
+	fnParent=null
+	switch(args().size()) {
+	case 1: 
+		if(typeof(param,'node') ) {
+			className=param.id
+			obj=param
+		} else {
+			className=param
+			obj=object("class.$className")
+		}
+	case 2:
+		if(typeof(param,'string') ) {
+			args(className, base)
+			if(typeof(base,'bool')) {
+				base=this.var(baseCode)
+			}
+			className=_baseName(className, base)
+		} else {
+			args(obj,className)
+		}
+	case 3:
+		args(obj,className,base)
+		if(typeof(base,'bool')) {
+			base=obj.var(baseCode)
+		}
+		if( base ) {
+			className=_baseName(className, base)
+		}
+	case 4:
+		args(obj,className,base,funcNode)
+		if( base ) {
+			className=_baseName(className, base)
+		}
+		fnParent=funcNode
+	default:
+	}
+	not(typeof(obj,'node')) return print("$className class 객체 미설정(obj:$obj)")
+	not(className) return print("class 매개변수 미설정")
+	print("class $className 시작")
+	src=conf("class.$className")
+	not(src) {
+		not(className.find('/')) {
+			mapId=object('map.className').get(className)
+			src=conf("class.$mapId")
+		}
+		not(src) return print("class $className 클래스 소스 미등록 (mapId:$mapId)")
+	}
+	moduleName=_moduleName(className)
+	arr=obj.addArray("@classNames") 
+	not(fnParent) {
+		fnParent=Cf.funcNode('parent')
+	}
+	find=arr.find(className)
+	if(find.ne(-1)) {
+		print("$className 클래스 이미 등록됨")	 
+		return obj;
+	}
+	arr.add(className)
+	if( typeof(obj,'widget')) {
+		print("class $className 위젯객체")
+		tag=obj.tag;
+		if(tag.eq('page','dialog','main')) {
+			not(className.eq('page')) class(obj,'page',null,fnParent)
+		} else { 
+			not(className.eq('widget')) {
+				class(obj,'widget',null,fnParent)
+			}
+		}
+	}
+	if(extend) {
+		classExtends(obj, extend)
+	}
+	extend=conf("extends.$className")
+	parse(obj, src)
+	obj.var(useClass, true)
+	fcInit=obj.get("${moduleName}#initClass")
+	if(typeof(fcInit,'func')) {
+		print("$className class initClass 함수 실행시작")
+		call(fcInit,obj,fnParent)
+	}
+	return obj;
+	
+	parse=func(obj, &s) {			
+		init='', funcs='';
+		n=0;
+		print("$className class parse start")
+		while(s.valid()) {
+			not(s.ch()) break;
+			if(funcCheck(s)) {
+				sp=s.cur()
+				fnm=s.move()
+				initCheck=false
+				if(fnm.eq('private','public')) {
+					sp=s.cur()
+					s.next().ch()
+				} else {
+					if(fnm.eq('initClass')) {
+						initCheck=true
+					}
+					s.ch()
+				}
+				s.match()
+				s.match(1)
+				src=s.value(sp, s.cur(), true)
+				if(initCheck) {
+					funcs.add(moduleName,'#',src)
+				} else {
+					funcs.add(src)
+				}
+				c=s.ch()
+				if(c.eq(',',';')) s.incr();
+				continue;
+			} 
+			line=s.findPos("\n").trim()
+			if(n) init.add("\r\n")
+			init.add(line)
+			n++;
+		}  
+		fnInit=Cf.funcNode(obj)
+		if(fnInit) {
+			if(funcs) obj[$funcs]
+			if(init) {
+				fnInit.set('fnParent', fnParent)
+				eval(init, obj, fnInit, true)
+				print("onInit 이미 설정됨 eval 실행 $className", fnInit.get(), obj)
+			}
+		} else {
+			src="onInit() {$init} $funcs"
+			obj[$src]
+			fnInit=Cf.funcNode(obj)
+			if(fnInit) {
+				fnInit.set('fnParent', fnParent)
+				obj.onInit()
+			}
+		}
+	};
+	funcCheck = func(&s) {
+		not(s.ch()) return false;
+		fnm=s.move()
+		if(fnm.eq('private','public')) {
+			c=s.next().ch()
+		} else {
+			c=s.ch()
+		}
+		if(c.eq('(')) {
+			s.match()
+			c=s.ch()
+			if(c.eq('{')) return true
+		}
+		return false
+	};
+}
+</func>

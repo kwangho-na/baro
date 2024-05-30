@@ -1,0 +1,49 @@
+<call> 
+	include("def.src");
+	include("common/object.js")
+	include("common/draw.js")
+	include("common/string.js")
+	include("common/ui.js")
+	include("common/json.js")
+	include("common/widget.js")
+	include("common/data.js")
+	include("common/api.js")
+	include("common/web.js")
+	include("common/was.js")
+	include("common/was.command.js")
+	include("common/pages.js")
+	include("common/etc.js")
+	include("common/proc.js")
+	include("common/proxy.js")
+	include("common/db.js")
+	include("common/template.js")
+	
+	Cf.debug(true, "data/logs"); 
+	include("common/utils.js")
+	classLoad(true)
+	startServer();
+
+	/*
+	Cf.include("web/router.js")
+	@router.makeUrlMap();
+	
+	include("dev/sourceEditor.js")
+	@dev.sourceEditor().open();
+	include("app/ndid.js")
+	include("app/etc.js")
+	include("app/javaRun.js")
+	include("app/linker.js")
+	include("app/javaRun.js")
+	Cf.postEvent(@proc.postEvent);
+	@proxy.clientStart("na");
+	@app.linkerPageOpen()	
+	@was.templateWatcherProc();
+	@was.loadUrlMap();
+	
+	classLoadAll()
+	*/ 
+
+	page=classLayout("app/sourceEditor")
+	page.open()
+	
+</call>
