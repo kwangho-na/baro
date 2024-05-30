@@ -529,18 +529,7 @@ class func:parse {
 			return strVal;
 		}
 	}
-	left(str, sep) {
-		not(sep) sep=',';
-		return str.find(sep).trim();
-	}
-	right(&str, sep, left) {
-		a=str.findLast(sep);
-		if( a.valid() ) {
-			return a.right().trim();
-		} else {
-			return name;
-		}
-	}
+	
 }
 
 class func:convert {

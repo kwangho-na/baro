@@ -142,30 +142,7 @@ class func:common {
 		}
 		return folder;
 	}
-	fileRead(path) {
-		fo=Baro.file('read'); // 파일객체 생성
-		not(fo.open(path,'read')) {
-			return print("readFile open error (경로 $path)");
-		}
-		src = fo.read();
-		fo.close()
-		return src;
-	}
-	fileWrite(path, buf, mode) {
-		not(mode) mode="write";
-		fo=Baro.file('save');
-		if(path.find('/')) {
-			str=path.findLast('/').trim();
-		} else {
-			str=path;
-		}
-		not(fo.isFolder(str)) {
-			fo.mkdir(str, true);
-		}
-		not(fo.open(path,mode)) return print("writeFile open error (경로 $path)");
-		fo.write(buf);
-		fo.close();
-	}
+	
 	fileAppend(path, data) {
 		fo=Baro.file('append');
 		if(fo.open(path,'append')) {
@@ -277,15 +254,7 @@ class func:common {
 		}
 		return;
 	}
-	lastEq(a,b) {
-		as=a.size(), bs=b.size()
-		if(as.gt(bs)) {
-			p=as-bs
-			aa=a.value(p)
-			if(aa.eq(b)) return true;
-		}
-		return false;
-	}
+	
 }
 
 /*
@@ -418,46 +387,58 @@ class func:filesystem {
 			}
 		})
 	}
-	isFile(fileName) {
-		fo=Baro.file();
-		return fo.isFile( localPath(fileName) );
+	localPath(path, make) {
+		if( path ) {
+			ch=path.ch(1);
+			if( path.ch('/') || ch.eq(':') ) {
+				return path;
+			}
+			path=System.filePath(path,make);
+			return path;
+		}
+	}	 
+	relativePath(base, path) {
+		if(base ) {
+		  base=base.trim();
+		} else {
+		  base=System.path();
+		}
+		not(path ) return base;
+		while( path.ch('.') ) {
+		  ch=path.ch(1);
+		  if( ch.eq('/') ) {
+			// 경로 ./ 처리
+			path=path.value(2);
+		  } else if( ch.eq('.') ) {
+			// 경로 ../../ 처리
+			ch=path.ch(2);
+			if( ch.eq("/") ) {
+			  path=path.value(3);
+			  not( base.find("/") ) return print("[relativePath] 기준경로 오류 (base:$base)");
+			  base=base.findLast("/").trim();
+			} else {
+			  return print("[relativePath] 경로오류 (path:$path)");
+			}
+		  }
+		}
+		return "$base/$path";
 	}
-	isFolder(path, makeCheck) {
+	isFile(fileName) {
+		return Baro.file().isFile( fileName );
+	}
+	isFolder(path, checkMake) {
 		fo=Baro.file();
 		fullPath=localPath(path);
 		folder=fo.isFolder(fullPath);
 		not(folder) {
-			if(makeCheck) {
+			if(checkMake) {
 				fo.mkdir(fullPath, true);
 				folder=fo.isFolder(fullPath);
 			}
 		}
 		return folder;
 	}
-	fileRead(path) {
-		fo=Baro.file('read'); // 파일객체 생성
-		not(fo.open(path,'read')) {
-			return print("readFile open error (경로 $path)");
-		}
-		src = fo.read();
-		fo.close()
-		return src;
-	}
-	fileWrite(path, buf, mode) {
-		not(mode) mode="write";
-		fo=Baro.file('save');
-		if(path.find('/')) {
-			str=path.findLast('/').trim();
-		} else {
-			str=path;
-		}
-		not(fo.isFolder(str)) {
-			fo.mkdir(str, true);
-		}
-		not(fo.open(path,mode)) return print("writeFile open error (경로 $path)");
-		fo.write(buf);
-		fo.close();
-	}
+	 
 	fileAppend(path, data) {
 		fo=Baro.file('append');
 		if(fo.open(path,'append')) {
@@ -541,34 +522,4 @@ class func:filesystem {
 	}
 }
 
-/* 
-	소스관리 함수
-*/
-class func:source {
-	stripComment(&s, mode) {
-		not(mode) mode=1;
-		rst='';
-		while(s.valid()) {
-			if(mode.eq(1)) {
-				left=s.findPos('/*',1,1);
-				s.match();
-			} else if(mode.eq(2)) {
-				left=s.findPos('//',1,1);
-				s.findPos("\n");
-			} else if(mode.eq(3)) {
-				left=s.findPos('<!--',1,1);
-				s.match('<!--','-->');
-			} else if(mode.eq(4)) {
-				left=s.findPos('--',1,1);
-				s.findPos("\n");
-			}
-			rst.add(left);
-			not(s.valid()) break;
-		}
-		return rst;
-	}
-	stripJsComment(&s) {
-		rst=stripComment(s,1);
-		return stripComment(rst,2);
-	}
-}
+ 

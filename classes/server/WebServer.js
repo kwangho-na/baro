@@ -1,5 +1,4 @@
-class WebServer {
-	dc=null
+class WebServer {	
 	start(port, path) {
 		not(port) port=80;
 		not(path) path=Cf.val(System.path(),"/web");
@@ -106,7 +105,7 @@ class func:router {
 }
 
 class func:api {
-		apiController(req, param, service, uri) {
+	apiController(req, param, service, uri) {
 		bound=req.getValue('boundary');
 		buffer=null;
 		if(bound) {

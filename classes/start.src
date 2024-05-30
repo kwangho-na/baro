@@ -54,7 +54,65 @@ include(fileCode, skip) {
 	}
 	Cf.include(fileName);
 }
-
+objectArray(key, flag) {
+	arr=[]
+	not(flag) flag='name'
+	root=Cf.getObject()
+	while(name, root.keys()) {
+		if(name.start(key)) {
+			switch(flag) {
+			case name: arr.add(name)
+			case object: arr.add(root.get(name))
+			default: break;
+			}
+		}
+	}
+	return arr;
+}
+lastEq(a,b) {
+	as=a.size(), bs=b.size()
+	if(as.gt(bs)) {
+		p=as-bs
+		aa=a.value(p)
+		if(aa.eq(b)) return true;
+	}
+	return false;
+}
+left(str, sep) {
+	not(sep) sep=',';
+	return str.find(sep).trim();
+}
+right(&str, sep, left) {
+	a=str.findLast(sep);
+	if( a.valid() ) {
+		return a.right().trim();
+	} else {
+		return name;
+	}
+}
+fileRead(path) {
+	fo=Baro.file('read'); // 파일객체 생성
+	not(fo.open(path,'read')) {
+		return print("readFile open error (경로 $path)");
+	}
+	src = fo.read();
+	fo.close()
+	return src;
+}
+fileWrite(path, buf) {
+	fo=Baro.file('save');
+	if(path.find('/')) {
+		str=path.findLast('/').trim();
+	} else {
+		str=path;
+	}
+	not(fo.isFolder(str)) {
+		fo.mkdir(str, true);
+	}
+	not(fo.open(path,"write")) return print("writeFile open error (경로 $path)");
+	fo.write(buf);
+	fo.close();
+}
 classLoad(mapCheck, classPath ) { 
 	if( mapCheck ) {
 		db=Baro.db('config')
@@ -67,7 +125,7 @@ classLoad(mapCheck, classPath ) {
 	}
 	not(classPath) {
 		path=System.path()
-		classPath=Cf.val(path,"/data/libs/classes")
+		classPath=Cf.val(path,"/classes")
 	}
 	classLoadPath(classPath)
 }
@@ -80,6 +138,8 @@ classLoadAll(resetModify) {
 			conf("classModify.${cd}",0)
 		}
 	}
+	db.exec("delete from conf_info where grp='funcSource'")
+	db.exec("delete from conf_info where grp='layoutSource'")
 	db.exec("delete from conf_info where grp='classModify'")
 	db.exec("delete from conf_info where grp='class'")
 	db.exec("delete from conf_info where grp='extends'")
@@ -99,14 +159,14 @@ classLoadPath(path, pathLen) {
 				classLoadPath(fullPath, pathLen)
 				continue;
 			}
-			if(ext.eq('js','src')) {
+			if(ext.eq("js")) {
 				relative=fullPath.trim(pathLen+1)
 				groupId=relative.findPos('.').trim()
 				modify=Baro.file().modifyDate(fullPath)
 				prev=conf("classModify.$groupId")
 				if( prev && modify.le(prev) ) {
 					src=conf("funcSource.$groupId")
-					if(src) {
+					if(src) {			
 						Cf.sourceApply("<func>${src}</func>", groupId, true)
 					}
 					if( conf('local.classMapCheck') ) {
@@ -142,12 +202,14 @@ classLayout(name, skip) {
 	Cf.sourceApply(#[
 		<widgets base="${name}">${src}</widgets>
 	]);
+	
 	while(cur,objectArray("page.$name:", "object")) {
+		print("class Layout cur id == ${cur.id}")
 		if(cur.cmp('id','main')) {
 			return cur;
 		}
 	}
-	return node;
+	return;
 }
 classStartCheck(&s) {
 	type=s.move()
@@ -256,6 +318,11 @@ classSource(src, groupId, fullPath, modify) {
 				subName=right(className,":")
 				className="layout"
 			}
+			src=s.match(1)
+			if(typeof(src,'bool')) {
+				print("클래스소스 매칭오류 (아이디:$mapId)");
+				break;
+			}
 			not(groupId ) groupId=className
 			if( groupId.eq(className) ) {
 				mapId=className
@@ -268,26 +335,27 @@ classSource(src, groupId, fullPath, modify) {
 			}
 			node=map.get(mapId)
 			if( typeof(node,'node') ) {
-				node.updateTm=System.localtime()
-				if(node.source ) {
-					node.source=''
+				if( node.updateTm ) {
+					dist=System.localtime() - node.updateTm;
+					print("$className update time check => $dist")
+					if(dist.gt(2000)) {
+						node.source=''
+					}
 				}
+				node.updateTm=System.localtime()
 			} else {
 				node=map.addNode(mapId)
 				node.groupId=groupId
 				node.name=className
+				node.source=''
 				node.regTm=System.localtime()
 			}
 			if(modify ) {
 				node.path=fullPath
 				node.modifyDate=modify 
 			}
-			src=s.match(1)
-			if(typeof(src,'bool')) {
-				print("클래스소스 매칭오류 (아이디:$mapId)");
-				break;
-			}
-			if( className.eq("layout","func") ) {
+			if( className.eq("layout","func") ) { 
+				print("@@@@@@@@@@ $className sub:$subName")
 				if(subName) {
 					conf("${className}Source.${groupId}:${subName}", src, true)
 				}
@@ -298,7 +366,7 @@ classSource(src, groupId, fullPath, modify) {
 				}
 			} else if(className.eq("conf")) {
 				setConfSrc(groupId,src)
-			} else { 
+			} else {
 				not( mapId.eq(className)) {
 					conf("mapClassName.${className}", mapId, true)
 					object('map.className').set(className, mapId)
@@ -540,5 +608,31 @@ class(param) {
 		}
 		return false
 	};
+}
+stripComment(&s, mode) {
+	not(mode) mode=1;
+	rst='';
+	while(s.valid()) {
+		if(mode.eq(1)) {
+			left=s.findPos("/*",1,1);
+			s.match();
+		} else if(mode.eq(2)) {
+			left=s.findPos("//",1,1);
+			s.findPos("\n");
+		} else if(mode.eq(3)) {
+			left=s.findPos("<!--",1,1);
+			s.match("<!--","-->");
+		} else if(mode.eq(4)) {
+			left=s.findPos("--",1,1);
+			s.findPos("\n");
+		}
+		rst.add(left);
+		not(s.valid()) break;
+	}
+	return rst;
+}
+stripJsComment(&s) {
+	rst=stripComment(s,1);
+	return stripComment(rst,2);
 }
 </func>
