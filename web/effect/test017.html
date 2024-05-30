@@ -1,0 +1,219 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<style>  
+@font-face {
+  font-family: HoonGothicgulim;
+  src: url(/css/fonts/HoonGothicgulim.ttf) format('truetype'); 
+}
+
+body,
+html {
+  min-height: 100vh;
+  min-width: 100vw;
+  width: 100%;
+  height: 100%;
+  font-family: HoonGothicgulim, sans-serif;
+}
+
+h2.title {
+  position: relative;
+  top: 25px;
+  width: 90%;
+  margin: 0 auto;
+  font-size: 50px;
+  overflow: hidden;
+}
+h2.title span {
+  display: inline-block;
+}
+
+.section {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+.controls {
+  position: absolute;
+  top: 0;
+  right: 50px;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+.controls button {
+  width: 100px;
+  padding: 10px;
+  margin: 20px;
+  box-shadow: none;
+  border: 2px solid transparent;
+  font-family: "Montserrat", sans-serif;
+  cursor: pointer;
+  font-size: 20px;
+  color: #fff;
+  background: #000;
+  transition: all 0.3s ease;
+  position: relative;
+  top: 60%;
+}
+.controls button:hover {
+  color: #000;
+  background: #fff;
+  border: 2px solid #000;
+}
+.controls button:active {
+  outline: none;
+}
+
+.section.active {
+  display: block;
+}
+</style>
+</head>
+<body style="padding:0;margin:0;overflow:hidden;"> 
+
+<link href="https://fonts.googleapis.com/css?family=Teko:300,400" rel="stylesheet">
+
+<div class="section  l1 active" data-slide="1">
+  <h2 class="title">리마크빌에</h2>
+</div>
+
+<div class="section l2" data-slide="2">
+  <h2 class="title">오신것을</h2>
+</div>
+
+<div class="section l3" data-slide="3">
+  <h2 class="title">환영합니다</h2>
+</div>
+
+<div class="section l4" data-slide="4">
+  <h2 class="title">감사합니다!</h2>
+</div>
+<div class="section l5" data-slide="4">
+  <h2 class="title">&nbsp;</h2>
+</div>
+  
+
+
+	<script src="/js/jquery.js"></script> 
+	<script src="/js/TweenMax.min.js"></script>
+	<script> 
+var totaldiv = 0;
+var clickcount = 0;
+var clickcountdown = 0;
+var lastdiv = "";
+
+var colors = ["#757D75","#6C7A89"]
+
+$(".title").each(function() {
+  var self = $(this);
+  var titleSplit = $(this).text();
+  var chararray = titleSplit.split("");
+  $(this).text("");
+
+  $.each(chararray, function(index) {
+    var spanAppend = "<span>" + chararray[index] + "</span>";
+    self.append(spanAppend);
+  });
+  totaldiv++;
+});
+
+function tweenvartersup() {
+  var def = new $.Deferred();
+  var titlespans = $(".section.active .title span");
+  TweenMax.staggerTo(
+    titlespans,
+    0.3,
+    { y: -150, x: -5, autoAlpha: 1, ease: Power3.easeInOut },
+    0.1 - 0.03,
+    resolve
+  );
+  function resolve() {
+    def.resolve();
+  }
+  return def.promise();
+}
+
+function tweenvartersdown() {
+  var def = new $.Deferred();
+  var titlespans = $(".section.active .title span");
+  TweenMax.staggerTo(
+    titlespans,
+    0.3,
+    { y: 150, x: 0, autoAlpha: 1, ease: Power3.easeInOut },
+    0.1 - 0.03,
+    resolve
+  );
+  function resolve() {
+    def.resolve();
+  }
+  return def.promise();
+}
+
+function tweenvarterfromdown() {
+  
+  var titlespans = $(".section.active .title span");
+  TweenMax.staggerFromTo(
+    titlespans,
+    0.3,
+    { y: 200, x: 0, autoAlpha: 0, ease: Power3.easeInOut },
+    { y: 0, x: 0, autoAlpha: 1, ease: Power3.easeInOut },
+    0.1 - 0.03
+  );
+}
+
+function tweenvarterfromup() {
+  var titlespans = $(".section.active .title span");
+  TweenMax.staggerFromTo(
+    titlespans,
+    0.3,
+    { y: -150, x: 0, autoAlpha: 0, ease: Power3.easeInOut },
+    { y: 0, x: 0, autoAlpha: 1, ease: Power3.easeInOut },
+    0.1 - 0.03
+  );
+}
+
+function upText() {
+  tweenvartersup().then(function() {
+    var indexNumber = parseInt(
+      $($(".section.active").next()).attr("data-slide")
+    );
+
+    if (isNaN(indexNumber)) {
+      var nextsection = $(".section.l1");
+      clickcount = 0;
+    } else {
+      var nextsection = $(".section.active").next();
+    }
+
+    $(".section.active").removeClass("active");
+    $(nextsection).addClass("active");
+    tweenvarterfromdown();
+  });
+  clickcount++;
+}
+
+function downText() {
+  tweenvartersdown().then(function() {
+    var indexNumber = parseInt(
+      $($(".section.active").next()).attr("data-slide")
+    );
+
+    if (isNaN(indexNumber)) {
+      var nextsection = $(".section.l1");
+      clickcountdown = 0;
+    } else {
+      var nextsection = $(".section.active").next();
+    }
+
+    $(".section.active").removeClass("active");
+    $(nextsection).addClass("active");
+    tweenvarterfromup();
+  });
+  clickcountdown++;
+}
+	setInterval(downText, 2000);	
+	</script>
+ </body>
+</html>

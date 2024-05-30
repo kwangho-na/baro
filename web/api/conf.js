@@ -1,4 +1,5 @@
 <api>
+	
 	confVal(req, param, &uri) {
 		name=uri.findPos('/').trim()
 		db=Baro.db('config')

@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta charset="UTF-8">
+
+<style> 
+	@font-face {
+	  font-family: HoonGothicgulim;
+	  src: url(/css/fonts/HoonGothicgulim.ttf) format('truetype');
+	  font-style: normal;
+	  unicode-range: U+0-10FFFF;
+	} 
+	.container {
+		min-width: 400px;
+		height: 100vh;
+		align-items: center; 
+		background:#2E3D4B; 
+	}
+
+	.typewriter {
+		font-family: HoonGothicgulim, sans-serif;
+		font-size: 30px;
+		color: #fff;
+		font-weight: bold;
+		position: relative;
+		margin: 0;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	.typewriter span {
+		color: #6AE3FF;
+		text-transform: uppercase;
+		padding: 10px;
+		border-right: solid #6AE3FF 10px; 
+		animation: cursor 1s ease-in-out infinite;
+	}
+
+	@keyframes cursor {
+		from { border-color: #6AE3FF; }
+		to { border-color: transparent; }
+	}
+
+	@media (max-width: 576px) {
+		.typewriter { font-size: 24px; }
+	}
+	@media (max-width: 768px) {
+		.typewriter { font-size: 36px; }
+	}
+</style>
+</head>
+<body style="padding:0;margin:0;overflow:hidden;" onload="initPage()"> 
+	<div class="container">
+		<p class="typewriter">
+			<span data-text="안녕하세요 좋은날씨입니다 건강에 조심하세요"></span>
+		</p>
+	</div>
+	<script src="/js/jquery.js"></script>
+	<script>
+		var textArr = [];
+		var maxTextIndex = 0; 
+
+		var sPerChar = 0.15; 
+		var sBetweenWord = 1.5;
+		var textIndex = 0; 
+		var span = document.querySelector(".typewriter span");
+		function initPage() {
+			setText();
+		}
+		function setTextStyle(text, fontSize, background, fontColor) {
+			setText(text);
+		}
+		function setText(text) {
+			if(!text) text=span.getAttribute("data-text");
+			textArr = text.split(","); 
+			maxTextIndex = textArr.length;  
+			typing(textIndex, textArr[textIndex]); 
+		}
+
+		function typing(textIndex, text) {
+			var charIndex = 0; 
+			var maxCharIndex = text.length - 1; 
+			
+			var typeInterval = setInterval(function () {
+				span.innerHTML += text[charIndex]; 
+				if (charIndex == maxCharIndex) {
+					clearInterval(typeInterval);
+					setTimeout(function() { deleting(textIndex, text) }, sBetweenWord * 1000); 
+					
+				} else {
+					charIndex += 1; 
+				}
+			}, sPerChar * 1000); 
+		}
+
+		function deleting(textIndex, text) {
+			var minCharIndex = 0; 
+			var charIndex = text.length - 1; 
+
+			var typeInterval = setInterval(function () {
+				span.innerHTML = text.substr(0, charIndex); 
+				if (charIndex == minCharIndex) {
+					clearInterval(typeInterval);
+					textIndex + 1 == maxTextIndex ? textIndex = 0 : textIndex += 1; 
+					setTimeout(function() { typing(textIndex, textArr[textIndex]) }, sBetweenWord * 1000); 
+				} else {
+					charIndex -= 1; 
+				}
+			}, sPerChar * 1000); 
+		}	
+	</script>
+ </body>
+</html>

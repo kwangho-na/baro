@@ -1,0 +1,147 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<style>  
+	
+main {
+    width: 100vw;
+    height: 100vh; 
+    align-items: center;
+    justify-content: center;
+}
+
+.clock { 
+    align-items: center;
+    justify-content: center;
+    background: rgb(39, 39, 39) ;
+    border: solid 6px rgb(100, 100, 100) ;
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    scale: 1;
+}
+
+.clock > div {
+    position: absolute;
+}
+.centerdot {
+    background-color: #ffffff;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+#secbar {
+    width: 160px;
+    height: 160px;
+}
+#secbar .indicator {
+    position: relative;
+    top: 0%;
+    left: calc(50% - 2px / 2);
+    width: 2px;
+    height: 100px;
+    background: #ffffff;
+    border-radius: 100px;
+}
+
+#minbar {
+    width: 160px;
+    height: 120px;
+}
+
+#minbar .indicator {
+    position: relative;
+    top: 0%;
+    left: calc(50% - 3.5px / 2);
+    width: 3.5px;
+    height: 75px;
+    background: #48cae4;
+    border-radius: 30px;
+}
+
+#hourbar {
+    width: 160px;
+    height: 100px;
+}
+
+#hourbar .indicator {
+    position: relative;
+    top: 0%;
+    left: calc(50% - 5.5px / 2);
+    width: 5.5px;
+    height: 50px;
+    background: #ef476f;
+    border-radius: 30px;
+}
+	</style>
+</head>
+<body style="overflow:hidden" onload="updateTime()">
+<main>
+    <div class="clock">
+        <div id="hourbar">
+            <div class="indicator"></div>
+        </div>
+        <div id="minbar">
+			<div class="indicator"></div>
+        </div>
+        <div id="secbar">
+            <div class="indicator"></div>
+            </div>
+    	<div class="centerdot"></div>
+    </div>
+</main>
+
+ 
+<!-- JavaScript Includes -->
+	<script src="/js/jquery.js"></script>
+	<script>
+
+//Time 12h
+	var currsec = 0
+	var currmin = 0
+	var currhour = 0
+	var now;
+
+	var secbar = document.getElementById("secbar")
+	var minbar = document.getElementById("minbar")
+	var hourbar = document.getElementById("hourbar")
+
+	function updateClock() {
+		now = new Date();
+		currsec = now.getSeconds()
+		currmin = now.getMinutes()
+		currhour = now.getHours()
+
+		secrotateamount = (currsec * 360) / 60  
+		minrotateamount = (currmin * 360) / 60 
+		hourrotateamount = (currhour * 720) / 24
+
+		if (currsec == 0) {
+			secbar.style.transition = "0s"
+		} else {
+			secbar.style.transition = "0.5s"
+		}
+		if (currmin == 0) {
+			minbar.style.transition = "0s"
+		} else {
+			minbar.style.transition = "0.5s"
+		}
+		if (currhour == 0) {
+			hourbar.style.transition = "0s"
+		} else {
+			hourbar.style.transition = "0.5s"
+		}
+
+		secbar.style.rotate = secrotateamount + 'deg'
+		minbar.style.rotate = minrotateamount + 'deg'
+		hourbar.style.rotate = hourrotateamount + 'deg'
+
+	}
+
+	setInterval(function() {
+		updateClock()
+	}, 500);
+
+	</script>
+</body>
+</html>

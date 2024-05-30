@@ -1,0 +1,132 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<style>
+.clock {
+	text-align: center;
+	width: 200px;
+	height: 100px;
+}
+.date {
+	width: 100%;
+	color: #333;
+	text-align: center;
+	font-size: 16px;
+}
+.date, .hr, .min, .sec, .colon {
+	padding: 8px;
+	color: #666;
+	text-shadow: 0 0 10px #bbb, 0 0 15px #ddd;
+}
+.hr, .min, .sec, .colon {
+	float: left;
+	text-align: center;
+	font-size: 30px;
+}
+	</style>
+</head>
+
+<body onload="initPage()"> 
+ 
+    <div class='clock'>
+      <div class='date'></div>
+      <div class='hr'></div>
+      <div class='colon'>:</div>
+      <div class='min'></div>
+      <div class='colon'>:</div>
+      <div class='sec'></div>
+    </div>
+ 
+<!-- JavaScript Includes -->
+	<script src="/js/jquery.js"></script>
+	<script>  
+	function setClockColor(background, color ) {
+		var bk=rgbToHex(background);
+		var clr=rgbToHex(color);
+		$('.clock').css('background-color', bk);
+		$('.clock').css('color', clr);		
+	}
+	
+	String.prototype.padLeft = function(length, char) {
+		return char.repeat(Math.max(0, length - this.length)) + this;
+	}
+
+	function initPage() {
+		clock();
+		setClockColor('#fff','#aaa');
+		setInterval( clock, 1000 );
+	}
+	function setClockStyle() {
+	}		
+		 
+				
+	function genTimerStrings(tm){
+		var i=0,num=2;
+		var ret = tm.toString(10);
+		var left = ret.length;
+
+		if( left < num){
+			for(i=0; i<( num - left ); i++ ){
+				ret = String(0) + ret;
+			}
+		}
+
+		return ret;
+	}
+
+	function clock() {
+	  
+	  // a crete date object
+	  var d = new Date();
+	  
+	  // get year
+	  var year = d.getFullYear().toString()
+	  
+	  // get month - from 0 to 11
+	  var month = genTimerStrings( d.getMonth() + 1 )
+	  
+	  // get day of the month - from 1 to 31
+	  var day = genTimerStrings(d.getDate() )
+	  
+	  // get day of the week - from 0 to 6
+	  // get name of the weekday, 0 = Sunday, 1 = Monday, 2 = Tuesday, ...
+	  switch ( d.getDay() ) {
+		case 1: 
+		  var weekDay = '월'; break;
+		case 2: 
+		  var weekDay = '화'; break;
+		case 3: 
+		  var weekDay = '수'; break;
+		case 4: 
+		  var weekDay = '목'; break;
+		case 5: 
+		  var weekDay = '금'; break;
+		case 6: 
+		  var weekDay = '토'; break;
+		case 0: 
+		  var weekDay = '일'; break;
+	  }
+	  
+	  // add leading zero
+	  var hr = genTimerStrings( d.getHours() ) 
+	  var min = genTimerStrings( d.getMinutes() ) 
+	  var sec = genTimerStrings( d.getSeconds() ) 
+	  
+	  // set content of date
+	  $('.clock .date').html(year + '-' + month + '-' + day + ' ' + weekDay);
+	  
+	  // set content of hour
+	  $('.clock .hr').html(hr);
+	  
+	  // set content of minute
+	  $('.clock .min').html(min);
+	  
+	  // set content of second
+	  $('.clock .sec').html(sec);
+	}
+
+
+
+	</script>
+</body>
+</html>

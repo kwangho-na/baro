@@ -1,0 +1,282 @@
+<html>
+<head>
+	<style>
+@font-face{
+ font-family:'digital-7';
+ src: url('./fonts/digital-7.ttf');
+}
+body {
+	float: left;
+	font-family: 'digital-7', sans-serif;
+	margin:0;
+	padding:0;
+	overflow: hidden;
+}
+body h1 {
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  font-family: sans-serif;
+  padding-bottom: 5px;
+}
+
+.light-on {
+	color: #f1e3e3 !important;
+}
+
+/* CLOCK */
+.clock-field {
+	margin: 8px;
+	float: left;
+}
+.clock-field div {
+	display: inline-block;
+	position: relative;
+}
+.clock-field div p {
+	font-size: 100px;
+	position: relative;
+	z-index: 100;
+}
+.clock-field .numbers .placeholder { 
+	position: absolute;
+	top: 0;
+	z-index: 50;
+}
+.clock-field .numbers .type {
+  font-size: 10px;
+  font-weight: bold;
+  font-family: sans-serif;
+  text-transform: uppercase;
+  margin-top: -10px;
+}
+.clock-field .am-pm {
+	font-family: sans-serif;
+	text-transform: uppercase;
+	width: 20px;
+}
+.clock-field .am-pm div p {
+	font-size: 12px;
+	font-weight: bold;
+	width: 100%;
+}
+.clock-field .am, .clock-field .pm {
+	color: #2b2828;
+}
+
+@media (max-width:550px) {
+  .clock-field div p {
+  	font-size: 80px;
+  }
+}
+
+@media (max-width:468px) {
+  .clock-field div p {
+  	font-size: 60px;
+  }
+}
+
+@media (max-width:400px) {
+  .clock-field .am-pm div p {
+    font-size: 10px;
+  }
+  .clock-field div p {
+  	font-size: 50px;
+  }
+}
+
+@media (max-width:350px) {
+  .clock-field div p {
+  	font-size: 43px;
+  }
+}
+
+@media (max-width:320px) {
+  .clock-field div p {
+  	font-size: 40px;
+  }
+}
+
+	</style>
+</head>
+<body onload="init()"> 
+  
+ <div class="clock-field">
+			<div class="numbers">
+				<p class="hours"></p>
+				<p class="placeholder">88</p>
+			</div>
+			<div class="colon">
+				<p>:</p>
+			</div>
+			<div class="numbers">
+				<p class="minutes"></p>
+				<p class="placeholder">88</p>
+			</div>
+			<div class="colon">
+				<p>:</p>
+			</div>
+			<div class="numbers">
+				<p class="seconds"></p>
+				<p class="placeholder">88</p>
+			</div>
+			<div class="am-pm">
+				<div>
+					<p class="am">am</p>
+				</div>
+				<div>
+					<p class="pm">pm</p>
+				</div>
+			</div>
+		</div>
+ 
+<!-- JavaScript Includes -->
+	<script src="/js/jquery.js"></script>
+	<script> 
+	var fontDarkMode=false;
+	var fontBkColor='#aaa';
+	
+	function init(){
+		updateClock();
+		setClockColor('#222','#aaa');
+		setInterval(function(){
+			updateClock();
+		}, 1000);
+	}
+
+	function updateClock(){
+		resetClock();
+		getCurrentTime();
+		displayCurrentTime();
+	}
+
+	function getCurrentTime(){
+		var fullDate = new Date();
+		var month = fullDate.getMonth();
+		var date = fullDate.getDate();
+		var year = fullDate.getFullYear();
+		var day = fullDate.getDay();
+		var	hours = fullDate.getHours();
+		var	minutes = fullDate.getMinutes();
+		var	seconds = fullDate.getSeconds();
+		var period = (hours >= 12) ? "pm" : "am";
+		window.clock = {};
+		window.clock.time = {
+			/*
+			fullDate: fullDate,
+			month: month,
+			date: date,
+			year: year,
+			day: day,
+			*/
+			hours: hours,
+			minutes: minutes,
+			seconds: seconds,
+			period: period
+		};
+	}
+
+	function displayCurrentTime(){
+		var hours = window.clock.time.hours;
+		var minutes = window.clock.time.minutes;
+		var seconds = window.clock.time.seconds;
+		var period = window.clock.time.period;
+
+		//formats hours
+		hours = (hours > 12) ? (hours - 12) : hours;
+		hours = (hours === 0) ? 12 : hours;
+		hours = (hours <= 9) ? ("0" + hours) : hours;
+		//formats minutes
+		minutes = (minutes <= 9) ? ("0" + minutes) : minutes;
+		//formats seconds
+		seconds = (seconds <= 9) ? ("0" + seconds) : seconds;
+		/*
+		var day = window.clock.time.day;
+		var month = window.clock.time.month;
+		var date = window.clock.time.date;
+		var year = window.clock.time.year;
+		//formats day
+		var days = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+		var dayText = '';
+		if(days[day].length === 6) dayText = '<span style="color: #2b2828;">ooo</span>'+days[day];
+		if(days[day].length === 7) dayText = '<span style="color: #2b2828;">oo</span>'+days[day];
+		if(days[day].length === 8) dayText = '<span style="color: #2b2828;">o</span>'+days[day];
+		if(days[day].length === 9) dayText = '<span style="color: #2b2828;"></span>'+days[day];
+		//formats mobile day
+		var mobileDays = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+		//formats month
+		var months = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+		//formats date
+		date = (date <= 9) ? ("0" + date) : date;
+		*/
+		// targets the html
+
+		var hoursHtml = document.getElementsByClassName('hours')[0];
+		var minutesHtml = document.getElementsByClassName('minutes')[0];
+		var secondsHtml = document.getElementsByClassName('seconds')[0];
+		var periodHtml = document.getElementsByClassName(period)[0];
+
+		// changes the html values
+		
+		hoursHtml.innerHTML = hours;
+		minutesHtml.innerHTML = minutes;
+		secondsHtml.innerHTML = seconds;
+		if(fontDarkMode) {
+			$(periodHtml).css('color','#eee');
+		} else {
+			$(periodHtml).css('color','#554');
+		}
+		
+	}
+
+	function resetClock() {
+		var lights = document.querySelectorAll(".light-on");
+		if(lights) {
+			for(var n=0;n<lights.length; n++ ) {
+				var item=lights[n];
+				item.classList.remove("light-on");
+			}
+		}
+	}
+	function setClockColor(background, color, darkMode) {
+		var bk=rgbToHex(background);
+		var clr=rgbToHex(color);
+		var vel=0.1;
+		if(darkMode) vel*=-1;
+		if(!bk) bk='eee';
+		if(!clr) clr='334';
+		fontBkColor=convertColor(bk,vel);
+		fontDarkMode=darkMode? true: false;
+		$('body').css('background-color', bk);
+		$('body').css('color', clr);
+		$('.clock-field .numbers .placeholder').css('color',fontBkColor);
+		$('.clock-field .am').css('color',fontBkColor);
+		$('.clock-field .am').css('color',fontBkColor); 
+		
+	}
+	function convertColor(hex, lum) {
+		// validate hex string
+		/*
+		convertColor("#69c", 0);		// returns "#6699cc"
+		convertColor("6699CC", 0.2);	// "#7ab8f5" - 20% lighter
+		convertColor("69C", -0.5);	// "#334d66" - 50% darker
+		*/
+		hex = hex.replace(/[^0-9a-f]/gi, '');
+		if (hex.length < 6) {
+			hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+		}
+		lum = lum || 0;
+		var rgb = "#", c, i;
+		for (i = 0; i < 3; i++) {
+			c = parseInt(hex.substr(i*2,2), 16);
+			c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+			rgb += ("00"+c).substr(c.length);
+		}
+
+		return rgb;
+	}
+
+	</script>
+</body>
+</html>

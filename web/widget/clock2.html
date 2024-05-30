@@ -1,0 +1,66 @@
+<html>
+<head>
+	<style>
+	  @import url("https://fonts.googleapis.com/css2?family=Londrina+Solid&display=swap");
+
+* {
+box-sizing: border-box;
+padding: 0;
+margin: 0;
+}
+
+body {
+display: flex;
+align-items: center;
+justify-content: center;
+min-height: 100vh;
+text-align: center;
+background-color: #08798c;
+font-family: sans-serif;
+}
+
+.container {
+border-radius: 10px;
+background: #f7f9f7;
+box-shadow: 0px 0px 20px #282d28;
+padding: 2rem 3rem 3rem 3rem;
+color: #191414;
+cursor: default;
+}
+span {
+font-size: 2rem;
+}
+
+.digital-clock {
+font-size: 3.5rem;
+margin-bottom: 30px;
+letter-spacing: 0.3rem;
+color: #095888;
+}
+
+	</style>
+</head>
+<body> 
+  <div class="container">
+
+	<div class="digital-clock" id="digital-clock"></div>
+	<span>DIGITAL CLOCK</span>
+	</div>
+
+ 
+<!-- JavaScript Includes -->
+	<script src="/js/jquery.js"></script>
+	<script src="/js/moment.min.js"></script>
+	<script>
+		 let clock = document.getElementById("digital-clock");
+
+      setInterval(() => {
+        let date = new Date();
+        clock.innerHTML = date.toLocaleTimeString();
+      }, 1000);
+
+
+
+	</script>
+</body>
+</html>

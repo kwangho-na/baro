@@ -1,0 +1,191 @@
+<html>
+<head>
+	<style>  
+	
+	*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+ 
+html{
+  font-size: 5px;
+}
+
+body{
+  height: 100vh;
+  background-color: #202020;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+#main-container{
+  display: inline-grid;
+  grid-template-columns: repeat(5, auto);
+  grid-gap: 1rem;
+}
+
+.box-number{
+  width: (calc( 5rem*4) + (1rem*3) );
+  display: inline-grid;
+  grid-template-columns: repeat(4, auto);
+  grid-gap: 1rem;
+}
+
+#space.box-number{
+  grid-template-columns: repeat(2, auto);
+}
+
+.clock{
+  width: 5rem;
+  height: 5rem;
+  
+  border-radius: 360px;
+  /*background-color: red;*/
+  position: relative;
+  transition: 1s;
+}
+
+#main-container.digital-mode .clock{border: .1rem solid #606060;}
+.clock{border: .1rem solid #303030;}
+#main-container.digital-mode .clock span.p-h,
+#main-container.digital-mode .clock span.p-m{
+  background-color: #ffffff;
+}
+
+.clock span.p-m,
+.clock span.p-h{
+  width: .2rem;    
+  display: inline-block;
+  position: absolute;
+  left: 50%;
+  translate: -50%;
+  transform-origin: bottom;
+  transition: 1s;
+}
+
+.clock span.p-m{
+  height: calc(5rem/2.5);
+  background-color: green;
+  background-color: #fff;
+  top: calc( (5rem/2) - (5rem/2.5) );
+}
+
+.clock span.p-h{
+  height: calc(5rem/3);
+  background-color: blue;
+  background-color: #fff;
+  top: calc( (5rem/2) - (5rem/3) );
+}
+
+
+	</style>
+</head>
+<body> 
+ 
+
+	<div id="main-container" class="digital-mode"></div>
+ 
+<!-- JavaScript Includes -->
+	<script src="jquery.js"></script>
+	<script>
+	 $(document).ready(function(){
+  var numbers = [
+    [0, 4, 4, 1, 5, 0, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2, 3, 5, 2, 4, 4, 3],
+    [6, 6, 0, 1, 6, 6, 5, 5, 6, 6, 5, 5, 6, 6, 5, 5, 6, 6, 5, 5, 6, 6, 2, 3],
+    [0, 4, 4, 1, 2, 4, 1, 5, 0, 4, 3, 5, 5, 0, 4, 3, 5, 2, 4, 1, 2, 4, 4, 3],
+    [0, 4, 4, 1, 2, 4, 1, 5, 0, 4, 3, 5, 2, 4, 1, 5, 0, 4, 3, 5, 2, 4, 4, 3],
+    [0, 1, 0, 1, 5, 5, 5, 5, 5, 2, 3, 5, 2, 4, 1, 5, 6, 6, 5, 5, 6, 6, 2, 3],
+    [0, 4, 4, 1, 5, 0, 4, 3, 5, 2, 4, 1, 2, 4, 1, 5, 0, 4, 3, 5, 2, 4, 4, 3],
+    [0, 4, 4, 1, 5, 0, 4, 3, 5, 2, 4, 1, 5, 0, 1, 5, 5, 2, 3, 5, 2, 4, 4, 3],
+    [0, 4, 4, 1, 2, 4, 1, 5, 6, 6, 5, 5, 6, 6, 5, 5, 6, 6, 5, 5, 6, 6, 2, 3],
+    [0, 4, 4, 1, 5, 0, 1, 5, 5, 2, 3, 5, 5, 0, 1, 5, 5, 2, 3, 5, 2, 4, 4, 3],
+    [0, 4, 4, 1, 5, 0, 1, 5, 5, 2, 3, 5, 2, 4, 1, 5, 0, 4, 3, 5, 2, 4, 4, 3],
+    /*[6, 6, 6, 6, 6, 0, 1, 6, 6, 2, 3, 6, 6, 0, 1, 6, 6, 2, 3, 6, 6, 6, 6, 6]*/
+    [6, 6, 0, 1, 2, 3, 0, 1, 2, 3, 6, 6]
+  ];
+  
+  //var rules = [ "ctl", "ctr", "cbl", "cbr", "lx", "ly", "dtrbl" ];
+  var rules_num = [ 
+    [90, 180], [180, 270], [0, 90], [0, 270], [90, 270], [180, 0]/*, [45, 225]*/, [0, 0]
+  ];
+ 
+  var today = new Date();
+  var h = today.getHours();
+  var m = today.getMinutes();
+
+  
+  function drawNumber(char, id){
+    $("#main-container").append('<div class="box-number number-'+char+'" id="'+id+'"></div>');
+    for(var i = 0; i < numbers[char].length; i++){
+      $("#"+id).append('<div class="clock"><span class="p-m"></span><span class="p-h"></span></div>');
+
+    }
+  }
+
+  function drawCss(char){
+    var i = char;
+    for(var j = 1; j < numbers[i].length+1; j++){
+      $("#css-box-clocks").append(`
+        .number-${i} .clock:nth-child(${j}) .p-m{rotate:${rules_num[numbers[i][j-1]][0]}deg;${numbers[i][j-1]===6?'background-color:#303030;':''}}
+        .number-${i} .clock:nth-child(${j}) .p-h{rotate:${rules_num[numbers[i][j-1]][1]}deg;${numbers[i][j-1]===6?'background-color:#303030;':''}}
+      `);
+    }
+
+  }
+
+  for(var i = 0; i < numbers.length; i++){
+    drawCss(i);
+  }
+  
+  drawNumber(0, "h-1");
+  drawNumber(0, "h-2");
+  drawNumber(10, "space");
+  drawNumber(0, "m-1");
+  drawNumber(0, "m-2");
+  
+  $("#css-box-animations").empty().append(`
+    #main-container.digital-mode .clock span.p-m{rotate: ${0}deg}
+    #main-container.digital-mode .clock span.p-h{rotate: ${0}deg}
+  `)
+
+  setInterval(function(){
+    var today = new Date();
+    var h = today.getHours();
+    var m = today.getMinutes().toFixed(0);
+    h = (h + (m / 100));
+    var timeString = String(Math.floor(h)).padStart(2, "0") + String(m).padStart(2, "0");
+    
+    if( $("#main-container").hasClass("digital-mode") ){
+      $("#css-box-animations").empty().append(`
+        #main-container.digital-mode .clock span.p-m{rotate: ${(m*360) / 60}deg}
+        #main-container.digital-mode .clock span.p-h{rotate: ${(h*360) / 12}deg}
+      `)
+      
+    }else{
+      for(var i = 0; i < 10; i++){
+        $(".box-number").removeClass(`number-${i}`);
+      }
+
+      $("#h-1").addClass(`number-${timeString[0]}`);
+      $("#h-2").addClass(`number-${timeString[1]}`);
+      $("#m-1").addClass(`number-${timeString[2]}`);
+      $("#m-2").addClass(`number-${timeString[3]}`);
+    }
+    
+    
+    
+  }, 1000);
+  
+  $("body").click(function(){
+    $("#main-container").toggleClass("digital-mode");
+  })
+  
+});
+
+	</script>
+</body>
+</html>

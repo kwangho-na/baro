@@ -1,0 +1,76 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<style> 
+	@font-face {
+	  font-family: HoonGothicgulim;
+	  src: url(/css/fonts/HoonGothicgulim.ttf) format('truetype'); 
+	}
+	body { 
+	  font-family: HoonGothicgulim, Arial, sans-serif; 
+	  background: #becccc; 
+	  color: #fff; 
+	  text-align: center; 
+	}
+
+
+	h2{
+	  font-size:40px;
+	  position:relative;
+	  font-weight: bold;
+	  cursor: pointer;
+	}
+
+.superShadow {
+  text-shadow:     0 1px 0 hsl(174,5%,80%),
+	                 0 2px 0 hsl(174,5%,75%),
+	                 0 3px 0 hsl(174,5%,70%),
+	                 0 4px 0 hsl(174,5%,66%),
+	                 0 5px 0 hsl(174,5%,64%),
+	                 0 6px 0 hsl(174,5%,62%),
+	                 0 7px 0 hsl(174,5%,61%),
+	                 0 8px 0 hsl(174,5%,60%),
+	
+	                 0 0 5px rgba(0,0,0,.05),
+	                0 1px 3px rgba(0,0,0,.2),
+	                0 3px 5px rgba(0,0,0,.2),
+	               0 5px 10px rgba(0,0,0,.2),
+	              0 10px 10px rgba(0,0,0,.2),
+	              0 20px 20px rgba(0,0,0,.3);
+}
+
+strong{
+  font-size:60px;
+}
+</style>
+</head>
+<body style="padding:0;margin:0;overflow:hidden;"> 
+
+
+
+<h2>안녕하세요 스크롤 텍스트 입니다 Smile messenger</h2> 
+
+
+	<script src="/js/jquery.js"></script>
+	<script src="/js/TweenMax.min.js"></script>
+	<script> 
+
+$("h2").each(function(index, element){
+  var animation = TweenMax.to(this, 0.2, {
+    className: '+= superShadow',
+    marginTop: '-10px',
+    marginBottom: '10px',
+    ease: Power1.easeIn,
+    paused:true
+  });
+  element.animation = animation;
+})
+
+
+$('h2').each(function(){
+	this.animation.play();
+	// this.animation.reverse();
+})
+	</script>
+ </body>
+</html>

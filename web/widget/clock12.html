@@ -1,0 +1,383 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<style>  
+	
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  min-width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background-color: #eaeaeb;
+}
+
+.clock {
+  display: flex;
+  flex-direction: row;
+}
+
+.clock__digit {
+  width: 100px;
+  height: 200px;
+  margin: 0 10px;
+  display: grid;
+  grid-template-areas: "g1 g2 g3" "g4 .  g5" "g6 g7 g8" "g9 .  g10" "g11 g12 g13";
+  grid-template-rows: 1fr 2fr 1fr 2fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
+  grid-column-gap: 5px;
+  grid-row-gap: 10px;
+}
+
+.clock__digit > span {
+  background-color: #eaeaeb;
+  box-shadow: 0 0 0 #c0c4c8, 0 0 0 white;
+  position: relative;
+  transition: box-shadow 0.75s ease;
+}
+.clock__digit > span:nth-child(1) {
+  grid-area: g1;
+  z-index: 1;
+}
+.clock__digit > span:nth-child(2) {
+  grid-area: g2;
+  z-index: 2;
+}
+.clock__digit > span:nth-child(3) {
+  grid-area: g3;
+  z-index: 3;
+}
+.clock__digit > span:nth-child(4) {
+  grid-area: g4;
+  z-index: 4;
+}
+.clock__digit > span:nth-child(5) {
+  grid-area: g5;
+  z-index: 5;
+}
+.clock__digit > span:nth-child(6) {
+  grid-area: g6;
+  z-index: 6;
+}
+.clock__digit > span:nth-child(7) {
+  grid-area: g7;
+  z-index: 7;
+}
+.clock__digit > span:nth-child(8) {
+  grid-area: g8;
+  z-index: 8;
+}
+.clock__digit > span:nth-child(9) {
+  grid-area: g9;
+  z-index: 9;
+}
+.clock__digit > span:nth-child(10) {
+  grid-area: g10;
+  z-index: 10;
+}
+.clock__digit > span:nth-child(11) {
+  grid-area: g11;
+  z-index: 11;
+}
+.clock__digit > span:nth-child(12) {
+  grid-area: g12;
+  z-index: 12;
+}
+.clock__digit > span:nth-child(13) {
+  grid-area: g13;
+  z-index: 13;
+}
+.clock__digit > span:nth-child(14) {
+  grid-area: g14;
+  z-index: 14;
+}
+
+.clock__spacer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  margin: 0 40px;
+}
+.clock__spacer:before, .clock__spacer:after {
+  content: "";
+  display: block;
+  box-shadow: 5px 5px 12px #c0c4c8, -5px -5px 12px white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.clock__digit.zero span:nth-child(1),
+.clock__digit.zero span:nth-child(2),
+.clock__digit.zero span:nth-child(3),
+.clock__digit.zero span:nth-child(4),
+.clock__digit.zero span:nth-child(5),
+.clock__digit.zero span:nth-child(6),
+.clock__digit.zero span:nth-child(8),
+.clock__digit.zero span:nth-child(9),
+.clock__digit.zero span:nth-child(10),
+.clock__digit.zero span:nth-child(11),
+.clock__digit.zero span:nth-child(12),
+.clock__digit.zero span:nth-child(13), .clock__digit.one span:nth-child(3),
+.clock__digit.one span:nth-child(5),
+.clock__digit.one span:nth-child(8),
+.clock__digit.one span:nth-child(10),
+.clock__digit.one span:nth-child(13), .clock__digit.two span:nth-child(1),
+.clock__digit.two span:nth-child(2),
+.clock__digit.two span:nth-child(3),
+.clock__digit.two span:nth-child(5),
+.clock__digit.two span:nth-child(6),
+.clock__digit.two span:nth-child(7),
+.clock__digit.two span:nth-child(8),
+.clock__digit.two span:nth-child(9),
+.clock__digit.two span:nth-child(11),
+.clock__digit.two span:nth-child(12),
+.clock__digit.two span:nth-child(13), .clock__digit.three span:nth-child(1),
+.clock__digit.three span:nth-child(2),
+.clock__digit.three span:nth-child(3),
+.clock__digit.three span:nth-child(5),
+.clock__digit.three span:nth-child(6),
+.clock__digit.three span:nth-child(7),
+.clock__digit.three span:nth-child(8),
+.clock__digit.three span:nth-child(10),
+.clock__digit.three span:nth-child(11),
+.clock__digit.three span:nth-child(12),
+.clock__digit.three span:nth-child(13), .clock__digit.four span:nth-child(1),
+.clock__digit.four span:nth-child(3),
+.clock__digit.four span:nth-child(4),
+.clock__digit.four span:nth-child(5),
+.clock__digit.four span:nth-child(6),
+.clock__digit.four span:nth-child(7),
+.clock__digit.four span:nth-child(8),
+.clock__digit.four span:nth-child(10),
+.clock__digit.four span:nth-child(13), .clock__digit.five span:nth-child(1),
+.clock__digit.five span:nth-child(2),
+.clock__digit.five span:nth-child(3),
+.clock__digit.five span:nth-child(4),
+.clock__digit.five span:nth-child(6),
+.clock__digit.five span:nth-child(7),
+.clock__digit.five span:nth-child(8),
+.clock__digit.five span:nth-child(10),
+.clock__digit.five span:nth-child(11),
+.clock__digit.five span:nth-child(12),
+.clock__digit.five span:nth-child(13), .clock__digit.six span:nth-child(1),
+.clock__digit.six span:nth-child(2),
+.clock__digit.six span:nth-child(3),
+.clock__digit.six span:nth-child(4),
+.clock__digit.six span:nth-child(6),
+.clock__digit.six span:nth-child(7),
+.clock__digit.six span:nth-child(8),
+.clock__digit.six span:nth-child(9),
+.clock__digit.six span:nth-child(10),
+.clock__digit.six span:nth-child(11),
+.clock__digit.six span:nth-child(12),
+.clock__digit.six span:nth-child(13), .clock__digit.seven span:nth-child(1),
+.clock__digit.seven span:nth-child(2),
+.clock__digit.seven span:nth-child(3),
+.clock__digit.seven span:nth-child(5),
+.clock__digit.seven span:nth-child(8),
+.clock__digit.seven span:nth-child(10),
+.clock__digit.seven span:nth-child(13), .clock__digit.eight span:nth-child(1),
+.clock__digit.eight span:nth-child(2),
+.clock__digit.eight span:nth-child(3),
+.clock__digit.eight span:nth-child(4),
+.clock__digit.eight span:nth-child(5),
+.clock__digit.eight span:nth-child(6),
+.clock__digit.eight span:nth-child(7),
+.clock__digit.eight span:nth-child(8),
+.clock__digit.eight span:nth-child(9),
+.clock__digit.eight span:nth-child(10),
+.clock__digit.eight span:nth-child(11),
+.clock__digit.eight span:nth-child(12),
+.clock__digit.eight span:nth-child(13), .clock__digit.nine span:nth-child(1),
+.clock__digit.nine span:nth-child(2),
+.clock__digit.nine span:nth-child(3),
+.clock__digit.nine span:nth-child(4),
+.clock__digit.nine span:nth-child(5),
+.clock__digit.nine span:nth-child(6),
+.clock__digit.nine span:nth-child(7),
+.clock__digit.nine span:nth-child(8),
+.clock__digit.nine span:nth-child(10),
+.clock__digit.nine span:nth-child(13) {
+  box-shadow: 5px 5px 12px #c0c4c8, -5px -5px 12px white;
+}
+
+	</style>
+</head>
+<body style="overflow:hidden" onload="updateTime()">
+
+ <div class="clock">
+  <div id="h1" class="clock__digit">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+  <div id="h2" class="clock__digit">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <div class="clock__spacer"></div>
+
+  <div id="m1" class="clock__digit">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+  <div id="m2" class="clock__digit">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <div class="clock__spacer"></div>
+
+  <div id="s1" class="clock__digit">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+  <div id="s2" class="clock__digit">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+
+ 
+<!-- JavaScript Includes -->
+	<script src="/js/jquery.js"></script>
+	<script>
+var numname = [
+  "zero",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine"
+];
+
+function getCurrentSeconds() {
+  var dNow = new Date();
+  return dNow.getSeconds() + 60 * (dNow.getMinutes() + 60 * dNow.getHours());
+}
+
+var s1 = document.getElementById("s1");
+var s2 = document.getElementById("s2");
+
+var m1 = document.getElementById("m1");
+var m2 = document.getElementById("m2");
+
+var h1 = document.getElementById("h1");
+var h2 = document.getElementById("h2");
+
+var start = new Date().getTime();
+var interval = 1000;
+
+function countUp() {
+  var count = getCurrentSeconds();
+
+  // Only update if at least a second has passed.
+  if (new Date().getTime() - start >= interval) {
+    start = new Date().getTime();
+
+    s2.className = "clock__digit " + numname[(count % 60) % 10];
+
+    s1.className = "clock__digit " + numname[Math.floor((count % 60) / 10)];
+
+    m2.className =
+      "clock__digit " + numname[Math.floor(((count / 60) % 60) % 60) % 10];
+
+    m1.className =
+      "clock__digit " + numname[Math.floor((((count / 60) % 60) % 60) / 10)];
+
+    h2.className =
+      "clock__digit " + numname[Math.floor(((count / 3600) % 60) % 24) % 10];
+
+    h1.className =
+      "clock__digit " + numname[Math.floor((((count / 3600) % 60) % 24) / 10)];
+  }
+
+  requestAnimationFrame(countUp);
+}
+
+var raf = requestAnimationFrame(countUp);
+
+
+	</script>
+</body>
+</html>

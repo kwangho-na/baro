@@ -1,0 +1,116 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<style> 
+ 	@font-face {
+	  font-family: HoonGothicgulim;
+	  src: url(/css/fonts/HoonGothicgulim.ttf) format('truetype'); 
+	} 
+	body {
+	  background: #2d2d2d;
+	}
+
+	.Iam {
+	  font: normal 40px/50px HoonGothicgulim, sans-serif;
+	  color: #999;
+	  margin-left: 8px;
+	}
+	.Iam p {
+		height: 50px;
+		float: left;
+		margin-right: 0.3em;
+	}
+	.Iam b {
+		float: left;
+		overflow: hidden;
+		position: relative;
+		height: 50px; 
+	}
+	.Iam .innerIam {
+		display: inline-block;
+		color: #e74c3c;
+		position: relative;
+		white-space: nowrap;
+		top: 0;
+		left: 0;
+		/*animation*/
+		-webkit-animation:move 25s;
+		   -moz-animation:move 25s;
+			-ms-animation:move 25s;
+			 -o-animation:move 25s;
+				animation:move 25s;
+		/*animation-iteration-count*/
+		-webkit-animation-iteration-count:infinite;
+		   -moz-animation-iteration-count:infinite;
+			-ms-animation-iteration-count:infinite;
+			 -o-animation-iteration-count:infinite;
+				animation-iteration-count:infinite;
+		/*animation-delay*/
+		-webkit-animation-delay:6s;
+		   -moz-animation-delay:6s;
+			-ms-animation-delay:6s;
+			 -o-animation-delay:6s;
+				animation-delay:6s;
+	}
+	@keyframes move{
+		0%  { top: 0px; }
+		20% { top: -50px; }
+		40% { top: -100px; }
+		60% { top: -150px; }
+		80% { top: -200px; }
+	}
+
+	@-webkit-keyframes move {
+		0%  { top: 0px; }
+		20% { top: -50px; }
+		40% { top: -100px; }
+		60% { top: -150px; }
+		80% { top: -200px; }
+	}
+	@-moz-keyframes move {
+		0%  { top: 0px; }
+		20% { top: -50px; }
+		40% { top: -100px; }
+		60% { top: -150px; }
+		80% { top: -200px; }
+	}
+	@-o-keyframes move {
+		0%  { top: 0px; }
+		20% { top: -50px; }
+		40% { top: -100px; }
+		60% { top: -150px; }
+		80% { top: -200px; }
+	}
+	@keyframes move {
+		0%  { top: 0px; }
+		20% { top: -50px; }
+		40% { top: -100px; }
+		60% { top: -150px; }
+		80% { top: -200px; }
+	}
+</style>
+</head>
+<body style="padding:0;margin:0;overflow:hidden;" onload="initPage()"> 
+	<div class="Iam">  
+		<b>
+		  <div class="innerIam">
+			leggera<br /> 
+			a theme in progress<br />
+			built on bootstrap<br />
+			how I learn stuff<br />
+			how we do it
+			</div>
+		</b>
+	</div>
+
+	<script src="/js/jquery.js"></script>
+	<script>
+		function initPage() {
+			setText("안녕하세요\nOTF(Open Type font) : 그래픽 디자인 출력에 적합합니다.\n오른쪽 있는 글을 클릭하여 자유롭게 글을 써볼 수 있습니다.\n1111\n2222");
+		}
+		function setText(text) {
+			document.querySelector('.innerIam').innerHTML=text.replace(/\n/g, "<br />");
+		}
+	</script>
+ </body>
+</html>

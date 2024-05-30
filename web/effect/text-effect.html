@@ -1,0 +1,70 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<style> 
+ 	@font-face {
+	  font-family: HoonGothicgulim;
+	  src: url(/css/fonts/HoonGothicgulim.ttf) format('truetype'); 
+	}
+	.marquee {
+		color: black;
+		letter-spacing: 2px;
+		font-weight: 700;
+		padding: 30px;
+		font: normal 40px/50px HoonGothicgulim, sans-serif;
+	}
+</style>
+</head>
+<body style="padding:0;margin:0;overflow:hidden;" onload="initPage()"> 
+
+<marquee class="marquee" behavior="scroll" direction="left" style="width:100%;height:100%;">
+	
+</marquee>
+
+<!--
+<marquee class="html-marquee" direction="left" behavior="scroll" scrollamount="12">
+<p>GUYS...ADA JAVASCRIPT YG GA BERFUNGSI DI 'WIDGET CUTE" KRN HOSTINGANNYA EXPIRED</p>
+</marquee>
+<div class="bounce">
+	<p>BOUNCING TEXT</p>
+</div>
+<div class="marquee">
+	<p>SCROLLING TEXT</p>
+</div>
+<div class="marquee-outer">
+<div class="marquee-inner"><img src="https://media.tumblr.com/d8ec7cd2939ded874728b30d46352ce9/tumblr_inline_mueo3z0asZ1qdlkyg.gif" width="94" height="88"></div>
+</div>
+<marquee behavior="scroll" direction="left">Scrolling text...</marquee>
+-->
+
+
+
+	<script src="/js/jquery.js"></script>
+	<script> 
+		function initPage() {
+			setTextStyle('신규 템플릿을 통한 날씨와 시간을 출력합니다.', 60, '','#fff')
+		}
+		function rgbToHex(s) {
+			if(!s) return '#000';
+			if(s.charAt(0)=='#') return s;
+			var rgb = s.replace( /[^%,.\d]/g, "" ).split( "," ); 
+			var arr=[];
+			for(var str of rgb ) {
+				str = parseInt( str, 10 ).toString( 16 );
+				arr.push(str.length === 1 ?"0" + str:str);
+			}
+			return "#" + arr.join( "" ); 
+		}
+		
+		function setTextStyle(text, size, background, color) { 
+			var bk=rgbToHex(background);
+			var clr=rgbToHex(color); 
+			var el=$('.marquee');
+			el.css('font-size', size);
+			el.css('background-color', bk);
+			el.css('color', clr);
+			el.html(text);
+		}
+	</script>
+ </body>
+</html>

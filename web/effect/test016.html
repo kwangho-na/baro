@@ -1,0 +1,255 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<style> 
+	@import url("https://fonts.googleapis.com/css?family=Gothic+A1:900");
+	html {
+	  height: 100%;
+	  min-height: 100%;
+	}
+
+	body {
+	  height: 100%;
+	  min-height: 100%;
+	  margin: 0;
+	  background: #000;
+	  color: #fff;
+	  font-family: "Gothic A1", sans-serif;
+	}
+	body * {
+	  box-sizing: border-box;
+	}
+
+	div {
+	  display: flex;
+	  flex-flow: column nowrap;
+	  align-items: center;
+	  transform-style: flat;
+	  perspective: 1000px;
+	  min-height: 100%;
+	  padding: 10px;
+	  background: #333;
+	  text-align: center;
+	}
+
+	h1 {
+	  display: inline-block;
+	  transform-style: preserve-3d;
+	  margin: 0;
+	  font-size: 11vw;
+	  font-weight: 900;
+	  line-height: 1.1;
+	  text-transform: uppercase;
+	  white-space: nowrap;
+	}
+	h1 span,
+	h1 b,
+	h1 em,
+	h1 i,
+	h1 u {
+	  display: inline-block;
+	  font-style: normal;
+	  font-weight: inherit;
+	  text-decoration: none;
+	}
+	h1 span:first-of-type {
+	  position: relative;
+	  z-index: 2;
+	  color: #fff;
+	}
+	h1 span:last-of-type {
+	  position: absolute;
+	  top: 1vh;
+	  left: 2vw;
+	  z-index: 1;
+	  color: #000;
+	}
+	h1 b {
+	  position: relative;
+	  perspective: 120px;
+	  width: auto;
+	  min-width: 3vw;
+	  margin: 0 0.5vw;
+	  will-change: transform;
+	}
+	h1 em {
+	  transform-style: preserve-3d;
+	  transform: rotateX(5deg) rotateY(-5deg) skewX(-9deg) translateX(-4vw);
+	}
+	h1 i {
+	  position: absolute;
+	  top: -10%;
+	  bottom: -10%;
+	  left: 0;
+	  transform: rotate(23deg) skewY(23deg);
+	  width: 42%;
+	  overflow: hidden;
+	}
+	h1 i:first-of-type {
+	  position: static;
+	  visibility: hidden;
+	}
+	h1 i:nth-of-type(2) {
+	  left: -29.4%;
+	}
+	h1 i:nth-of-type(2) u {
+	  transform: rotate(-23deg) skewY(-23deg) translate(41.4%, 10%);
+	}
+	h1 i:nth-of-type(3) {
+	  left: 12.6%;
+	}
+	h1 i:nth-of-type(3) u {
+	  transform: rotate(-23deg) skewY(-23deg) translate(5.4%, 10%);
+	}
+	h1 i:nth-of-type(4) {
+	  left: 54.6%;
+	}
+	h1 i:nth-of-type(4) u {
+	  transform: rotate(-23deg) skewY(-23deg) translate(-30.6%, 10%);
+	}
+	h1 i:nth-of-type(5) {
+	  left: 96.6%;
+	}
+	h1 i:nth-of-type(5) u {
+	  transform: rotate(-23deg) skewY(-23deg) translate(-66.6%, 10%);
+	}
+	h1 i:nth-of-type(6) {
+	  left: 138.6%;
+	}
+	h1 i:nth-of-type(6) u {
+	  transform: rotate(-23deg) skewY(-23deg) translate(-102.6%, 10%);
+	}
+
+</style>
+</head>
+<body style="padding:0;margin:0;overflow:hidden;"> 
+
+<link href="https://fonts.googleapis.com/css?family=Teko:300,400" rel="stylesheet">
+
+<div>
+  <h1>Lobster|Type</h1>
+</div>
+
+
+
+	<script src="/js/jquery.js"></script> 
+	<script src="/js/TweenMax.min.js"></script>
+	<script> 
+		
+		var LobsterType = function () {
+		  this.headlines = document.querySelectorAll('h1')
+		  this.renderType(this.headlines)
+
+		  window.addEventListener('mousemove', this.moveType.bind(this))
+		  window.addEventListener('touchmove', this.moveType.bind(this))
+		  
+		  this.clientX = window.innerWidth
+		  this.clientY = window.innerHeight / 2
+		  this.moveType()
+		  setTimeout(function () {
+			this.clientX = window.innerWidth / 2
+			this.moveType()
+		  }.bind(this), 500)
+		}
+
+		LobsterType.prototype.renderType = function (items) {
+		  Array.prototype.forEach.call(items, function (headline) {
+			var headlineText = headline.innerHTML
+			headline.innerHTML = '<span></span><span></span>'
+			var headlineWraps = headline.querySelectorAll('span')
+			
+			Array.prototype.forEach.call(headlineWraps, function (headlineWrap) {
+			  Array.prototype.forEach.call(headlineText, function (letter) {
+
+				if (letter === '|') {
+				  headlineWrap.innerHTML += '<br>'
+				} else {
+				  var outerLetterWrap = document.createElement('b')
+				  var innerLetterWrap = document.createElement('em')
+
+				  headlineWrap.appendChild(outerLetterWrap)
+				  outerLetterWrap.appendChild(innerLetterWrap)
+
+				  for (var i = 0; i < 6; i++) {
+					innerLetterWrap.innerHTML += '<i><u>' + letter + '</u></i>'
+				  }
+				}
+
+			  })
+			})
+		  })
+		  this.letters = document.querySelectorAll('h1 b')
+		}
+
+		LobsterType.prototype.centerOf = function (element) {
+		  var posX = element.getBoundingClientRect().left + element.getBoundingClientRect().width / 2
+		  var posY = element.getBoundingClientRect().top + element.getBoundingClientRect().height / 2 - document.body.getBoundingClientRect().top
+		  var modX = Math.abs((window.innerWidth - this.clientX) / window.innerWidth - 1) - Math.abs((window.innerWidth - posX) / window.innerWidth - 1)
+		  var modY = Math.abs((window.innerHeight - this.clientY) / window.innerHeight - 1) - Math.abs((window.innerHeight - posY) / window.innerHeight - 1)
+
+		  return {
+			modX: modX,
+			modY: modY
+		  }
+		}
+
+		LobsterType.prototype.moveType = function (event) {
+		  if (event) {
+			this.clientX = event.touches ? event.touches[0].clientX : event.clientX
+			this.clientY = event.touches ? event.touches[0].clientY : event.clientY 
+		  }
+
+		  Array.prototype.forEach.call(this.headlines, function (headline) {
+			TweenMax.to(headline, 1, {
+			  rotationY: this.centerOf(headline).modX * 16,
+			  rotationX: this.centerOf(headline).modY * -22
+			})
+
+			TweenMax.to(headline.querySelector('span:last-of-type'), 1.5, {
+			  x: this.centerOf(headline).modX * -37,
+			  y: this.centerOf(headline).modY * -37
+			})
+		  }.bind(this))
+
+		  Array.prototype.forEach.call(this.letters, function (letter) {
+			var modX = this.centerOf(letter).modX
+			var modY = this.centerOf(letter).modY
+			var mod = .77
+
+			TweenMax.to(letter.querySelector('i:nth-of-type(2)'), .5, {
+			  x: mod * modX * 15,
+			  y: mod * modY * 7,
+			  width: 42 - mod * modX * 15 + '%'
+			})
+
+			TweenMax.to(letter.querySelector('i:nth-of-type(3)'), .5, {
+			  x: mod * modX * 10,
+			  y: mod * -modY * 7,
+			  width: 42 - mod * modX * 30 + '%'
+			})
+
+			TweenMax.to(letter.querySelector('i:nth-of-type(4)'), .5, {
+			  x: mod * -modX * 15,
+			  y: mod * modY * 7,
+			  width: 42 + mod * modX * 30 + '%'
+			})
+
+			TweenMax.to(letter.querySelector('i:nth-of-type(5)'), .5, {
+			  x: mod * modX * 17,
+			  y: mod * -modY * 7,
+			  width: 42 - mod * modX * 30 + '%'
+			})
+
+			TweenMax.to(letter.querySelector('i:nth-of-type(6)'), .5, {
+			  x: mod * -modX * 8,
+			  y: mod * modY * 9,
+			  width: 42 + mod * modX * 15 + '%'
+			})
+		  }.bind(this))
+		}
+
+		new LobsterType()
+
+	</script>
+ </body>
+</html>
