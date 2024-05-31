@@ -1,3 +1,39 @@
+###########################################################################################
+[usage]
+myRuler.api.setPos({x:100, y:100})
+/*
+change the left, top, positions of the rulers
+*/
+myRuler.api.setScale(1.5);
+/*
+change the scale of the points
+*/
+myRuler.api.toggleRulerVisibility(true);
+/*
+hide/show rulers
+*/
+myRuler.api.toggleGuideVisibility(true);
+/*
+hide/show guides
+*/
+myRuler.api.clearGuides(true);
+/*
+get list of guides to store or copy
+*/
+myRuler.api.getGuides(); // => [{dimension: number, poxX: number: posY: number}...]
+/*
+set guides from a pre stored list
+*/
+myRuler.api.setGuides([{dimension: number, poxX: number: posY: number}...]);
+/*
+clear all guides
+*/
+myRuler.api.destory();
+/*
+remove rulers, guides and references;
+*/
+###########################################################################################
+
 "use strict";
 var ruler = function (options) {
   this.api = this.builder();
