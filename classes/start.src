@@ -21,18 +21,7 @@ _node(code, reuse) {
 	if( typeof(reuse,"bool") && reuse ) node.reset(true);
 	return node;
 }
-
-global(code, value) {
-	root=Cf.rootNode();
-	not(code) return root;
-	sz=args().size();
-	gcode="@$code";
-	if(sz.eq(1)) {
-		return root.get(gcode);
-	}
-	if(code.eq('funcInfo')) return;
-	root.set(gcode, value);
-}
+ 
 object(code, newCheck) {
 	if( code.find('.') ) {
 		code.split('.').inject(a,b);
@@ -183,19 +172,7 @@ classLoadPath(path, pathLen) {
 	});
 }
 
-classFuncLoad(name) {
-	db=Baro.db('config')
-	node=db.fetchAll("select data from conf_info where grp='funcSource'")
-	src=''
-	while(cur, node) {
-		src.add(cur.data,"\n")
-	}
-	not(src) {
-		print("$name/func 함수정보가 없습니다")
-		return;
-	}
-	Cf.sourceApply("<func>${src}</func>", "${name}/func", true)
-}
+
 classLayout(name, skip) {
 	src=conf("layoutSource.${name}")
 	not(src) return print("$name layout source 오류");
@@ -228,55 +205,7 @@ classStartCheck(&s) {
 	}
 	return false;
 }
-classMapCheck(src, groupId) {
-	parse = func(&s) {
-		while(s.valid() ) {
-			c=s.ch()
-			if(c.eq(',',';')) {
-				s.incr()
-				continue;
-			}
-			chk=classStartCheck(s)
-			not(chk) {
-				return print("클래스 맵체크 오류 (경로: groupId)");
-			}
-			s.next().ch()
-			if( typeof(chk,'bool')) {
-				className=s.findPos('{',0,1).trim()
-			} else {
-				sp=s.cur()
-				c=s.next().ch()
-				while(c.eq('/',':','-')) c=s.next().ch()
-				className=s.trim(sp,s.cur())
-				s.findPos('{',0,1)
-			}
-			not(className) return;
-			not(groupId ) groupId=className
-			if( groupId.eq(className) ) {
-				mapId=className
-			} else {
-				if( lastEq(groupId, className)) {
-					mapId=groupId
-				} else {
-					mapId="${groupId}:${className}"
-				}
-			}  
-			src=s.match(1)
-			if(typeof(src,'bool')) {
-				return print("클래스소스 매핑오류 (아이디:$mapId)");
-			}
-			if( className.eq("layout","func","conf")) {
-				 continue;
-			}
-			not( mapId.eq(className)) {
-				object('map.className').set(className, mapId)
-				conf("mapClassName.${className}", mapId, true)
-			}
-		} 
-	};
-	
-	return parse(stripJsComment(src))
-}
+
 classSource(src, groupId, fullPath, modify) {
 	map=object('map.classes')
 	parse = func(&s) {
@@ -421,18 +350,7 @@ classSource(src, groupId, fullPath, modify) {
 	};
 	return parse(stripJsComment(src))
 }
-classReload(param) {
-	if(typeof(param,'node') && param.var(useClass) ) {
-		param.var(useClass,false)
-		arr=param.var(classNames)
-		if(typeof(arr,'array')) {
-			name=arr.get(0)
-			arr.reuse()
-			if(name) class(param, name)
-		}
-	}
-	return param;
-}
+
 classExtends(obj, &s ) { 
 	while(s.valid()) {
 		name=s.findPos(',').trim() 
@@ -530,7 +448,7 @@ class(param) {
 		classExtends(obj, extend)
 	}
 	extend=conf("extends.$className")
-	parse(obj, src)
+	_parse(obj, src)
 	obj.var(useClass, true)
 	fcInit=obj.get("${moduleName}#initClass")
 	if(typeof(fcInit,'func')) {
@@ -539,7 +457,7 @@ class(param) {
 	}
 	return obj;
 	
-	parse=func(obj, &s) {			
+	_parse=func(obj, &s) {			
 		init='', funcs='';
 		n=0;
 		print("$className class parse start")

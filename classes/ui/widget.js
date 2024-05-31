@@ -39,6 +39,20 @@ class func {
 		}
 		return widget;
 	}
+	@widget.test(id, tag) {
+		not(id) id='p1'
+		not(tag) tag='grid'
+		Cf.sourceApply(#[
+			<widgets base="test">
+				<page id="${id}">
+					<${tag} id="${tag}">
+					<hbox id="buttonsBar">
+					</hbox>
+				</page>
+			</widgets>
+		])
+		return page("test:$id")
+	}
 	@widget.find(base, id) {
 		_find=func(&s) {
 			s.findPos('.')

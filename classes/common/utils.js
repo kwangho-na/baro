@@ -11,6 +11,86 @@ class utils {
 		classLoadAll()
 	}
 }
+class func:classlib {
+	classFuncLoad(name) {
+		db=Baro.db('config')
+		node=db.fetchAll("select data from conf_info where grp='funcSource'")
+		src=''
+		while(cur, node) {
+			src.add(cur.data,"\n")
+		}
+		not(src) {
+			print("$name/func 함수정보가 없습니다")
+			return;
+		}
+		Cf.sourceApply("<func>${src}</func>", "${name}/func", true)
+	}
+	classReload(obj) {
+		not( typeof(obj,"node") ) return print("클래스 새로고침 객체 오류")
+		obj.var(useClass,false)
+		arr=obj.var(classNames)
+		if(typeof(arr,"array")) {
+			a=[]
+			while(name, arr) {
+				a.add(name)
+			}
+			arr.reuse()
+			while(name,a) {
+				class(obj, name)
+			}
+		}
+		return obj;
+	}
+	classMapCheck(src, groupId) {
+		parse = func(&s) {
+			while(s.valid() ) {
+				c=s.ch()
+				if(c.eq(',',';')) {
+					s.incr()
+					continue;
+				}
+				chk=classStartCheck(s)
+				not(chk) {
+					return print("클래스 맵체크 오류 (경로: groupId)");
+				}
+				s.next().ch()
+				if( typeof(chk,'bool')) {
+					className=s.findPos('{',0,1).trim()
+				} else {
+					sp=s.cur()
+					c=s.next().ch()
+					while(c.eq('/',':','-')) c=s.next().ch()
+					className=s.trim(sp,s.cur())
+					s.findPos('{',0,1)
+				}
+				not(className) return;
+				not(groupId ) groupId=className
+				if( groupId.eq(className) ) {
+					mapId=className
+				} else {
+					if( lastEq(groupId, className)) {
+						mapId=groupId
+					} else {
+						mapId="${groupId}:${className}"
+					}
+				}  
+				src=s.match(1)
+				if(typeof(src,'bool')) {
+					return print("클래스소스 매핑오류 (아이디:$mapId)");
+				}
+				if( className.eq("layout","func","conf")) {
+					 continue;
+				}
+				not( mapId.eq(className)) {
+					object('map.className').set(className, mapId)
+					conf("mapClassName.${className}", mapId, true)
+				}
+			} 
+		};
+		
+		return parse(stripJsComment(src))
+	}
+}
 /* 
 	공통 유틸리티함수
 */
