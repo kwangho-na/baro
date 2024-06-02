@@ -346,3 +346,23 @@ class func:rect {
 		return arr;
 	}
 }
+class func:position {
+	@draw.arr(type, num, baseSize) {
+		a=[]
+		step=1.59/num;
+		sp=0.0;
+		while(n=0, num) {
+			sp+=step
+			switch(type) {
+			case sin: x=Math.sin(sp)
+			case cos: x=Math.cos(sp)
+			case tan: x=Math.tan(sp)
+			case atan: x=Math.atan(sp)
+			default: x=n
+			}
+			if(baseSize) x*=baseSize;
+			a.add(x)
+		}
+		return a;
+	}
+}

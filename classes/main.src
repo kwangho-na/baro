@@ -1,9 +1,8 @@
 <call> 
-	Cf.debug(true, "data/logs");  
-	classLoadAll()
-	class('WebServer').start()
-
-	page=classLayout("app/sourceEditor")
-	page.open()
-	 
+	include(true)
+	classLayout("app/sourceEditor").open()
+	class("WebServer").start()
+	Cf.debug(true, "data/logs")	
+	/*
+	*/
 </call>

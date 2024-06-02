@@ -1,15 +1,34 @@
+class func:array {
+	@data.filter(node, field, val) {
+		arr=_arr()
+		while(cur, node) {
+			if(cur.cmp(field,val)) arr.add(cur)
+		}
+		return arr;
+	}
+	@data.fieldArr(node, field) {
+		arr=_arr()
+		while(cur, node) arr.add(cur.get(field))
+		return arr;
+	}
+}
 class data {
 	nodes=object('data.nodes')
-	copyNode(name,target) {
+	dataNode(name,target) {
 		cur=nodes.addNode(name)
 		sub=cur.addNode()
 		if(target) sub.copyNode(target)
 		return sub;
 	}
-	resetNode(name) {
+	dataNodeReset(name) {
 		cur=nodes.addNode(name)
 		cur.removeAll(true)
 		return cur;
+	}
+	recalc(name, total, info) {
+		arr=nodes.addArray(name)
+		not(total) return arr;
+		return arr.recalc(total, info);
 	}
 }
 class DevData {
@@ -35,8 +54,7 @@ class DevData {
 		return root;
 		
 		_reset=func(a) {
-			this.resetNode('confInfo')
-			this.resetNode('classTarget')
+			this.dataNodeReset('classTarget')
 			root.removeAll(true)
 			if(typeof(a,'array')) {
 				while(cur, a ) this.classInfoTree(cur)
@@ -90,7 +108,7 @@ class DevData {
 			root.type='base'
 			root.name=name 
 			root.baseName=base
-			parent.target==this.copyNode('classTarget',target)
+			parent.target=this.dataNode('classTarget',target)
 			// 레이아웃정보
 			src=conf("layoutSource.$base")
 			if( src ) {

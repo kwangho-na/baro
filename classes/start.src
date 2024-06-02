@@ -29,19 +29,98 @@ object(code, newCheck) {
 		return Cf.getObject(a,b,true);
 	}
 	return Cf.getObject("page", code);
-} 
-include(fileCode, skip) {
-	if(fileCode.find('.')) {
-		fileName="classes/${fileCode}";
-	} else {
-		fileName="classes/${fileCode}.js";
+}
+include() {
+	db=Baro.db("config")
+	switch(args().size()) {
+	case 0:
+		// ex) include()
+		filter="and instr(cd, ':')=0"
+		while(cur, _select(filter)) {
+			Cf.sourceApply("<func>${cur.data}</func>", cur.cd, true)
+		} 
+	case 1:
+		args(name)
+		if(typeof(name,"bool")) {
+			check=name
+			object("app.setup").set("includeMode", true)
+			classLoad(check) _selectAll(check)
+			object("app.setup").set("includeMode", false)
+			return;
+		}
+		not(name) return print("include 모듈이름이 없습니다");
+		if( name.eq("reset")) {
+			classLoadAll()
+		} else if(name.eq("*")) {
+			_selectAll()
+		} else {
+			if(name.find(":")) {
+				name.split(":").inject(a,b)
+				if(b.eq("*")) {
+					filter="and cd like '$a:%'"
+					sql="select cd, data from conf_info where grp='funcSource' ${filter} and use_yn='Y'"
+					not(db.count(sql)) {
+						filter="and cd='$a'"
+					}
+				} else {
+					filter="and cd='$a:$b'"
+				}
+			} else {
+				filter="and cd='$name'"
+			}
+			print("include filter ${filter} 시작")
+			while(cur, _select(filter)) {
+				Cf.sourceApply("<func>${cur.data}</func>", cur.cd, true)
+			}
+		}
+	case 2:
+		args(name,param)
+		if(name.eq("*")) {
+			_selectAll(param) if(param) classLoad(true)
+		} else {
+			subName=param
+			if(typeof(subName,"bool")) {
+				subName="*"
+			}
+			if(subName.eq("*")) {
+				classLoad()
+				filter="and cd='$name'"
+			} else {
+				filter="and cd='$name:$subName'"
+			}
+			print("include filter ${filter} 시작")
+			while(cur, _select(filter)) {
+				Cf.sourceApply("<func>${cur.data}</func>", cur.cd, true)
+			}
+		}
+	default: return print("include 매개변수 오류")
 	}
-	fo=Baro.file();
-	not( fo.isFile(fileName) ) {
-		if(skip) return;
-		return print("파일이 없습니다(파일명:$fileName)");
-	}
-	Cf.include(fileName);
+
+	_select=func(filter) {
+		return db.fetchAll("select cd, data from conf_info where grp='funcSource' ${filter} and use_yn='Y' order by cd")
+	};
+	_selectAll = func(checkError) {
+		if(checkError) Cf.error(true)
+		node=_select()
+		while(cur, node, n) {
+			not(cur.cd.find(":")) {
+				next=node.child(n+1)
+				nextCode=when(next,next.cd)
+				if(nextCode.start(cur.cd) ) {
+					continue;
+				}
+			}
+			print("include ${cur.cd} 시작")
+			Cf.sourceApply("<func>${cur.data}</func>", cur.cd, true)
+			if(checkError) {
+				err=Cf.error()
+				if(err) {
+					alert("include ${cur.cd} 오류: $err")
+				}
+			}
+		}
+	};
+	
 }
 objectArray(key, flag) {
 	arr=[]
@@ -154,13 +233,6 @@ classLoadPath(path, pathLen) {
 				modify=Baro.file().modifyDate(fullPath)
 				prev=conf("classModify.$groupId")
 				if( prev && modify.le(prev) ) {
-					src=conf("funcSource.$groupId")
-					if(src) {			
-						Cf.sourceApply("<func>${src}</func>", groupId, true)
-					}
-					if( conf('local.classMapCheck') ) {
-						classMapCheck(src, groupId)
-					}
 					continue;
 				}
 				print("클래스소스 변경 경로:$fullPath (변경:$modify)", groupId)
@@ -264,14 +336,13 @@ classSource(src, groupId, fullPath, modify) {
 			}
 			node=map.get(mapId)
 			if( typeof(node,'node') ) {
-				if( node.updateTm ) {
-					dist=System.localtime() - node.updateTm;
+				if( node.updateTick ) {
+					dist=System.tick() - node.updateTick;
 					print("$className update time check => $dist")
 					if(dist.gt(2000)) {
 						node.source=''
 					}
 				}
-				node.updateTm=System.localtime()
 			} else {
 				node=map.addNode(mapId)
 				node.groupId=groupId
@@ -283,8 +354,8 @@ classSource(src, groupId, fullPath, modify) {
 				node.path=fullPath
 				node.modifyDate=modify 
 			}
+			node.updateTick=System.tick()
 			if( className.eq("layout","func") ) { 
-				print("@@@@@@@@@@ $className sub:$subName")
 				if(subName) {
 					conf("${className}Source.${groupId}:${subName}", src, true)
 				}
@@ -311,7 +382,9 @@ classSource(src, groupId, fullPath, modify) {
 		node=map.get("${groupId}:func")
 		if(node) {
 			conf("funcSource.$groupId", node.source, true)
-			Cf.sourceApply("<func>${node.source}</func>", groupId, true)
+			not(object("app.setup").get("includeMode")) {
+				Cf.sourceApply("<func>${node.source}</func>", groupId, true)
+			}
 		}
 	};
 	
@@ -384,6 +457,7 @@ class(param) {
 		} else {
 			className=param
 			obj=object("class.$className")
+			if(obj.var(useClass)) return obj;
 		}
 	case 2:
 		if(typeof(param,'string') ) {
