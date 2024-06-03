@@ -21,7 +21,20 @@ _node(code, reuse) {
 	if( typeof(reuse,"bool") && reuse ) node.reset(true);
 	return node;
 }
- 
+global(code) {
+	root=Cf.rootNode().addNode("@global");
+	switch(args().size()) {
+	case 0:
+		return root;
+	case 1: 
+		return root.get(code)
+	case 2:
+		args(1,value)
+		root.set(gcode, value);
+	default:
+	}
+	return root;
+}
 object(code, newCheck) {
 	if( code.find('.') ) {
 		code.split('.').inject(a,b);
@@ -490,6 +503,7 @@ class(param) {
 	print("class $className 시작")
 	src=conf("class.$className")
 	not(src) {
+		mapId=null
 		not(className.find('/')) {
 			mapId=object('map.className').get(className)
 			src=conf("class.$mapId")
@@ -498,13 +512,13 @@ class(param) {
 	}
 	moduleName=_moduleName(className)
 	arr=obj.addArray("@classNames") 
-	not(fnParent) {
-		fnParent=Cf.funcNode('parent')
-	}
 	find=arr.find(className)
 	if(find.ne(-1)) {
 		print("$className 클래스 이미 등록됨")	 
 		return obj;
+	}
+	not(fnParent) {
+		fnParent=Cf.funcNode('parent')
 	}
 	arr.add(className)
 	if( typeof(obj,'widget')) {

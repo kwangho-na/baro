@@ -1,14 +1,7 @@
 class draw {
-	dc=null
-	images=_arr('draw.images')
 	initClass() {
-		not(images.size()) { 
-			@draw.loadImages()
-			map=object("user.mdcMap")
-			while(key, map.keys() ) {
-				images.add(map.get(key))
-			}
-		}
+		@dc=null
+		@images=_arr('draw.images')
 	}
 	begin(dc, rc) {
 		this.setMemberVar('dc,rect:rc')
@@ -364,5 +357,69 @@ class func:position {
 			a.add(x)
 		}
 		return a;
+	}
+	
+	@draw.rangeInfo(&s, gap, mode) {
+		not(s.ch()) return;
+		sp=s.cur()
+		ss=''
+		while(s.valid()) {
+			v=s.findPos(',')
+			c=v.ch()
+			if(c.eq('*','#')) {
+				if(ss) ss.add(',')
+				ss.add('*')
+				continue;
+			}
+			if(v.find('*')) {
+				sa=v.findPos('*').trim(), sb=v.trim()
+				not(typeof(sb,'num')) print("range info error [$sa, $sb 가 올바른 형식이 아닙니다]")
+				while(n=0,sb) {
+					if(n) {
+						ss.add(',')
+					} else {
+						if(ss) ss.add(',')
+					}
+					ss.add(sa,'px')
+				}
+			} else {
+				val=v.trim()
+				if(ss) ss.add(',')
+				ss.add(val,'px')
+			}
+		}
+		if(typeof(gap,'num')) return @draw.marginInfo(ss, gap, mode);
+		return ss;
+	}
+	@draw.marginInfo(&s, gap, mode) {
+		not(typeof(gap,'num')) return s;
+		gg=gap*2;
+		ss='';
+		while(s.valid(), n) {
+			v=s.findPos(',')
+			if(v.find('px')) {
+				val=v.findPos('px').trim()
+			} else {
+				val=v.trim()
+			}
+			if(val.eq('*','#')) {
+				if(n) ss.add(',')
+				ss.add('*')
+				continue;
+			}
+			c=s.ch()
+			if( mode.eq('start') ) {
+				if( n.eq(0)) {
+					val+=gap;
+				} else if(c) {
+					val+=gg;
+				}
+			} else {
+				val+=gg;
+			}
+			if(n) ss.add(',')
+			ss.add(val,'px')
+		}
+		return ss;
 	}
 }

@@ -14,6 +14,7 @@ class func:array {
 }
 class data {
 	nodes=object('data.nodes')
+	arrays=object('data.arrays')
 	dataNode(name,target) {
 		cur=nodes.addNode(name)
 		sub=cur.addNode()
@@ -25,10 +26,16 @@ class data {
 		cur.removeAll(true)
 		return cur;
 	}
-	recalc(name, total, info) {
-		arr=nodes.addArray(name)
-		not(total) return arr;
-		return arr.recalc(total, info);
+	recalc(name, a,b,c) {
+		not(typeof(name,'string')) return print("data recalc 이름이 없습니다");
+		arr=arrays.addArray(name) 
+		switch(args().size()) {
+		case 1: return arr;
+		case 2: return arr.recalc(a);
+		case 3: return arr.recalc(a,b);
+		case 4: return arr.recalc(a,b,c);
+		}
+		return arr;
 	}
 }
 class DevData {

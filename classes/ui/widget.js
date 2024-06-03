@@ -31,27 +31,12 @@ class func {
 		widget.parentWidget(parent);
 		widget.flags("child");
 		widgetAdd(parent, widget);
-		if(typeof(rect,"rect") ) {
-			rcGeo=parent.mapGlobal(rect);
+		if(typeof(rect,"rect") ) { 
 			widget.rectClient=rect;
-			widget.move(rcGeo);
-			widget.show();
+			widget.move(rect);
+			widget.open();
 		}
 		return widget;
-	}
-	@widget.test(id, tag) {
-		not(id) id='p1'
-		not(tag) tag='grid'
-		Cf.sourceApply(#[
-			<widgets base="test">
-				<page id="${id}">
-					<${tag} id="${tag}">
-					<hbox id="buttonsBar">
-					</hbox>
-				</page>
-			</widgets>
-		])
-		return page("test:$id")
 	}
 	@widget.find(base, id) {
 		_find=func(&s) {
@@ -124,6 +109,20 @@ class func {
 		not(tag.eq('vbox','hbox','form')) return print("page margin 오류 레이아웃 미정의");
 		box.spacing(num)
 	}
+	@page.test(id, tag) {
+		not(id) id='p1'
+		not(tag) tag='canvas'
+		Cf.sourceApply(#[
+			<widgets base="test">
+				<page id="${id}">
+					<${tag} id="${tag}">
+					<hbox id="buttonsBar">
+					</hbox>
+				</page>
+			</widgets>
+		])
+		return page("test:$id")
+	}
 }
 class widget {
 	base() {
@@ -138,24 +137,45 @@ class widget {
 		base=this.base()
 		return conf("${base}.${name}")
 	}
-	addWidget(tag, name) {
+	addWidget(tag, id, rc, init) {
 		base=this.base()
-		widget=Cf.getObject(tag, "$base:$name")
-		not(widget) return print("$name 위젯 미정의 (addChild 오류)")
-		arr=this.member(widgetList)
-		not(arr) {
-			page=page('main')
-			not(page) page=this.pageNode()
-			arr=page.addArray('@widgetList')
-			this.member(widgetList, arr)
+		not(id) {
+			idx=this.incrNum("widgetIndex")
+			id="widget_${idx}"
 		}
-		while(cur, arr) {
-			if(cur.cmp('id',name)) return cur;
+		widget=Cf.getObject(tag, "$base:$id")
+		not(widget) {
+			src=""
+			if(init) {
+				src="initClass(fn) {$init}";
+			}
+			Cf.sourceApply(#[
+				<widgets base="${base}">
+					<${tag} id="${id}">${src}</${tag}>
+				</widgets>
+			]);
+			widget=Cf.getObject(tag, "$base:$id")
+			if(widget) class(widget, 'widget')
 		}
-		arr.add(widget)
-		widget.parentWidget(this)
+		
+		not(widget) return print("$tag : $id 위젯 미정의 (addChild 오류)")
+		not(this.member(widgetList)) @widgetList=this.dataArray('widgetList')
+		find=null
+		while(cur, widgetList ) {
+			if(cur.cmp('id',id)) {
+				find=cur
+				break;
+			}
+		}
+		not(find) widgetList.add(widget)
 		widget.flags("child")
-		return arr;
+		if(typeof(rc,'rect')) {
+			widget.clientRect=rc
+			widget.parentWidget(this)
+			widget.move(rc)
+			widget.open();
+		}
+		return widget;
 	}
 	getWidget(id) {
 		obj=this.get(id)
@@ -170,8 +190,7 @@ class widget {
 				}
 			}
 			not(obj) {
-				base=this.base()
-				obj=@widget.find(base,id);
+				obj=@widget.find(this.base(),id);
 			}
 		}
 		if(typeof(obj,'widget')) {
@@ -185,14 +204,18 @@ class widget {
 		}
 		return obj;
 	}
-	widgetMove(widget, rect) {
-		if(typeof(rect,"rect") ) {
-			widget.rectClient=rect; 
+	widgetMove(param, rc) {
+		if(typeof(param,'string')) {
+			widget=this.getWidget(param)
 		} else {
-			rect=widget.rectClient;
+			widget=param
 		}
-		rcGeo=this.mapGlobal(rect);
-		widget.move(rcGeo);
+		if(typeof(widget,'widget')) {
+			widget.parentWidget(this)
+			widget.move(rc)
+			widget.open();
+		}
+		return widget;
 	}
 	injectVar(param) {
 		fn=Cf.funcNode('parent')
@@ -285,7 +308,7 @@ class widget {
 			}
 		}
 	}
-	makePage(code, pageId) {
+	makeWidget(code, pageId) {
 		base=this.base()
 		src=this.conf(code)
 		ss=format(, pageId)
@@ -293,6 +316,16 @@ class widget {
 			<widgets base="${base}">${ss}</widgets>
 		])
 		return page(pageId)
+	}
+	dataNode(code, reset) {
+		base=this.base() not(base) return print("data $code 노드 생성오류 위젯 base 미정의");
+		if(reset) return class('data').dataNodeReset("${base}.${code}");
+		return class('data').dataNode("${base}.${code}");
+	}
+	dataArray(code, reset) {
+		not(code) return _arr();
+		base=this.base() not(base) return print("data $code 배열 생성오류 위젯 base 미정의");
+		return class('data').recalc("${base}.${code}")
 	}
 }
 
