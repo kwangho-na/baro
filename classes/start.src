@@ -159,7 +159,7 @@ lastEq(a,b) {
 	}
 	return false;
 }
-left(str, sep) {
+left(&str, sep) {
 	not(sep) sep=',';
 	return str.find(sep).trim();
 }
@@ -275,15 +275,15 @@ classLayout(name, skip) {
 }
 classStartCheck(&s) {
 	type=s.move()
-	not(type.eq('class')) return false;
+	not(type.eq("class")) return false;
 	c=s.next().ch()
-	while(c.eq('/',':','-')) c=s.next().ch()
+	while(c.eq("/",":","-")) c=s.next().ch()
 	if(c.eq('{')) return true;
 	name=s.move()
-	if( name.eq('extends', 'extend') ) {
+	if( name.eq("extends" ) ) {
 		sp=s.cur()
 		c=s.next().ch()
-		while(c.eq('/',':','-',',')) c=s.next().ch()
+		while(c.eq("/",":","-",",")) c=s.next().ch()
 		if(c.eq('{')) {
 			return s.trim(sp, s.cur());
 		}
@@ -296,7 +296,7 @@ classSource(src, groupId, fullPath, modify) {
 	parse = func(&s) {
 		while(s.valid() ) {
 			c=s.ch()
-			if(c.eq(',',';')) {
+			if(c.eq(",",";")) {
 				s.incr()
 				continue;
 			}
@@ -309,12 +309,12 @@ classSource(src, groupId, fullPath, modify) {
 				break;
 			}
 			s.next().ch()
-			if(typeof(chk,'bool')) {
-				className=s.findPos('{',0,1).trim()
+			if(typeof(chk,"bool")) {
+				className=s.findPos("{",0,1).trim()
 			} else {
 				sp=s.cur()
 				c=s.next().ch()
-				while(c.eq('/',':','-')) c=s.next().ch()
+				while(c.eq("/",":","-")) c=s.next().ch()
 				className=s.trim(sp,s.cur())
 				print("$className class source extends ", chk) 
 				conf("extends.$className", chk, true)
@@ -439,39 +439,67 @@ classSource(src, groupId, fullPath, modify) {
 
 classExtends(obj, &s ) { 
 	while(s.valid()) {
-		name=s.findPos(',').trim() 
+		name=s.findPos(",").trim() 
 		if(name) {
 			class(obj, name)
 		}
 	}
+} 
+classBaseName(&s) {
+	if(s.find(":")) return s.findPos(":").trim();
+	return s.trim();
 }
-classBase() {
-	_funcCheck = func(&s) {
-		not(s.ch()) return false;
-		fnm=s.move()
-		if(fnm.eq('private','public')) {
-			c=s.next().ch()
-		} else {
-			c=s.ch()
-		}
-		if(c.eq('(')) {
-			s.match()
-			c=s.ch()
-			if(c.eq('{')) return true
-		}
-		return false
-	};
-	_baseName=func(base,name) { 
+classBase() {	
+	_mapName=func(base,name) { 
 		not(base) return name;
-		if(base.find(":")) {
-			base=left(base,":")
-		}
 		if(lastEq(base,name)) {
 			return base
 		} else {
 			return "$base:$name"
 		}
 	};
+	switch(args().size()) {
+	case 1:
+		arg(className)
+		src=conf("class.$className")
+	case 2:
+		args(className, base)
+		mapId=_mapName(base, className)
+		src=conf("class.$mapId")
+	default:
+	}
+	not(src) {
+		not(mapId) {
+			mapId=object("map.className").get(className)
+			src=conf("class.$mapId")
+		}
+		not(src) return print("class $className 클래스 소스 미등록 (mapId:$mapId)");
+	}
+	not(mapId) mapId=className
+	obj=object("class.$mapId")
+	if(obj.var(useClass)) {
+		return obj;
+	}
+	obj.var(baseCode, mapId)
+	obj.var(useClass, true)
+	return _parse(obj, src);
+	
+	_funcCheck = func(&s) {
+		not(s.ch()) return false;
+		fnm=s.move()
+		if(fnm.eq("private","public")) {
+			c=s.next().ch()
+		} else {
+			c=s.ch()
+		}
+		if(c.eq("(")) {
+			s.match()
+			c=s.ch()
+			if(c.eq("{")) return true
+		}
+		return false
+	};
+	
 	_parse=func(obj, &s) {			
 		n=0;
 		init='', funcs='';
@@ -482,11 +510,11 @@ classBase() {
 				sp=s.cur()
 				fnm=s.move()
 				initCheck=false
-				if(fnm.eq('private','public')) {
+				if(fnm.eq("private","public")) {
 					sp=s.cur()
 					s.next().ch()
 				} else {
-					if(fnm.eq('initClass')) {
+					if(fnm.eq("initClass")) {
 						initCheck=true
 					}
 					s.ch()
@@ -495,134 +523,109 @@ classBase() {
 				s.match(1)
 				src=s.value(sp, s.cur(), true)
 				if( initCheck) {
-					funcs.add(moduleName,'#',src)
+					funcs.add(className,"#",src)
 				} else {
 					funcs.add(src)
 				}
 				c=s.ch()
-				if(c.eq(',',';')) s.incr();
+				if(c.eq(",",";")) s.incr();
 				continue;
 			} 
 			line=s.findPos("\n").trim()
-			if(n) init.add("\r\n")
-			init.add(line)
-			n++;
+			if(line) {
+				if(n) init.add("\r\n")
+				init.add(line)
+				n++;
+			}
 		}
+		obj.var(funcInit, init)
+		obj.var(funcSrc, funcs)
+		return obj;
 	};
-	
-	switch(args().size()) {
-	case 1:
-		args(className)
-		base=className
-	case 2:
-		args(className, base)
-		className=_baseName(base, className)
-	default:
-	}
-	mapId=object("map.className").get(className)
-	not(mapId) mapId=className;
-	obj=object("class.$mapId")
-	if(obj.var(useClass)) return obj;
-	src=conf("class.$className")
-	_parse(obj, src)
-	
-	obj.baseName=base;
-	obj.var(useClass, true)
-	
-	return obj;
 }
-class(param) {
-	
-	fnParent=null
-	switch(args().size()) {
+
+class(param) { 
+	baseName="";
+	size=args().size()
+	switch(size) {
 	case 1: 
 		args(className)
 		baseNode=classBase(className)
 		if(baseNode.var(useClass)) return baseNode;
+		obj=baseNode
 	case 2:
-		if(typeof(param,'string') ) {
-			args(className, base)
-			if(typeof(base,'bool')) {
-				base=this.var(baseCode)
-			}
-			className=_baseName(base, className)
-		} else {
-			
-		}
+		args(obj, className)
+		baseNode=classBase(className)
 	case 3:
-		args(obj,className,base)
-		if(typeof(base,'bool')) {
-			base=obj.var(baseCode)
+		args(obj, className, base)
+		if( typeof(base,"bool")) {
+			baseName=classBaseName(obj.var(baseCode))
+		} else if( base && typeof(base,"string") ) {
+			baseName=base
 		}
-		if( base ) {
-			className=_baseName(base, className)
-		}
-	case 4:
-		args(obj,className,base,funcNode)
-		if( base ) {
-			className=_baseName(className, base)
-		}
-		fnParent=funcNode
+		baseNode=classBase(className, baseName)
 	default:
 	}
-	not(typeof(obj,'node')) return print("$className class 객체 미설정(obj:$obj)")
-	not(className) return print("class 매개변수 미설정")
-	print("class $className 시작")
-	src=conf("class.$className")
-	not(src) {
-		mapId=null
-		not(className.find("/")) {
-			mapId=object("map.className").get(className)
-			src=conf("class.$mapId")
-		}
-		not(src) return print("class $className 클래스 소스 미등록 (mapId:$mapId)")
-	}
-	 
+	not(typeof(baseNode,"node")) return print("$className 기준객체 미설정");
+	not(typeof(obj,"node")) return print("$className class 객체 미설정");
+	
+	baseNode.inject(@baseCode, @funcInit, @funcSrc)
+
 	arr=obj.addArray("@classNames")  
-	if( arr.find(className) ) {
-		print("$className 클래스 이미 등록됨")	 
+	if( arr.find(baseCode) ) {
+		print("$baseCode 클래스 이미 등록됨")	 
 		return obj;
 	}
-	not(fnParent) {
-		fnParent=Cf.funcNode('parent')
-	}
-	arr.add(className)
-	if( typeof(obj,'widget')) {
-		print("class $className 위젯객체")
+	arr.add(baseCode)
+	if( typeof(obj,"widget")) {
 		tag=obj.tag;
-		if( tag.eq('page','dialog','main')) {
-			not(className.eq('page')) class(obj,'page',null,fnParent)
+		if( tag.eq("page","dialog","main")) {
+			not(className.eq("page")) class(obj,"page")
 		} else { 
-			not(className.eq('widget')) {
-				class(obj,'widget',null,fnParent)
+			not(className.eq("widget")) {
+				class(obj,"widget")
 			}
 		}
 	}
-	
-	extend=conf("extends.$className") 
-	
-	
+	extend=conf("extends.$className")
+	if(extend) {
+		classExtends(obj, extend)
+	}
 	fnInit=Cf.funcNode(obj)
-	if(fnInit) {
-		if(funcs) obj[$funcs]
-		if(init) {
-			fnInit.set('fnParent', fnParent)
-			eval(init, obj, fnInit, true)
-			print("onInit 이미 설정됨 eval 실행 $className", fnInit.get(), obj)
-		}
-	} else {
-		src="onInit() {$init} $funcs"
+	if(obj==baseNode ) {
+		src="onInit() {$funcInit} $funcSrc"
 		obj[$src]
-		fnInit=Cf.funcNode(obj)
+	} else {
+		obj.copyNode(baseNode,"class")
 		if(fnInit) {
-			fnInit.set('fnParent', fnParent)
-			obj.onInit()
+			if(funcInit) {
+				fnInit.set("fnParent", fnParent)
+				eval(funcInit, obj, fnInit, true)
+				print("onInit 이미 설정됨 eval 실행 $className", fnInit.get(), obj)
+			}
+		} else {
+			src="onInit() {$funcInit}"
+			obj[$src]
+			fnInit=Cf.funcNode(obj)
+			if( fnInit ) {
+				Cf.funcNode(obj, true);
+				fnInit.set("fnParent", fnParent)
+				obj.onInit()
+			}
 		}
 	}
-	fcInit=obj.get("${baseNode.baseName}#initClass")
-	if(typeof(fcInit,'func')) {
+	initClass=obj.get("${baseNode.baseName}#initClass")
+	if(typeof(initClass,'func')) {
 		print("$className class initClass 함수 실행시작")
-		call(fcInit,obj,fnParent)
+		if(size.gt(3)) {
+			param=_arr()
+			while(n=3, size) {
+				param.add(args().get(n))
+			}
+			call(initClass,obj,param)
+		} else {
+			call(initClass,obj,fnParent)
+		}
 	}
 	return obj;
 }
