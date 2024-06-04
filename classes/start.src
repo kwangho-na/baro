@@ -445,11 +445,26 @@ classExtends(obj, &s ) {
 		}
 	}
 }
-class(param) {
-	_baseName=func(name,base) { 
+classBase() {
+	_funcCheck = func(&s) {
+		not(s.ch()) return false;
+		fnm=s.move()
+		if(fnm.eq('private','public')) {
+			c=s.next().ch()
+		} else {
+			c=s.ch()
+		}
+		if(c.eq('(')) {
+			s.match()
+			c=s.ch()
+			if(c.eq('{')) return true
+		}
+		return false
+	};
+	_baseName=func(base,name) { 
 		not(base) return name;
-		if(base.find(':')) {
-			base=left(base,':')
+		if(base.find(":")) {
+			base=left(base,":")
 		}
 		if(lastEq(base,name)) {
 			return base
@@ -457,101 +472,13 @@ class(param) {
 			return "$base:$name"
 		}
 	};
-	_moduleName=func(&s) {
-		if(s.find(':')) s.findPos(':')
-		return s.trim();
-	};
-	fnParent=null
-	switch(args().size()) {
-	case 1: 
-		if(typeof(param,'node') ) {
-			className=param.id
-			obj=param
-		} else {
-			className=param
-			obj=object("class.$className")
-			if(obj.var(useClass)) return obj;
-		}
-	case 2:
-		if(typeof(param,'string') ) {
-			args(className, base)
-			if(typeof(base,'bool')) {
-				base=this.var(baseCode)
-			}
-			className=_baseName(className, base)
-		} else {
-			args(obj,className)
-		}
-	case 3:
-		args(obj,className,base)
-		if(typeof(base,'bool')) {
-			base=obj.var(baseCode)
-		}
-		if( base ) {
-			className=_baseName(className, base)
-		}
-	case 4:
-		args(obj,className,base,funcNode)
-		if( base ) {
-			className=_baseName(className, base)
-		}
-		fnParent=funcNode
-	default:
-	}
-	not(typeof(obj,'node')) return print("$className class 객체 미설정(obj:$obj)")
-	not(className) return print("class 매개변수 미설정")
-	print("class $className 시작")
-	src=conf("class.$className")
-	not(src) {
-		mapId=null
-		not(className.find('/')) {
-			mapId=object('map.className').get(className)
-			src=conf("class.$mapId")
-		}
-		not(src) return print("class $className 클래스 소스 미등록 (mapId:$mapId)")
-	}
-	moduleName=_moduleName(className)
-	arr=obj.addArray("@classNames") 
-	find=arr.find(className)
-	if(find.ne(-1)) {
-		print("$className 클래스 이미 등록됨")	 
-		return obj;
-	}
-	not(fnParent) {
-		fnParent=Cf.funcNode('parent')
-	}
-	arr.add(className)
-	if( typeof(obj,'widget')) {
-		print("class $className 위젯객체")
-		tag=obj.tag;
-		if(tag.eq('page','dialog','main')) {
-			not(className.eq('page')) class(obj,'page',null,fnParent)
-		} else { 
-			not(className.eq('widget')) {
-				class(obj,'widget',null,fnParent)
-			}
-		}
-	}
-	if(extend) {
-		classExtends(obj, extend)
-	}
-	extend=conf("extends.$className")
-	_parse(obj, src)
-	obj.var(useClass, true)
-	fcInit=obj.get("${moduleName}#initClass")
-	if(typeof(fcInit,'func')) {
-		print("$className class initClass 함수 실행시작")
-		call(fcInit,obj,fnParent)
-	}
-	return obj;
-	
 	_parse=func(obj, &s) {			
-		init='', funcs='';
 		n=0;
+		init='', funcs='';
 		print("$className class parse start")
 		while(s.valid()) {
 			not(s.ch()) break;
-			if(funcCheck(s)) {
+			if(_funcCheck(s)) {
 				sp=s.cur()
 				fnm=s.move()
 				initCheck=false
@@ -567,7 +494,7 @@ class(param) {
 				s.match()
 				s.match(1)
 				src=s.value(sp, s.cur(), true)
-				if(initCheck) {
+				if( initCheck) {
 					funcs.add(moduleName,'#',src)
 				} else {
 					funcs.add(src)
@@ -580,41 +507,127 @@ class(param) {
 			if(n) init.add("\r\n")
 			init.add(line)
 			n++;
-		}  
+		}
+	};
+	
+	switch(args().size()) {
+	case 1:
+		args(className)
+		base=className
+	case 2:
+		args(className, base)
+		className=_baseName(base, className)
+	default:
+	}
+	mapId=object("map.className").get(className)
+	not(mapId) mapId=className;
+	obj=object("class.$mapId")
+	if(obj.var(useClass)) return obj;
+	src=conf("class.$className")
+	_parse(obj, src)
+	
+	obj.baseName=base;
+	obj.var(useClass, true)
+	
+	return obj;
+}
+class(param) {
+	
+	fnParent=null
+	switch(args().size()) {
+	case 1: 
+		args(className)
+		baseNode=classBase(className)
+		if(baseNode.var(useClass)) return baseNode;
+	case 2:
+		if(typeof(param,'string') ) {
+			args(className, base)
+			if(typeof(base,'bool')) {
+				base=this.var(baseCode)
+			}
+			className=_baseName(base, className)
+		} else {
+			
+		}
+	case 3:
+		args(obj,className,base)
+		if(typeof(base,'bool')) {
+			base=obj.var(baseCode)
+		}
+		if( base ) {
+			className=_baseName(base, className)
+		}
+	case 4:
+		args(obj,className,base,funcNode)
+		if( base ) {
+			className=_baseName(className, base)
+		}
+		fnParent=funcNode
+	default:
+	}
+	not(typeof(obj,'node')) return print("$className class 객체 미설정(obj:$obj)")
+	not(className) return print("class 매개변수 미설정")
+	print("class $className 시작")
+	src=conf("class.$className")
+	not(src) {
+		mapId=null
+		not(className.find("/")) {
+			mapId=object("map.className").get(className)
+			src=conf("class.$mapId")
+		}
+		not(src) return print("class $className 클래스 소스 미등록 (mapId:$mapId)")
+	}
+	 
+	arr=obj.addArray("@classNames")  
+	if( arr.find(className) ) {
+		print("$className 클래스 이미 등록됨")	 
+		return obj;
+	}
+	not(fnParent) {
+		fnParent=Cf.funcNode('parent')
+	}
+	arr.add(className)
+	if( typeof(obj,'widget')) {
+		print("class $className 위젯객체")
+		tag=obj.tag;
+		if( tag.eq('page','dialog','main')) {
+			not(className.eq('page')) class(obj,'page',null,fnParent)
+		} else { 
+			not(className.eq('widget')) {
+				class(obj,'widget',null,fnParent)
+			}
+		}
+	}
+	
+	extend=conf("extends.$className") 
+	
+	
+	fnInit=Cf.funcNode(obj)
+	if(fnInit) {
+		if(funcs) obj[$funcs]
+		if(init) {
+			fnInit.set('fnParent', fnParent)
+			eval(init, obj, fnInit, true)
+			print("onInit 이미 설정됨 eval 실행 $className", fnInit.get(), obj)
+		}
+	} else {
+		src="onInit() {$init} $funcs"
+		obj[$src]
 		fnInit=Cf.funcNode(obj)
 		if(fnInit) {
-			if(funcs) obj[$funcs]
-			if(init) {
-				fnInit.set('fnParent', fnParent)
-				eval(init, obj, fnInit, true)
-				print("onInit 이미 설정됨 eval 실행 $className", fnInit.get(), obj)
-			}
-		} else {
-			src="onInit() {$init} $funcs"
-			obj[$src]
-			fnInit=Cf.funcNode(obj)
-			if(fnInit) {
-				fnInit.set('fnParent', fnParent)
-				obj.onInit()
-			}
+			fnInit.set('fnParent', fnParent)
+			obj.onInit()
 		}
-	};
-	funcCheck = func(&s) {
-		not(s.ch()) return false;
-		fnm=s.move()
-		if(fnm.eq('private','public')) {
-			c=s.next().ch()
-		} else {
-			c=s.ch()
-		}
-		if(c.eq('(')) {
-			s.match()
-			c=s.ch()
-			if(c.eq('{')) return true
-		}
-		return false
-	};
+	}
+	fcInit=obj.get("${baseNode.baseName}#initClass")
+	if(typeof(fcInit,'func')) {
+		print("$className class initClass 함수 실행시작")
+		call(fcInit,obj,fnParent)
+	}
+	return obj;
 }
+
+
 stripComment(&s, mode) {
 	not(mode) mode=1;
 	rst='';

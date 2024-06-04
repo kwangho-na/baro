@@ -11,10 +11,103 @@ class func:array {
 		while(cur, node) arr.add(cur.get(field))
 		return arr;
 	}
+	@data.arrayData(param) {
+		arr=null
+		print("array data", args())
+		if(typeof(param,'array')) {
+			arr=param
+			args().pop()
+		} else {
+			arr=class("data").tempArray()
+		}
+		switch(args().size()) {
+		case 0: 
+			return arr;
+		case 1: 
+			args(a)
+			return arr.recalc(a)
+		case 2:
+			args(a,b)
+			return arr.recalc(a,b)
+		case 3:
+			args(a,b,c)
+			return arr.recalc(a,b,c)
+		default:
+		}
+		return arr;
+	}
+	@data.nodeData() {
+		node=null
+		print("node data", args())
+		if(typeof(param,'node')) {
+			node=param
+			args().pop()
+		} else {
+			node=class("data").tempNode()
+		}
+		switch(args().size()) {
+		case 0: 
+			return node;
+		case 1: 
+			args(a)
+			if(typeof(a,'string')) {
+				return node.parseJson(a)
+			} else if(typeof(a,'node')) {
+				return node.copyNode(a)
+			}
+			return arr.recalc(a)
+		case 2:
+			args(a,b)
+			return arr.recalc(a,b)
+		case 3:
+			args(a,b,c)
+			return arr.recalc(a,b,c)
+		default:
+		}
+		
+	}
 }
 class data {
-	nodes=object('data.nodes')
-	arrays=object('data.arrays')
+	initClass() {
+		this.cycleNodeNum=0;
+		this.cycleArrayNum=0;
+		@maxNodeSize=100;
+		@maxArrSize=4096;
+		@nodes=object('data.nodes')
+		@arrays=object('data.arrays')
+		@tempNodes=object('data.temps')
+	}
+	tempNode(data) {
+		_val=func(cur) {
+			cur.removeAll(true)
+			if(typeof(data,'node')) {
+				cur.copyNode(data)
+			} else if(typeof(data,'string')) {
+				cur.parseJson(data)
+			}
+			return cur;
+		};
+		idx=this.incrNum("tempNodeIndex")
+		size=tempNodes.childCount()
+		if(idx.ge(size)) {
+			if(size.lt(maxNodeSize)) return _val(tempNodes.newNode())
+			this.incrNum("cycleNodeNum")	
+			this.set("tempNodeIndex", 0)
+			idx=this.incrNum("tempNodeIndex")
+		}
+		return _val(tempNodes.child(idx))
+	}
+	tempArray() {		
+		idx=this.incrNum("tempArrayIndex")
+		size=arrays.localArray()
+		if(idx.ge(size)) {
+			if(size.lt(maxArrSize)) return arrays.newArray();
+			this.incrNum("cycleArrayNum")	
+			this.set("tempArrayIndex", 0)
+			idx=this.incrNum("tempArrayIndex")
+		}
+		return arrays.localArray(idx)
+	}
 	dataNode(name,target) {
 		cur=nodes.addNode(name)
 		sub=cur.addNode()
@@ -26,16 +119,9 @@ class data {
 		cur.removeAll(true)
 		return cur;
 	}
-	recalc(name, a,b,c) {
-		not(typeof(name,'string')) return print("data recalc 이름이 없습니다");
-		arr=arrays.addArray(name) 
-		switch(args().size()) {
-		case 1: return arr;
-		case 2: return arr.recalc(a);
-		case 3: return arr.recalc(a,b);
-		case 4: return arr.recalc(a,b,c);
-		}
-		return arr;
+	recalc() {
+		arr=this.tempArray()
+		return call(@data.arrayData, args() );
 	}
 }
 class DevData {

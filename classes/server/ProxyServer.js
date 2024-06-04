@@ -1,76 +1,9 @@
-class func {
-	proxyController(req, param, &url, proxy ) {
-		print("PROXY CONTROL START URL:$url")
-		not(url.start('/proxy/',true)) return @proxy.sendError(req, param, "proxy client start error [URL:$url]");
-		uid=url.findPos('/').trim();
-		client=proxy.get(uid) not(client) return @proxy.sendError(req, param, "proxy client connect error [ID:$uid URL:$url]");
-		client.isCall(true)
-		tm=System.localtime();
-		header='';
-		header.add('"uid":', Cf.jsValue(uid));
-		header.add(', "localtime":', Cf.jsValue(tm)); 
-		if(req.getValue('Range')) {
-			header.add(', "range":', Cf.jsValue(req.getValue('Range')));
-		}
-		if(req.getValue('boundary')) {
-			header.add(', "boundary":', Cf.jsValue(req.getValue('boundary')));
-		}
-		size=req.getValue('Content-Length') not(size) size=0;
-		packet="##>api:$size:$url{$header}\r\n";
-		if(size) {
-			post=req.getBuffer();
-			print("send post size:$size", post);
-			packet.add(post);
-		}
-		ok=false;
-		client.sendData(packet)
-		print("web => client send packet ", packet)
-		if( client.isRead(5000) ) {
-			result='';
-			while(true) {
-				recv=client.recvData()
-				not(recv) break;
-				result.add(recv)
-			}
-			print("proxy web read size == ", result.size())
-			not(req.isConnect() ) {
-				print("proxy web closed !!! ")
-			}
-			not(result) result=@proxy.errorData()
-			req.send(result)
-		} else {
-			print("read timeout");
-		}
-	}
-	@proxy.errorData() {
-		data="proxy api error: $client $packet"
-		return data;
-	}
-}
-
 class ProxyServer {
 	server=Baro.was("proxy")
 	callback=null
 	start(port) {
 		not(port) port=8093
-		server.var(module, this)
-		server.startServer(port, 
-			func(client, proxy) {
-				server=client.server()
-				print("proxy dispatch ", client, server)
-				if( client.isCall()) {
-					print("clientDispatch 프록시 클라이언트 처리중")
-					return;
-				}
-				data=client.recvData();
-				if( typeof(data,'bool')) {
-					client.close();
-					return;
-				}
-				server.var(module).dispatch(client,proxy,data)		
-			}, 
-			"proxy", 2500
-		);
+		server.startServer(port, this, this.serverProc, "proxy", 2500 );
 		print("proxy server started ", server)
 	}
 	stop() {
@@ -83,6 +16,19 @@ class ProxyServer {
 		}
 		size=data.size()
 		client.sendData("##>$type:$size:$uri{$props}\r\n$data")
+	}
+	serverProc(client, proxy) { 
+		print("proxy dispatch ", client, server)
+		if( client.isCall()) {
+			print("clientDispatch 프록시 클라이언트 처리중")
+			return;
+		}
+		data=client.recvData();
+		if( typeof(data,'bool')) {
+			client.close();
+			return;
+		}
+		this.dispatch(client,proxy,data)		
 	}
 	dispatch(client,proxy,&data) {
 		line=data.findPos('##>') if(line.size() > 32 ) return print("PROXY SERVER dispatch start error line=$line")
@@ -151,64 +97,43 @@ class ProxyServer {
 
 
 class ProxyClient {
-	workers=_arr('proxyWorkers')
+	initClass() {
+		@workers=class("data").dataArray('proxyWorkers')
+		this.start()
+	}
 	start(clientId, ip, port, timeout) {
-		not(clientId) return print("장치아이디를 등록하세요");
-		not(ip) ip='localhost';
-		not(port) port=8093;
-		not(timeout) timeout=2500;
-		call(func() {
-			self=this
-			socket=Baro.socket(clientId)
-			worker=Baro.worker(clientId)
-			worker.start(this.socketProc, true, 100)
-			idx=workers.find(worker)
-			if(idx.eq(-1)) {
-				idx=worker.size()
-				workers.add(worker)
-			}
-			worker.funcNode=Cf.funcNode()
-		});
-		return Baro.socket(clientId)
+		socket=Baro.socket(clientId)
+		worker=Baro.worker(clientId)
+		worker.start(this, this.socketProc, true, 100)
+		not(workers.find(worker)) {
+			workers.add(worker)
+		}
+		worker.with(clientId, socket, ip, port, timeout)
+		return worker;
 	}
 	setTarget(clientId, target) {
 		worker=Baro.worker(clientId)
 		worker.target = target
 		return worker;
-	}
-	funcNode(id) {
-		while(w, workers) {
-			not(w.funcNode) continue
-			w.funcNode.inject(clientId, socket)
-			if(id.eq(clientId)) return w.funcNode;
-		}
-		print("ProxyClient $id 클라이언트 funcNode 미정의"); 
-		return;
-	}
-	socket(id) {
-		fn=this.funcNode(id) not(fn) return;
-		return fn.get('socket');
-	}
+	} 
+	 
 	isConnect(id) {
-		fn=this.funcNode(id) not(fn) return;
-		fn.inject(socket, worker)
+		socket=Baro.socket(id)
 		return socket.isConnect()
 	}
 	closeClient(id) {
-		fn=this.funcNode(id) not(fn) return;
-		fn.inject(socket, worker)
-		idx=workers.find(worker)
-		not(idx.eq(-1)) workers.remove(idx)
-		worker.close()
+		socket=Baro.socket(id)
+		worker=Baro.worker(id)
 		socket.close()
-		fn.delete()
+		worker.close()
+		worker.socket=null
+		workers.remove(worker)
 	}
 	closeAll() {
-		while(w, workers) {
-			not(w.funcNode) continue
-			w.funcNode.inject(clientId, socket, worker)
+		while(worker, workers) {
+			not(worker.socket) continue
 			worker.close()
-			socket.close()
+			worker.socket.close()
 		}
 		workers.reuse()
 	}
@@ -222,57 +147,51 @@ class ProxyClient {
 		socket.sendData("##>$type:$size:$uri{$props}\r\n$data")
 	}	
 	sendClient(id, type, uri, data, props) {
-		fn=this.funcNode(id)
-		not(fn) return print("send client error [$id client not found]");
-		fn.inject(socket, worker)
+		socket=Baro.socket(id)
 		this.send(socket, type, uri, data, props)
 	}	
 	socketProc() {
+		this.inject(socket, clientId, ip, port);
 		not(socket) {
-			print("client process socket is null", clientId, ip, port, socket)
+			print("client process socket is null", clientId, ip, port )
 			return System.sleep(1000);
 		}
 		if( socket.isRead(500) ) {
 			data=socket.recvData();
 			if(typeof(data,'bool')) {
-				self.var(error,"proxy client maybe closed");
+				this.var(error,"proxy client maybe closed");
 				return;
 			}
 			not(data) {
-				self.var(error,"proxy client empty data");
+				this.var(error,"proxy client empty data");
 				return;
 			}
-			self.clientRecv(socket, data);
+			this.clientRecv(socket, data);
 		}
-		if( self.var(error) ) {
-			tick=self.var(errorTick)
+		if( this.var(error) ) {
+			tick=this.var(errorTick)
 			if(tick) {
 				d=System.tick() - tick
 				if(d>1000) {
-					print("proxy client error tick==$d", self.var(error) )
-					self.var(error, '')
-					self.var(errorTick, 0)
+					print("proxy client error tick==$d", this.var(error) )
+					this.var(error, '')
+					this.var(errorTick, 0)
 				}
 			} else {
-				self.var(errorTick, System.tick() )
+				this.var(errorTick, System.tick() )
 			}
 			return;
 		}
 		not(socket.isConnect()) {
-			fn=Cf.funcNode("parent");
-			print("socket connect start", clientId, ip, port, fn.get() );
+			print("socket connect start", clientId, ip, port, "parent func value:", Cf.funcNode('parent').get() )
 			if(socket.connect(ip,port,timeout)) { 
-				if( self.send(socket,"login","",clientId) ) {
+				if( this.send(socket,"login","",clientId) ) {
 					if(socket.isRead(500)) {
-						result=socket.recvData();
-						print("connect result == $result");
-						url=fn.get('apiUrl')
-						if(url) {
-							fn.set('apiUrl', null)
-							self.send(socket,'api',url)
-						}
+						result=socket.recvData()
+						print("connect result == $result")
+						
 					} else {
-						print("connect recv timeout", socket);
+						print("connect recv timeout", socket)
 					}
 				}
 			}
@@ -347,8 +266,10 @@ class ProxyClient {
 
 
 class ProxyData {
-	chunSize=4*1024*1024
-	sendMaps=this.addNode("@sendMaps")
+	initClass() {
+		@chunSize=4*1024*1024
+		@sendMaps=this.addNode("@sendMaps")
+	}
 	apiResult(&uri, &data, param) {
 		if(uri.ch('/')) uri.incr();
 		service=uri.findPos('/').trim();
@@ -451,15 +372,14 @@ class ProxyData {
 		not(next) this.fileSendEnd(name, ref)
 	} 
 	gitFileDownload(client, name, path) {
-		this.webDownload("https://raw.githubusercontent.com/kwangho-na/baro/na/$name", path)
+		web=Baro.web("down") 
+		web.download("https://raw.githubusercontent.com/kwangho-na/baro/na/$name", path, this, this.webDownloadProgress) 
 	}
 	webDownload(client, url, path, callback) {
 		not(isFile(path)) return print("웹다운로드 파일오류 ($path 파일을 찾을 수 없습니다)")
-		call(func() {
-			web=Baro.web("down") 
-			web.download(url, path, this.webDownloadProgress)
-			setCallback('webDownload', true)
-		})
+		web=Baro.web("down") 
+		web.download(url, path, this)
+		setCallback('webDownload', true)
 	}
 	webDownloadProgress(type) {
 		if(type=='progress') {
@@ -468,7 +388,7 @@ class ProxyData {
 			if(client) client.send("downloadProgress", url, "sp:$sp,ep:$ep");
 		}
 		if( type=='finish') {
-			setCallback('webDownload', null)
+			
 		}
 	}
 }
@@ -486,5 +406,55 @@ class ProxyFileChunck {
 	}
 	fileSendEnd(name, ref) {
 		
+	}
+}
+
+class func {
+	proxyController(req, param, &url, proxy ) {
+		print("PROXY CONTROL START URL:$url")
+		not(url.start('/proxy/',true)) return @proxy.sendError(req, param, "proxy client start error [URL:$url]");
+		uid=url.findPos('/').trim();
+		client=proxy.get(uid) not(client) return @proxy.sendError(req, param, "proxy client connect error [ID:$uid URL:$url]");
+		client.isCall(true)
+		tm=System.localtime();
+		header='';
+		header.add('"uid":', Cf.jsValue(uid));
+		header.add(', "localtime":', Cf.jsValue(tm)); 
+		if(req.getValue('Range')) {
+			header.add(', "range":', Cf.jsValue(req.getValue('Range')));
+		}
+		if(req.getValue('boundary')) {
+			header.add(', "boundary":', Cf.jsValue(req.getValue('boundary')));
+		}
+		size=req.getValue('Content-Length') not(size) size=0;
+		packet="##>api:$size:$url{$header}\r\n";
+		if(size) {
+			post=req.getBuffer();
+			print("send post size:$size", post);
+			packet.add(post);
+		}
+		ok=false;
+		client.sendData(packet)
+		print("web => client send packet ", packet)
+		if( client.isRead(5000) ) {
+			result='';
+			while(true) {
+				recv=client.recvData()
+				not(recv) break;
+				result.add(recv)
+			}
+			print("proxy web read size == ", result.size())
+			not(req.isConnect() ) {
+				print("proxy web closed !!! ")
+			}
+			not(result) result=@proxy.errorData()
+			req.send(result)
+		} else {
+			print("read timeout");
+		}
+	}
+	@proxy.errorData() {
+		data="proxy api error: $client $packet"
+		return data;
 	}
 }
