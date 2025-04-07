@@ -1,3 +1,5 @@
 my new file contents
 
 main modify
+
+aaa
